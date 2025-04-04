@@ -1,0 +1,5 @@
+if (GLQUAKE)
+    add_subdirectory(gl)
+else ()
+    add_subdirectory(software)
+endif ()
