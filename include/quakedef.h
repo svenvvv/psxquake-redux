@@ -335,7 +335,6 @@ void Chase_Reset (void);
 void Chase_Update (void);
 
 qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace);
-qboolean VID_Is8bit(void);
 void R_DrawWaterSurfaces (void);
 void R_RenderBrushPoly (msurface_t *fa);
 void GL_Set2D (void);
@@ -343,7 +342,6 @@ int GL_LoadPicTexture (qpic_t *pic);
 void GL_SubdivideSurface (msurface_t *fa);
 void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 void R_InitParticles (void);
-void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboolean alpha);
 void R_ClearParticles (void);
 int R_LightPoint (vec3_t p);
 void R_DrawBrushModel (entity_t *e);

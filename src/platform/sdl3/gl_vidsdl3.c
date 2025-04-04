@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// vid_null.c -- null video driver to aid porting efforts
 
 #include "quakedef.h"
 
@@ -36,7 +35,6 @@ int		texture_mode = GL_LINEAR;
 qboolean gl_mtexable = false;
 qboolean isPermedia = false;
 float		gldepthmin, gldepthmax;
-const char *gl_renderer = "SDL3";
 int		texture_extension_number = 1;
 
 cvar_t	gl_ztrick = {"gl_ztrick","1"};
@@ -47,11 +45,9 @@ void	VID_SetPalette (unsigned char *palette)
 	unsigned r,g,b;
 	unsigned v;
 	int     r1,g1,b1;
-	int		j,k,l,m;
+	int		k;
 	unsigned short i;
 	unsigned	*table;
-	FILE *f;
-	char s[255];
 	int dist, bestdist;
 
 	//
@@ -168,17 +164,9 @@ void D_EndDirectRect (int x, int y, int width, int height)
 void GL_BeginRendering (int *x, int *y, int *width, int *height) {
 	*x = *y = 0;
 	SDL_GetWindowSize(sdl_window, width, height);
-
-	glClearColor (0, 0, 0, 1);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GL_EndRendering () {
 	glFlush();
 	SDL_GL_SwapWindow(sdl_window);
-}
-
-qboolean VID_Is8bit(void)
-{
-	return false;
 }
