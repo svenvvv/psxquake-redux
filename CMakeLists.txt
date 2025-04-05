@@ -52,6 +52,9 @@ target_include_directories(quake PRIVATE include)
 
 option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
 
+option(CONSOLE_COMPLETION "Enable console line completion" 1)
+target_compile_definitions(quake PRIVATE CONSOLE_COMPLETION=${CONSOLE_COMPLETION})
+
 set(PARTICLES_MAX 2048 CACHE STRING "Maximum number of particles")
 target_compile_definitions(quake PRIVATE MAX_PARTICLES=${PARTICLES_MAX})
 set(PARTICLES_MIN 512 CACHE STRING "Minimum number of particles")

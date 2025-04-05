@@ -246,6 +246,7 @@ void Key_Console(int key)
         return;
     }
 
+#ifdef CONSOLE_COMPLETION
     if (key == K_TAB) { // command completion
         cmd = Cmd_CompleteCommand(key_lines[edit_line] + 1);
         if (!cmd)
@@ -259,6 +260,7 @@ void Key_Console(int key)
             return;
         }
     }
+#endif
 
     if (key == K_BACKSPACE || key == K_LEFTARROW) {
         if (key_linepos > 1)

@@ -21,8 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-cvar_t *cvar_vars;
-char *cvar_null_string = "";
+static cvar_t *cvar_vars;
+static char const * const cvar_null_string = "";
 
 /*
 ============
@@ -60,7 +60,7 @@ float Cvar_VariableValue(char *var_name)
 Cvar_VariableString
 ============
 */
-char *Cvar_VariableString(char *var_name)
+char const *Cvar_VariableString(char *var_name)
 {
     cvar_t *var;
 
@@ -70,6 +70,7 @@ char *Cvar_VariableString(char *var_name)
     return var->string;
 }
 
+#ifdef CONSOLE_COMPLETION
 /*
 ============
 Cvar_CompleteVariable
@@ -92,6 +93,7 @@ char *Cvar_CompleteVariable(char *partial)
 
     return NULL;
 }
+#endif
 
 /*
 ============
