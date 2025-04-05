@@ -21,19 +21,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-void IN_Init (void)
+void IN_Init(void)
 {
 }
 
-void IN_Shutdown (void)
+void IN_Shutdown(void)
 {
 }
 
-void IN_Commands (void)
+void IN_Commands(void)
 {
 }
 
-void IN_Move (usercmd_t *cmd)
+void IN_Move(usercmd_t *cmd)
 {
 }
-

@@ -22,84 +22,83 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-cvar_t bgmvolume = {"bgmvolume", "1", true};
-cvar_t volume = {"volume", "0.7", true};
-cvar_t loadas8bit = {"loadas8bit", "0"};
+cvar_t bgmvolume = { "bgmvolume", "1", true };
+cvar_t volume = { "volume", "0.7", true };
+cvar_t loadas8bit = { "loadas8bit", "0" };
 
-volatile dma_t  *shm = 0;
+volatile dma_t *shm = 0;
 volatile dma_t sn;
 
-channel_t   channels[MAX_CHANNELS];
-int			total_channels;
+channel_t channels[MAX_CHANNELS];
+int total_channels;
 
 int paintedtime;
- 
-void S_Init (void)
+
+void S_Init(void)
 {
 }
 
-void S_AmbientOff (void)
+void S_AmbientOff(void)
 {
 }
 
-void S_AmbientOn (void)
+void S_AmbientOn(void)
 {
 }
 
-void S_Shutdown (void)
+void S_Shutdown(void)
 {
 }
 
-void S_TouchSound (char *sample)
+void S_TouchSound(char *sample)
 {
 }
 
-void S_ClearBuffer (void)
+void S_ClearBuffer(void)
 {
 }
 
-void S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
+void S_StaticSound(sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 {
 }
 
-void S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,  float attenuation)
+void S_StartSound(int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol, float attenuation)
 {
 }
 
-void S_StopSound (int entnum, int entchannel)
+void S_StopSound(int entnum, int entchannel)
 {
 }
 
-sfx_t *S_PrecacheSound (char *sample)
+sfx_t *S_PrecacheSound(char *sample)
 {
-	return NULL;
+    return NULL;
 }
 
-void S_ClearPrecache (void)
-{
-}
-
-void S_Update (vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up)
-{	
-}
-
-void S_StopAllSounds (qboolean clear)
+void S_ClearPrecache(void)
 {
 }
 
-void S_BeginPrecaching (void)
+void S_Update(vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up)
 {
 }
 
-void S_EndPrecaching (void)
+void S_StopAllSounds(qboolean clear)
 {
 }
 
-void S_ExtraUpdate (void)
+void S_BeginPrecaching(void)
 {
 }
 
-void S_LocalSound (char *s)
+void S_EndPrecaching(void)
 {
 }
 
+void S_ExtraUpdate(void)
+{
+}
+
+void S_LocalSound(char *s)
+{
+}
