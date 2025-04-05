@@ -51,7 +51,24 @@ add_executable(quake ${COMMON_SRC})
 target_link_libraries(quake PRIVATE m)
 target_include_directories(quake PRIVATE include)
 
-set(GLQUAKE 1)
+option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
+
+set(PARTICLES_MAX 2048 CACHE STRING "Maximum number of particles")
+target_compile_definitions(quake PRIVATE MAX_PARTICLES=${PARTICLES_MAX})
+set(PARTICLES_MIN 512 CACHE STRING "Minimum number of particles")
+target_compile_definitions(quake PRIVATE ABSOLUTE_MIN_PARTICLES=${PARTICLES_MIN})
+
+set(PLATFORM_VALUES "SDL3" "PSX")
+set(PLATFORM "SDL3" CACHE STRING "Minimum number of particles")
+set_property(CACHE PLATFORM PROPERTY STRINGS ${PLATFORM_VALUES})
+
+if (${PLATFORM} STREQUAL "SDL3")
+	set(PLATFORM_SDL3 1)
+elseif (${PLATFORM} STREQUAL "PSX")
+	set(PLATFORM_PSX 1)
+else ()
+	message(FATAL_ERROR "Invalid platform ${PLATFORM}")
+endif ()
 
 add_subdirectory(src/platform)
 add_subdirectory(src/render)

@@ -1,1 +1,5 @@
-add_subdirectory(sdl3)
+if (PLATFORM_SDL3)
+    add_subdirectory(sdl3)
+else ()
+    message(FATAL_ERROR "Invalid platform ${PLATFORM}")
+endif ()

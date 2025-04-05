@@ -21,21 +21,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "r_local.h"
 
-#define MAX_PARTICLES                         \
-    2048 // default max # of particles at one \
-        //  time
-#define ABSOLUTE_MIN_PARTICLES                 \
-    512 // no fewer than this no matter what's \
-        //  on the command line
+static int const ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
+static int const ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
+static int const ramp3[8] = { 0x6d, 0x6b, 6, 5, 4, 3 };
 
-int ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
-int ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
-int ramp3[8] = { 0x6d, 0x6b, 6, 5, 4, 3 };
+static particle_t *active_particles, *free_particles;
 
-particle_t *active_particles, *free_particles;
-
-particle_t *particles;
-int r_numparticles;
+static particle_t *particles;
+static int r_numparticles;
 
 vec3_t r_pright, r_pup, r_ppn;
 
@@ -110,28 +103,26 @@ R_EntityParticles
 
 #define NUMVERTEXNORMALS 162
 extern float r_avertexnormals[NUMVERTEXNORMALS][3];
-vec3_t avelocities[NUMVERTEXNORMALS];
-float beamlength = 16;
-vec3_t avelocity = { 23, 7, 3 };
-float partstep = 0.01;
-float timescale = 0.01;
+static vec3_t avelocities[NUMVERTEXNORMALS];
+static float beamlength = 16;
 
 void R_EntityParticles(entity_t *ent)
 {
-    int count;
     int i;
     particle_t *p;
     float angle;
-    float sr, sp, sy, cr, cp, cy;
+    float sp, sy, cp, cy;
     vec3_t forward;
     float dist;
 
     dist = 64;
-    count = 50;
 
     if (!avelocities[0][0]) {
-        for (i = 0; i < NUMVERTEXNORMALS * 3; i++)
-            avelocities[0][i] = (rand() & 255) * 0.01;
+        for (i = 0; i < NUMVERTEXNORMALS; i++) {
+            avelocities[i][0] = (rand() & 255) * 0.01f;
+            avelocities[i][1] = (rand() & 255) * 0.01f;
+            avelocities[i][2] = (rand() & 255) * 0.01f;
+        }
     }
 
     for (i = 0; i < NUMVERTEXNORMALS; i++) {
@@ -141,9 +132,6 @@ void R_EntityParticles(entity_t *ent)
         angle = cl.time * avelocities[i][1];
         sp = sin(angle);
         cp = cos(angle);
-        angle = cl.time * avelocities[i][2];
-        sr = sin(angle);
-        cr = cos(angle);
 
         forward[0] = cp * cy;
         forward[1] = cp * sy;
