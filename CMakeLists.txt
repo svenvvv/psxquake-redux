@@ -16,7 +16,6 @@ set(COMMON_SRC
 		src/cl_main.c
 		src/cl_parse.c
 		src/cl_tent.c
-		src/chase.c
 		src/cmd.c
 		src/common.c
 		src/console.c

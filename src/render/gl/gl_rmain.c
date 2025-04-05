@@ -619,9 +619,6 @@ void R_DrawViewModel(void)
     if (!r_drawviewmodel.value)
         return;
 
-    if (chase_active.value)
-        return;
-
     if (envmap)
         return;
 
