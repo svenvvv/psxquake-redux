@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
+set(CMAKE_C_STANDARD 11)
+
 project(
 	quake1
 	LANGUAGES    C ASM
@@ -28,7 +30,6 @@ set(COMMON_SRC
 		src/network/net_none.c
 		src/network/net_loop.c
 		src/network/net_main.c
-		src/network/net_vcr.c
 		src/pr_cmds.c
 		src/pr_edict.c
 		src/pr_exec.c

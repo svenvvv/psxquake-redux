@@ -28,112 +28,190 @@ key up events are sent even if in console mode
 #define MAXCMDLINE 256
 char key_lines[32][MAXCMDLINE];
 int key_linepos;
-int shift_down = false;
 int key_lastpress;
+static int shift_down = false;
 
 int edit_line = 0;
-int history_line = 0;
+static int history_line = 0;
 
 keydest_t key_dest;
 
 int key_count; // incremented every key event
 
 char *keybindings[256];
-qboolean consolekeys[256]; // if true, can't be rebound while in console
-qboolean menubound[256]; // if true, can't be rebound while in menu
-int keyshift[256]; // key to map to if shift held down in console
-int key_repeats[256]; // if > 1, it is autorepeating
-qboolean keydown[256];
+static qboolean keydown[256];
 
 typedef struct {
     char *name;
     int keynum;
 } keyname_t;
 
-keyname_t keynames[] = { { "TAB", K_TAB },
-                         { "ENTER", K_ENTER },
-                         { "ESCAPE", K_ESCAPE },
-                         { "SPACE", K_SPACE },
-                         { "BACKSPACE", K_BACKSPACE },
-                         { "UPARROW", K_UPARROW },
-                         { "DOWNARROW", K_DOWNARROW },
-                         { "LEFTARROW", K_LEFTARROW },
-                         { "RIGHTARROW", K_RIGHTARROW },
+static keyname_t const keynames[] = {
+    { "TAB", K_TAB },
+    { "ENTER", K_ENTER },
+    { "ESCAPE", K_ESCAPE },
+    { "SPACE", K_SPACE },
+    { "BACKSPACE", K_BACKSPACE },
+    { "UPARROW", K_UPARROW },
+    { "DOWNARROW", K_DOWNARROW },
+    { "LEFTARROW", K_LEFTARROW },
+    { "RIGHTARROW", K_RIGHTARROW },
 
-                         { "ALT", K_ALT },
-                         { "CTRL", K_CTRL },
-                         { "SHIFT", K_SHIFT },
+    { "ALT", K_ALT },
+    { "CTRL", K_CTRL },
+    { "SHIFT", K_SHIFT },
 
-                         { "F1", K_F1 },
-                         { "F2", K_F2 },
-                         { "F3", K_F3 },
-                         { "F4", K_F4 },
-                         { "F5", K_F5 },
-                         { "F6", K_F6 },
-                         { "F7", K_F7 },
-                         { "F8", K_F8 },
-                         { "F9", K_F9 },
-                         { "F10", K_F10 },
-                         { "F11", K_F11 },
-                         { "F12", K_F12 },
+    { "F1", K_F1 },
+    { "F2", K_F2 },
+    { "F3", K_F3 },
+    { "F4", K_F4 },
+    { "F5", K_F5 },
+    { "F6", K_F6 },
+    { "F7", K_F7 },
+    { "F8", K_F8 },
+    { "F9", K_F9 },
+    { "F10", K_F10 },
+    { "F11", K_F11 },
+    { "F12", K_F12 },
 
-                         { "INS", K_INS },
-                         { "DEL", K_DEL },
-                         { "PGDN", K_PGDN },
-                         { "PGUP", K_PGUP },
-                         { "HOME", K_HOME },
-                         { "END", K_END },
+    { "INS", K_INS },
+    { "DEL", K_DEL },
+    { "PGDN", K_PGDN },
+    { "PGUP", K_PGUP },
+    { "HOME", K_HOME },
+    { "END", K_END },
 
-                         { "MOUSE1", K_MOUSE1 },
-                         { "MOUSE2", K_MOUSE2 },
-                         { "MOUSE3", K_MOUSE3 },
+    { "MOUSE1", K_MOUSE1 },
+    { "MOUSE2", K_MOUSE2 },
+    { "MOUSE3", K_MOUSE3 },
 
-                         { "JOY1", K_JOY1 },
-                         { "JOY2", K_JOY2 },
-                         { "JOY3", K_JOY3 },
-                         { "JOY4", K_JOY4 },
+    { "JOY1", K_JOY1 },
+    { "JOY2", K_JOY2 },
+    { "JOY3", K_JOY3 },
+    { "JOY4", K_JOY4 },
 
-                         { "AUX1", K_AUX1 },
-                         { "AUX2", K_AUX2 },
-                         { "AUX3", K_AUX3 },
-                         { "AUX4", K_AUX4 },
-                         { "AUX5", K_AUX5 },
-                         { "AUX6", K_AUX6 },
-                         { "AUX7", K_AUX7 },
-                         { "AUX8", K_AUX8 },
-                         { "AUX9", K_AUX9 },
-                         { "AUX10", K_AUX10 },
-                         { "AUX11", K_AUX11 },
-                         { "AUX12", K_AUX12 },
-                         { "AUX13", K_AUX13 },
-                         { "AUX14", K_AUX14 },
-                         { "AUX15", K_AUX15 },
-                         { "AUX16", K_AUX16 },
-                         { "AUX17", K_AUX17 },
-                         { "AUX18", K_AUX18 },
-                         { "AUX19", K_AUX19 },
-                         { "AUX20", K_AUX20 },
-                         { "AUX21", K_AUX21 },
-                         { "AUX22", K_AUX22 },
-                         { "AUX23", K_AUX23 },
-                         { "AUX24", K_AUX24 },
-                         { "AUX25", K_AUX25 },
-                         { "AUX26", K_AUX26 },
-                         { "AUX27", K_AUX27 },
-                         { "AUX28", K_AUX28 },
-                         { "AUX29", K_AUX29 },
-                         { "AUX30", K_AUX30 },
-                         { "AUX31", K_AUX31 },
-                         { "AUX32", K_AUX32 },
+    { "AUX1", K_AUX1 },
+    { "AUX2", K_AUX2 },
+    { "AUX3", K_AUX3 },
+    { "AUX4", K_AUX4 },
+    { "AUX5", K_AUX5 },
+    { "AUX6", K_AUX6 },
+    { "AUX7", K_AUX7 },
+    { "AUX8", K_AUX8 },
+    { "AUX9", K_AUX9 },
+    { "AUX10", K_AUX10 },
+    { "AUX11", K_AUX11 },
+    { "AUX12", K_AUX12 },
+    { "AUX13", K_AUX13 },
+    { "AUX14", K_AUX14 },
+    { "AUX15", K_AUX15 },
+    { "AUX16", K_AUX16 },
+    { "AUX17", K_AUX17 },
+    { "AUX18", K_AUX18 },
+    { "AUX19", K_AUX19 },
+    { "AUX20", K_AUX20 },
+    { "AUX21", K_AUX21 },
+    { "AUX22", K_AUX22 },
+    { "AUX23", K_AUX23 },
+    { "AUX24", K_AUX24 },
+    { "AUX25", K_AUX25 },
+    { "AUX26", K_AUX26 },
+    { "AUX27", K_AUX27 },
+    { "AUX28", K_AUX28 },
+    { "AUX29", K_AUX29 },
+    { "AUX30", K_AUX30 },
+    { "AUX31", K_AUX31 },
+    { "AUX32", K_AUX32 },
 
-                         { "PAUSE", K_PAUSE },
+    { "PAUSE", K_PAUSE },
 
-                         { "MWHEELUP", K_MWHEELUP },
-                         { "MWHEELDOWN", K_MWHEELDOWN },
+    { "MWHEELUP", K_MWHEELUP },
+    { "MWHEELDOWN", K_MWHEELDOWN },
 
-                         { "SEMICOLON", ';' }, // because a raw semicolon seperates commands
+    { "SEMICOLON", ';' }, // because a raw semicolon seperates commands
 
-                         { NULL, 0 } };
+    { NULL, 0 }
+ };
+
+// qboolean consolekeys[256]; // if true, can't be rebound while in console
+static qboolean Key_IsConsoleKey(uint8_t key)
+{
+    // TODO: this could be done better
+    return (32 <= key && key < 128)
+        || key == K_ENTER
+        || key == K_TAB
+        || key == K_LEFTARROW
+        || key == K_RIGHTARROW
+        || key == K_UPARROW
+        || key == K_DOWNARROW
+        || key == K_BACKSPACE
+        || key == K_PGUP
+        || key == K_PGDN
+        || key == K_SHIFT
+        || key == K_MWHEELUP
+        || key == K_MWHEELDOWN
+        || key == '`'
+        || key == '~'
+        ;
+}
+
+// qboolean menubound[256]; // if true, can't be rebound while in menu
+static qboolean Key_IsMenuBound(uint8_t key)
+{
+    return key == K_ESCAPE || (K_F1 <= key && key <= K_F12);
+}
+
+static uint8_t Key_GetShiftKey(uint8_t key)
+{
+    if ('a' <= key && key <= 'z') {
+        return key - 'a' + 'A';
+    }
+    switch (key) {
+    case '1':
+        return '!';
+    case '2':
+        return '@';
+    case '3':
+        return '#';
+    case '4':
+        return '$';
+    case '5':
+        return '%';
+    case '6':
+        return '^';
+    case '7':
+        return '&';
+    case '8':
+        return '*';
+    case '9':
+        return '(';
+    case '0':
+        return ')';
+    case '-':
+        return '_';
+    case '=':
+        return '+';
+    case ',':
+        return '<';
+    case '.':
+        return '>';
+    case '/':
+        return '?';
+    case ';':
+        return ':';
+    case '\'':
+        return '"';
+    case '[':
+        return '{';
+    case ']':
+        return '}';
+    case '`':
+        return '~';
+    case '\\':
+        return '|';
+    }
+    return key;
+}
 
 /*
 ==============================================================================
@@ -310,14 +388,12 @@ the K_* names are matched up.
 */
 int Key_StringToKeynum(char *str)
 {
-    keyname_t *kn;
-
     if (!str || !str[0])
         return -1;
     if (!str[1])
         return str[0];
 
-    for (kn = keynames; kn->name; kn++) {
+    for (keyname_t const * kn = keynames; kn->name; kn++) {
         if (!Q_strcasecmp(str, kn->name))
             return kn->keynum;
     }
@@ -335,7 +411,6 @@ FIXME: handle quote special (general escape sequence?)
 */
 char *Key_KeynumToString(int keynum)
 {
-    keyname_t *kn;
     static char tinystr[2];
 
     if (keynum == -1)
@@ -346,7 +421,7 @@ char *Key_KeynumToString(int keynum)
         return tinystr;
     }
 
-    for (kn = keynames; kn->name; kn++)
+    for (keyname_t const * kn = keynames; kn->name; kn++)
         if (keynum == kn->keynum)
             return kn->name;
 
@@ -486,56 +561,6 @@ void Key_Init(void)
     key_linepos = 1;
 
     //
-    // init ascii characters in console mode
-    //
-    for (i = 32; i < 128; i++)
-        consolekeys[i] = true;
-    consolekeys[K_ENTER] = true;
-    consolekeys[K_TAB] = true;
-    consolekeys[K_LEFTARROW] = true;
-    consolekeys[K_RIGHTARROW] = true;
-    consolekeys[K_UPARROW] = true;
-    consolekeys[K_DOWNARROW] = true;
-    consolekeys[K_BACKSPACE] = true;
-    consolekeys[K_PGUP] = true;
-    consolekeys[K_PGDN] = true;
-    consolekeys[K_SHIFT] = true;
-    consolekeys[K_MWHEELUP] = true;
-    consolekeys[K_MWHEELDOWN] = true;
-    consolekeys['`'] = false;
-    consolekeys['~'] = false;
-
-    for (i = 0; i < 256; i++)
-        keyshift[i] = i;
-    for (i = 'a'; i <= 'z'; i++)
-        keyshift[i] = i - 'a' + 'A';
-    keyshift['1'] = '!';
-    keyshift['2'] = '@';
-    keyshift['3'] = '#';
-    keyshift['4'] = '$';
-    keyshift['5'] = '%';
-    keyshift['6'] = '^';
-    keyshift['7'] = '&';
-    keyshift['8'] = '*';
-    keyshift['9'] = '(';
-    keyshift['0'] = ')';
-    keyshift['-'] = '_';
-    keyshift['='] = '+';
-    keyshift[','] = '<';
-    keyshift['.'] = '>';
-    keyshift['/'] = '?';
-    keyshift[';'] = ':';
-    keyshift['\''] = '"';
-    keyshift['['] = '{';
-    keyshift[']'] = '}';
-    keyshift['`'] = '~';
-    keyshift['\\'] = '|';
-
-    menubound[K_ESCAPE] = true;
-    for (i = 0; i < 12; i++)
-        menubound[K_F1 + i] = true;
-
-    //
     // register our functions
     //
     Cmd_AddCommand("bind", Key_Bind_f);
@@ -556,11 +581,6 @@ void Key_Event(int key, qboolean down)
     char *kb;
     char cmd[1024];
 
-    keydown[key] = down;
-
-    if (!down)
-        key_repeats[key] = 0;
-
     key_lastpress = key;
     key_count++;
     if (key_count <= 0) {
@@ -568,15 +588,13 @@ void Key_Event(int key, qboolean down)
     }
 
     // update auto-repeat status
-    if (down) {
-        key_repeats[key]++;
-        if (key != K_BACKSPACE && key != K_PAUSE && key_repeats[key] > 1) {
+    if (down && keydown[key]) {
+        if (key != K_BACKSPACE && key != K_PAUSE) {
             return; // ignore most autorepeats
         }
-
-        if (key >= 200 && !keybindings[key])
-            Con_Printf("%s is unbound, hit F4 to set.\n", Key_KeynumToString(key));
     }
+
+    keydown[key] = down;
 
     if (key == K_SHIFT)
         shift_down = down;
@@ -617,8 +635,9 @@ void Key_Event(int key, qboolean down)
             sprintf(cmd, "-%s %i\n", kb + 1, key);
             Cbuf_AddText(cmd);
         }
-        if (keyshift[key] != key) {
-            kb = keybindings[keyshift[key]];
+        int shiftkey = Key_GetShiftKey(key);
+        if (shiftkey != key) {
+            kb = keybindings[shiftkey];
             if (kb && kb[0] == '+') {
                 sprintf(cmd, "-%s %i\n", kb + 1, key);
                 Cbuf_AddText(cmd);
@@ -630,7 +649,7 @@ void Key_Event(int key, qboolean down)
     //
     // during demo playback, most keys bring up the main menu
     //
-    if (cls.demoplayback && down && consolekeys[key] && key_dest == key_game) {
+    if (cls.demoplayback && Key_IsConsoleKey(key) && key_dest == key_game) {
         M_ToggleMenu_f();
         return;
     }
@@ -638,8 +657,8 @@ void Key_Event(int key, qboolean down)
     //
     // if not a consolekey, send to the interpreter no matter what mode is
     //
-    if ((key_dest == key_menu && menubound[key]) || (key_dest == key_console && !consolekeys[key]) ||
-        (key_dest == key_game && (!con_forcedup || !consolekeys[key]))) {
+    if ((key_dest == key_menu && Key_IsMenuBound(key)) || (key_dest == key_console && !Key_IsConsoleKey(key)) ||
+        (key_dest == key_game && (!con_forcedup || !Key_IsConsoleKey(key)))) {
         kb = keybindings[key];
         if (kb) {
             if (kb[0] == '+') { // button commands add keynum as a parm
@@ -653,11 +672,8 @@ void Key_Event(int key, qboolean down)
         return;
     }
 
-    if (!down)
-        return; // other systems only care about key down events
-
     if (shift_down) {
-        key = keyshift[key];
+        key = Key_GetShiftKey(key);
     }
 
     switch (key_dest) {
@@ -684,10 +700,5 @@ Key_ClearStates
 */
 void Key_ClearStates(void)
 {
-    int i;
-
-    for (i = 0; i < 256; i++) {
-        keydown[i] = false;
-        key_repeats[i] = 0;
-    }
+    Q_memset(keydown, 0, sizeof(keydown));
 }
