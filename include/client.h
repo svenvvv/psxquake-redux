@@ -301,10 +301,6 @@ typedef struct {
     int state; // low bit is down state
 } kbutton_t;
 
-extern kbutton_t in_mlook, in_klook;
-extern kbutton_t in_strafe;
-extern kbutton_t in_speed;
-
 void CL_InitInput(void);
 void CL_SendCmd(void);
 void CL_SendMove(usercmd_t *cmd);
