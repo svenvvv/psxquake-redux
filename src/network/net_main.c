@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // net_main.c
 
 #include "quakedef.h"
-#include "net_vcr.h"
 
 qsocket_t *net_activeSockets = NULL;
 qsocket_t *net_freeSockets = NULL;
@@ -78,9 +77,6 @@ cvar_t config_modem_hangup = { "_config_modem_hangup", "AT H", true };
 #ifdef IDGODS
 cvar_t idgods = { "idgods", "0" };
 #endif
-
-int vcrFile = -1;
-qboolean recording = false;
 
 // these two macros are to make the code more readable
 #define sfunc net_drivers[sock->driver]
@@ -410,12 +406,6 @@ NET_CheckNewConnections
 ===================
 */
 
-struct {
-    double time;
-    int op;
-    long session;
-} vcrConnect;
-
 qsocket_t *NET_CheckNewConnections(void)
 {
     qsocket_t *ret;
@@ -429,22 +419,8 @@ qsocket_t *NET_CheckNewConnections(void)
             continue;
         ret = dfunc.CheckNewConnections();
         if (ret) {
-            if (recording) {
-                vcrConnect.time = host_time;
-                vcrConnect.op = VCR_OP_CONNECT;
-                vcrConnect.session = (long)ret;
-                Sys_FileWrite(vcrFile, &vcrConnect, sizeof(vcrConnect));
-                Sys_FileWrite(vcrFile, ret->address, NET_NAMELEN);
-            }
             return ret;
         }
-    }
-
-    if (recording) {
-        vcrConnect.time = host_time;
-        vcrConnect.op = VCR_OP_CONNECT;
-        vcrConnect.session = 0;
-        Sys_FileWrite(vcrFile, &vcrConnect, sizeof(vcrConnect));
     }
 
     return NULL;
@@ -483,14 +459,6 @@ returns -1 if connection is invalid
 =================
 */
 
-struct {
-    double time;
-    int op;
-    long session;
-    int ret;
-    int len;
-} vcrGetMessage;
-
 extern void PrintStats(qsocket_t *s);
 
 int NET_GetMessage(qsocket_t *sock)
@@ -525,24 +493,6 @@ int NET_GetMessage(qsocket_t *sock)
             else if (ret == 2)
                 unreliableMessagesReceived++;
         }
-
-        if (recording) {
-            vcrGetMessage.time = host_time;
-            vcrGetMessage.op = VCR_OP_GETMESSAGE;
-            vcrGetMessage.session = (long)sock;
-            vcrGetMessage.ret = ret;
-            vcrGetMessage.len = net_message.cursize;
-            Sys_FileWrite(vcrFile, &vcrGetMessage, 24);
-            Sys_FileWrite(vcrFile, net_message.data, net_message.cursize);
-        }
-    } else {
-        if (recording) {
-            vcrGetMessage.time = host_time;
-            vcrGetMessage.op = VCR_OP_GETMESSAGE;
-            vcrGetMessage.session = (long)sock;
-            vcrGetMessage.ret = ret;
-            Sys_FileWrite(vcrFile, &vcrGetMessage, 20);
-        }
     }
 
     return ret;
@@ -559,13 +509,6 @@ returns 1 if the message was sent properly
 returns -1 if the connection died
 ==================
 */
-struct {
-    double time;
-    int op;
-    long session;
-    int r;
-} vcrSendMessage;
-
 int NET_SendMessage(qsocket_t *sock, sizebuf_t *data)
 {
     int r;
@@ -582,14 +525,6 @@ int NET_SendMessage(qsocket_t *sock, sizebuf_t *data)
     r = sfunc.QSendMessage(sock, data);
     if (r == 1 && sock->driver)
         messagesSent++;
-
-    if (recording) {
-        vcrSendMessage.time = host_time;
-        vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-        vcrSendMessage.session = (long)sock;
-        vcrSendMessage.r = r;
-        Sys_FileWrite(vcrFile, &vcrSendMessage, 20);
-    }
 
     return r;
 }
@@ -610,14 +545,6 @@ int NET_SendUnreliableMessage(qsocket_t *sock, sizebuf_t *data)
     r = sfunc.SendUnreliableMessage(sock, data);
     if (r == 1 && sock->driver)
         unreliableMessagesSent++;
-
-    if (recording) {
-        vcrSendMessage.time = host_time;
-        vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-        vcrSendMessage.session = (long)sock;
-        vcrSendMessage.r = r;
-        Sys_FileWrite(vcrFile, &vcrSendMessage, 20);
-    }
 
     return r;
 }
@@ -643,14 +570,6 @@ qboolean NET_CanSendMessage(qsocket_t *sock)
     SetNetTime();
 
     r = sfunc.CanSendMessage(sock);
-
-    if (recording) {
-        vcrSendMessage.time = host_time;
-        vcrSendMessage.op = VCR_OP_CANSENDMESSAGE;
-        vcrSendMessage.session = (long)sock;
-        vcrSendMessage.r = r;
-        Sys_FileWrite(vcrFile, &vcrSendMessage, 20);
-    }
 
     return r;
 }
@@ -726,14 +645,6 @@ void NET_Init(void)
     int i;
     int controlSocket;
     qsocket_t *s;
-
-    if (COM_CheckParm("-playback")) {
-        net_numdrivers = 1;
-        net_drivers[0].Init = VCR_Init;
-    }
-
-    if (COM_CheckParm("-record"))
-        recording = true;
 
     i = COM_CheckParm("-port");
     if (!i)
@@ -826,11 +737,6 @@ void NET_Shutdown(void)
             net_drivers[net_driverlevel].Shutdown();
             net_drivers[net_driverlevel].initialized = false;
         }
-    }
-
-    if (vcrFile != -1) {
-        Con_Printf("Closing vcrfile.\n");
-        Sys_FileClose(vcrFile);
     }
 }
 
