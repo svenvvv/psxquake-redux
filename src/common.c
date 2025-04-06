@@ -128,8 +128,6 @@ void InsertLinkAfter(link_t *l, link_t *after)
 ============================================================================
 */
 
-qboolean bigendien;
-
 short (*BigShort)(short l);
 short (*LittleShort)(short l);
 int (*BigLong)(int l);
@@ -548,7 +546,7 @@ void COM_FileBase(char const *in, char *out, size_t out_len)
         s--;
         int len = s - s2;
         if (len > out_len) {
-            Sys_Error("COM_FileBase: name too long, %d %d", len, out_len);
+            Sys_Error("COM_FileBase: name too long, %d %ld", len, out_len);
         }
         strncpy(out, s2 + 1, s - s2);
         out[s - s2] = 0;
@@ -783,7 +781,6 @@ void COM_Init(void)
 
     // set the byte swapping variables in a portable manner
     if (*(short *)swaptest == 1) {
-        bigendien = false;
         BigShort = ShortSwap;
         LittleShort = ShortNoSwap;
         BigLong = LongSwap;
@@ -791,7 +788,6 @@ void COM_Init(void)
         BigFloat = FloatSwap;
         LittleFloat = FloatNoSwap;
     } else {
-        bigendien = true;
         BigShort = ShortNoSwap;
         LittleShort = ShortSwap;
         BigLong = LongNoSwap;

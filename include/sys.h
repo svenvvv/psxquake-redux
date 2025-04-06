@@ -44,12 +44,15 @@ void Sys_MakeCodeWriteable(unsigned long startaddr, unsigned long length);
 //
 // system IO
 //
+__attribute__ ((format (printf, 2, 3)))
 void Sys_DebugLog(char *file, char *fmt, ...);
 
 __attribute__((noreturn))
+__attribute__ ((format (printf, 1, 2)))
 void Sys_Error(char *error, ...);
 // an error will cause the entire program to exit
 
+__attribute__ ((format (printf, 1, 2)))
 void Sys_Printf(char *fmt, ...);
 // send text to the console
 

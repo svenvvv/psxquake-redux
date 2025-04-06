@@ -123,6 +123,7 @@ extern int pr_xstatement;
 
 extern unsigned short pr_crc;
 
+__attribute__ ((format (printf, 1, 2)))
 void PR_RunError(char *error, ...);
 
 void ED_PrintEdicts(void);

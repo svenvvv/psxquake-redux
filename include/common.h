@@ -150,6 +150,7 @@ void COM_StripExtension(char *in, char *out);
 void COM_FileBase(char const *in, char *out, size_t out_len);
 void COM_DefaultExtension(char *path, char *extension);
 
+__attribute__ ((format (printf, 1, 2)))
 char *va(char *format, ...);
 // does a varargs printf into a temp buffer
 

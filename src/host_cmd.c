@@ -58,6 +58,7 @@ void Host_Status_f(void)
     int minutes;
     int hours = 0;
     int j;
+    __attribute__ ((format (printf, 1, 2)))
     void (*print)(char *fmt, ...);
 
     if (cmd_source == src_command) {

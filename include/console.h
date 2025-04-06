@@ -34,8 +34,11 @@ void Con_CheckResize(void);
 void Con_Init(void);
 void Con_DrawConsole(int lines, qboolean drawinput);
 void Con_Print(char *txt);
+__attribute__ ((format (printf, 1, 2)))
 void Con_Printf(char *fmt, ...);
+__attribute__ ((format (printf, 1, 2)))
 void Con_DPrintf(char *fmt, ...);
+__attribute__ ((format (printf, 1, 2)))
 void Con_SafePrintf(char *fmt, ...);
 void Con_Clear_f(void);
 void Con_DrawNotify(void);
