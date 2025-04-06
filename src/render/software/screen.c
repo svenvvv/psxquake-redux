@@ -631,7 +631,6 @@ needs almost the entire 256k of stack space!
 void SCR_UpdateScreen(void)
 {
     static float oldscr_viewsize;
-    static float oldlcd_x;
     vrect_t vrect;
 
     if (scr_skipupdate || block_drawing)
@@ -664,11 +663,6 @@ void SCR_UpdateScreen(void)
     //
     if (oldfov != scr_fov.value) {
         oldfov = scr_fov.value;
-        vid.recalc_refdef = true;
-    }
-
-    if (oldlcd_x != lcd_x.value) {
-        oldlcd_x = lcd_x.value;
         vid.recalc_refdef = true;
     }
 
