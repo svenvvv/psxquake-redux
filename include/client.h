@@ -63,7 +63,6 @@ typedef struct {
 
 #define SIGNONS 4 // signon messages to receive before connected
 
-#define MAX_DLIGHTS 32
 typedef struct {
     vec3_t origin;
     float radius;
@@ -76,15 +75,12 @@ typedef struct {
 #endif
 } dlight_t;
 
-#define MAX_BEAMS 24
 typedef struct {
     int entity;
     struct model_s *model;
     float endtime;
     vec3_t start, end;
 } beam_t;
-
-#define MAX_EFRAGS 640
 
 #define MAX_MAPSTRING 2048
 #define MAX_DEMOS 8
@@ -254,9 +250,6 @@ extern cvar_t m_pitch;
 extern cvar_t m_yaw;
 extern cvar_t m_forward;
 extern cvar_t m_side;
-
-#define MAX_TEMP_ENTITIES 64 // lightning bolts, etc
-#define MAX_STATIC_ENTITIES 128 // torches, etc
 
 extern client_state_t cl;
 

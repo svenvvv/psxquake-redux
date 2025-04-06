@@ -21,17 +21,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-int num_temp_entities;
-entity_t cl_temp_entities[MAX_TEMP_ENTITIES];
-beam_t cl_beams[MAX_BEAMS];
+static int num_temp_entities;
+entity_t cl_temp_entities[MAX_TEMP_ENTITIES] = { 0 };
+beam_t cl_beams[MAX_BEAMS] = { 0 };
 
-sfx_t *cl_sfx_wizhit;
-sfx_t *cl_sfx_knighthit;
-sfx_t *cl_sfx_tink1;
-sfx_t *cl_sfx_ric1;
-sfx_t *cl_sfx_ric2;
-sfx_t *cl_sfx_ric3;
-sfx_t *cl_sfx_r_exp3;
+static sfx_t *cl_sfx_wizhit;
+static sfx_t *cl_sfx_knighthit;
+static sfx_t *cl_sfx_tink1;
+static sfx_t *cl_sfx_ric1;
+static sfx_t *cl_sfx_ric2;
+static sfx_t *cl_sfx_ric3;
+static sfx_t *cl_sfx_r_exp3;
 #ifdef QUAKE2
 sfx_t *cl_sfx_imp;
 sfx_t *cl_sfx_rail;
