@@ -230,8 +230,6 @@ Interactive line editing and console scrollback
 */
 void Key_Console(int key)
 {
-    char *cmd;
-
     if (key == K_ENTER) {
         Cbuf_AddText(key_lines[edit_line] + 1); // skip the >
         Cbuf_AddText("\n");
@@ -248,7 +246,7 @@ void Key_Console(int key)
 
 #ifdef CONSOLE_COMPLETION
     if (key == K_TAB) { // command completion
-        cmd = Cmd_CompleteCommand(key_lines[edit_line] + 1);
+        char * cmd = Cmd_CompleteCommand(key_lines[edit_line] + 1);
         if (!cmd)
             cmd = Cvar_CompleteVariable(key_lines[edit_line] + 1);
         if (cmd) {

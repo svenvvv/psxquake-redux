@@ -528,13 +528,13 @@ void Cmd_AddCommand(char *cmd_name, xcommand_t function)
     if (host_initialized) // because hunk allocation would get stomped
         Sys_Error("Cmd_AddCommand after host_initialized");
 
+    uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
+
     // fail if the command is a variable name
-    if (Cvar_VariableString(cmd_name)[0]) {
+    if (Cvar_FindVarHashed(cmd_name_hash) != NULL) {
         Con_Printf("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
         return;
     }
-
-    uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
 
     // fail if the command already exists
     cmd = Cmd_FunctionFind(cmd_name_hash);
@@ -562,6 +562,11 @@ qboolean Cmd_Exists(char *cmd_name)
 {
     uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
     return Cmd_FunctionFind(cmd_name_hash) != NULL;
+}
+
+qboolean Cmd_ExistsHashed(uint32_t name_hash)
+{
+    return Cmd_FunctionFind(name_hash) != NULL;
 }
 
 #ifdef CMD_FUNCTION_HAS_NAME

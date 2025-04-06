@@ -69,7 +69,7 @@ void Host_Status_f(void)
     } else
         print = SV_ClientPrintf;
 
-    print("host:    %s\n", Cvar_VariableString("hostname"));
+    // print("host:    %s\n", Cvar_VariableString("hostname"));
     print("version: %4.2f\n", VERSION);
     if (tcpipAvailable)
         print("tcp/ip:  %s\n", my_tcpip_address);

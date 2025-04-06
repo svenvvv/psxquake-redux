@@ -530,9 +530,9 @@ char *COM_FileExtension(char *in)
 COM_FileBase
 ============
 */
-void COM_FileBase(char *in, char *out)
+void COM_FileBase(char const *in, char *out, size_t out_len)
 {
-    char *s, *s2;
+    char const *s, *s2;
 
     s = in + strlen(in) - 1;
 
@@ -543,9 +543,13 @@ void COM_FileBase(char *in, char *out)
         ;
 
     if (s - s2 < 2)
-        strcpy(out, "?model?");
+        strncpy(out, "?model?", out_len);
     else {
         s--;
+        int len = s - s2;
+        if (len > out_len) {
+            Sys_Error("COM_FileBase: name too long, %d %d", len, out_len);
+        }
         strncpy(out, s2 + 1, s - s2);
         out[s - s2] = 0;
     }
@@ -1134,7 +1138,7 @@ byte *COM_LoadFile(char *path, int usehunk)
 {
     int h;
     byte *buf;
-    char base[32];
+    char base[64];
     int len;
 
     buf = NULL; // quiet compiler warning
@@ -1145,7 +1149,7 @@ byte *COM_LoadFile(char *path, int usehunk)
         return NULL;
 
     // extract the filename base name for hunk tag
-    COM_FileBase(path, base);
+    COM_FileBase(path, base, sizeof(base));
 
     if (usehunk == 1)
         buf = Hunk_AllocName(len + 1, base);
@@ -1166,7 +1170,7 @@ byte *COM_LoadFile(char *path, int usehunk)
     if (!buf)
         Sys_Error("COM_LoadFile: not enough space for %s", path);
 
-    ((byte *)buf)[len] = 0;
+    buf[len] = 0;
 
     Draw_BeginDisc();
     Sys_FileRead(h, buf, len);

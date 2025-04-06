@@ -53,12 +53,15 @@ Cvars are restricted from having the same names as commands to keep this
 interface from being ambiguous.
 */
 
+#include "murmurhash2.h"
+
 typedef struct cvar_s {
     char *name;
     char *string;
     qboolean archive; // set to true to cause it to be saved to vars.rc
     qboolean server; // notifies players when changed
     float value;
+    uint32_t name_hash;
     struct cvar_s *next;
 } cvar_t;
 
@@ -75,9 +78,6 @@ void Cvar_SetValue(char *var_name, float value);
 float Cvar_VariableValue(char *var_name);
 // returns 0 if not defined or non numeric
 
-char const *Cvar_VariableString(char *var_name);
-// returns an empty string if not defined
-
 #ifdef CONSOLE_COMPLETION
 char *Cvar_CompleteVariable(char *partial);
 // attempts to match a partial variable name for command line completion
@@ -93,4 +93,4 @@ void Cvar_WriteVariables(FILE *f);
 // Writes lines containing "set variable value" for all variables
 // with the archive flag set to true.
 
-cvar_t *Cvar_FindVar(char *var_name);
+cvar_t *Cvar_FindVarHashed(uint32_t var_name_hash);

@@ -22,19 +22,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 
 static cvar_t *cvar_vars;
-static char const * const cvar_null_string = "";
 
 /*
 ============
 Cvar_FindVar
 ============
 */
-cvar_t *Cvar_FindVar(char *var_name)
+static cvar_t *Cvar_FindVar(char *var_name)
 {
     cvar_t *var;
-
+    uint32_t var_name_hash = MurmurHash2(var_name, strlen(var_name));
     for (var = cvar_vars; var; var = var->next)
-        if (!Q_strcmp(var_name, var->name))
+        if (var->name_hash == var_name_hash)
+            return var;
+
+    return NULL;
+}
+
+cvar_t *Cvar_FindVarHashed(uint32_t var_name_hash)
+{
+    cvar_t *var;
+    for (var = cvar_vars; var; var = var->next)
+        if (var->name_hash == var_name_hash)
             return var;
 
     return NULL;
@@ -53,21 +62,6 @@ float Cvar_VariableValue(char *var_name)
     if (!var)
         return 0;
     return Q_atof(var->string);
-}
-
-/*
-============
-Cvar_VariableString
-============
-*/
-char const *Cvar_VariableString(char *var_name)
-{
-    cvar_t *var;
-
-    var = Cvar_FindVar(var_name);
-    if (!var)
-        return cvar_null_string;
-    return var->string;
 }
 
 #ifdef CONSOLE_COMPLETION
@@ -100,18 +94,9 @@ char *Cvar_CompleteVariable(char *partial)
 Cvar_Set
 ============
 */
-void Cvar_Set(char *var_name, char *value)
+static void Cvar_SetVar(cvar_t * var, char *value)
 {
-    cvar_t *var;
-    qboolean changed;
-
-    var = Cvar_FindVar(var_name);
-    if (!var) { // there is an error in C code if this happens
-        Con_Printf("Cvar_Set: variable %s not found\n", var_name);
-        return;
-    }
-
-    changed = Q_strcmp(var->string, value);
+    qboolean changed = Q_strcmp(var->string, value);
 
     Z_Free(var->string); // free the old value string
 
@@ -122,6 +107,17 @@ void Cvar_Set(char *var_name, char *value)
         if (sv.active)
             SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", var->name, var->string);
     }
+}
+
+void Cvar_Set(char *var_name, char *value)
+{
+    cvar_t * var = Cvar_FindVar(var_name);
+    if (!var) { // there is an error in C code if this happens
+        Con_Printf("Cvar_Set: variable %s not found\n", var_name);
+        return;
+    }
+
+    Cvar_SetVar(var, value);
 }
 
 /*
@@ -147,15 +143,16 @@ Adds a freestanding variable to the variable list.
 void Cvar_RegisterVariable(cvar_t *variable)
 {
     char *oldstr;
+    uint32_t name_hash = MurmurHash2(variable->name, strlen(variable->name));
 
-    // first check to see if it has allready been defined
-    if (Cvar_FindVar(variable->name)) {
-        Con_Printf("Can't register variable %s, allready defined\n", variable->name);
+    // first check to see if it has already been defined
+    if (Cvar_FindVarHashed(name_hash)) {
+        Con_Printf("Can't register variable %s, already defined\n", variable->name);
         return;
     }
 
     // check for overlap with a command
-    if (Cmd_Exists(variable->name)) {
+    if (Cmd_ExistsHashed(name_hash)) {
         Con_Printf("Cvar_RegisterVariable: %s is a command\n", variable->name);
         return;
     }
@@ -165,6 +162,7 @@ void Cvar_RegisterVariable(cvar_t *variable)
     variable->string = Z_Malloc(Q_strlen(variable->string) + 1);
     Q_strcpy(variable->string, oldstr);
     variable->value = Q_atof(variable->string);
+    variable->name_hash = name_hash;
 
     // link the variable in
     variable->next = cvar_vars;
@@ -193,7 +191,7 @@ qboolean Cvar_Command(void)
         return true;
     }
 
-    Cvar_Set(v->name, Cmd_Argv(1));
+    Cvar_SetVar(v, Cmd_Argv(1));
     return true;
 }
 
