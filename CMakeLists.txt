@@ -43,8 +43,6 @@ set(COMMON_SRC
 		src/view.c
 		src/wad.c
 		src/world.c
-		src/snd_mem.c
-		src/snd_mix.c
 		src/murmurhash2.c
 )
 
@@ -55,7 +53,7 @@ target_include_directories(quake PRIVATE include)
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	target_compile_options(quake PRIVATE -Wall -Wextra -fstack-protector-all)
 	target_compile_options(quake PRIVATE -Wno-missing-field-initializers -Wno-sign-compare -Wno-pointer-sign)
-	target_compile_definitions(quake PRIVATE PARANOID)
+	# target_compile_definitions(quake PRIVATE PARANOID)
 else ()
 	target_compile_options(quake PRIVATE -Os)
 	# target_compile_options(quake PRIVATE -fno-stack-protector)

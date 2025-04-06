@@ -87,6 +87,7 @@ void VID_ShiftPalette(unsigned char *palette)
 
 void VID_Init(unsigned char *palette)
 {
+    (void)palette;
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         Sys_Error("Could not initialize SDL, %s", SDL_GetError());
     }
@@ -134,6 +135,7 @@ void VID_Shutdown(void)
 
 void VID_Update(vrect_t *rects)
 {
+    (void)rects;
     SDL_UnlockSurface(sdl_surface);
 
     SDL_Texture *tex = SDL_CreateTextureFromSurface(sdl_renderer, sdl_surface);
@@ -150,8 +152,17 @@ void VID_Update(vrect_t *rects)
 
 void D_BeginDirectRect(int x, int y, byte *pbitmap, int width, int height)
 {
+    (void)x;
+    (void)y;
+    (void)pbitmap;
+    (void)width;
+    (void)height;
 }
 
 void D_EndDirectRect(int x, int y, int width, int height)
 {
+    (void)x;
+    (void)y;
+    (void)width;
+    (void)height;
 }

@@ -1134,7 +1134,10 @@ void Mod_LoadBrushModel(model_t *mod, void *buffer)
         if (i < mod->numsubmodels - 1) { // duplicate the basic information
             char name[10];
 
-            sprintf(name, "*%i", i + 1);
+            int fmt_len = snprintf(name, sizeof(name), "*%i", i + 1);
+            if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+                Sys_Error("Mod_LoadBrushModel: failed to format name, %d", fmt_len);
+            }
             loadmodel = Mod_FindName(name);
             *loadmodel = *mod;
             strcpy(loadmodel->name, name);

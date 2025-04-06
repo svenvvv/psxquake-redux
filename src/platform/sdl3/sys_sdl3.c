@@ -145,12 +145,6 @@ SYSTEM IO
 ===============================================================================
 */
 
-void Sys_MakeCodeWriteable(unsigned long startaddr, unsigned long length)
-{
-    (void)startaddr;
-    (void)length;
-}
-
 void Sys_Error(char *error, ...)
 {
     va_list argptr;
@@ -192,10 +186,6 @@ char *Sys_ConsoleInput(void)
     return NULL;
 }
 
-void Sys_Sleep(void)
-{
-}
-
 void Sys_SendKeyEvents(void)
 {
 }
@@ -210,14 +200,11 @@ void Sys_LowFPPrecision(void)
 
 //=============================================================================
 
-static uint8_t quake_heap[8 * 1024 * 1024];
+static uint8_t quake_heap[6 * 1024 * 1024];
 static quakeparms_t parms;
 
 int main(int argc, char **argv)
 {
-    // parms.memsize = 8*1024*1024;
-    // parms.membase = malloc (parms.memsize);
-    // parms.basedir = ".";
     parms.memsize = sizeof(quake_heap);
     parms.membase = quake_heap;
     parms.basedir = ".";

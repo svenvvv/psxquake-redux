@@ -25,8 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
     // right now, but that should move)
 
 #define LIGHT_MIN                                     \
-    5 // lowest light value we'll allow, to avoid the \
-        //  need for inner-loop light clamping
+    5 // lowest light value we'll allow, to avoid the need for inner-loop light clamping
 
 mtriangle_t *ptriangles;
 affinetridesc_t r_affinetridesc;

@@ -13,7 +13,7 @@
 
 #define MURMURHASH2_SEED 0x23665b41
 
-uint32_t MurmurHash2 (const void * key, int len)
+uint32_t MurmurHash2 (const void * key, size_t len)
 {
   /* 'm' and 'r' are mixing constants generated offline.
      They're not really 'magic', they just happen to work well.  */

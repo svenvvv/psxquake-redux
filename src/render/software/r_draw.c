@@ -38,11 +38,9 @@ zpointdesc_t r_zpointdesc;
 
 polydesc_t r_polydesc;
 
-clipplane_t *entity_clipplanes;
 clipplane_t view_clipplanes[4];
-clipplane_t world_clipplanes[16];
 
-medge_t *r_pedge;
+static medge_t *r_pedge;
 
 qboolean r_leftclipped, r_rightclipped;
 static qboolean makeleftedge, makerightedge;
@@ -531,7 +529,7 @@ void R_RenderBmodelFace(bedge_t *pedges, msurface_t *psurf)
     c_faceclip++;
 
     // this is a dummy to give the caching mechanism someplace to write to
-    r_pedge = &tedge;
+    // r_pedge = &tedge;
 
     // set up clip planes
     pclip = NULL;

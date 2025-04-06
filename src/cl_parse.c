@@ -358,6 +358,8 @@ void CL_ParseUpdate(int bits)
 #ifdef GLQUAKE
         if (num > 0 && num <= cl.maxclients)
             R_TranslatePlayerSkin(num - 1);
+#else
+        (void)skin;
 #endif
     }
 

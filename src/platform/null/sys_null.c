@@ -143,10 +143,6 @@ SYSTEM IO
 ===============================================================================
 */
 
-void Sys_MakeCodeWriteable(unsigned long startaddr, unsigned long length)
-{
-}
-
 void Sys_Error(char *error, ...)
 {
     va_list argptr;
@@ -186,10 +182,6 @@ double Sys_FloatTime(void)
 char *Sys_ConsoleInput(void)
 {
     return NULL;
-}
-
-void Sys_Sleep(void)
-{
 }
 
 void Sys_SendKeyEvents(void)
