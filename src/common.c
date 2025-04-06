@@ -797,7 +797,7 @@ FIXME: make this buffer size safe someday
 char *va(char *format, ...)
 {
     va_list argptr;
-    static char string[1024];
+    static char string[MAX_OSPATH];
 
     va_start(argptr, format);
     vsprintf(string, format, argptr);

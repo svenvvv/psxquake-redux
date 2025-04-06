@@ -53,10 +53,8 @@ byte *host_basepal;
 byte *host_colormap;
 
 cvar_t host_framerate = { "host_framerate", "0" }; // set for slow motion
-cvar_t host_speeds = { "host_speeds", "0" }; // set for running times
 
 cvar_t sys_ticrate = { "sys_ticrate", "0.05" };
-cvar_t serverprofile = { "serverprofile", "0" };
 
 cvar_t fraglimit = { "fraglimit", "0", false, true };
 cvar_t timelimit = { "timelimit", "0", false, true };
@@ -203,10 +201,8 @@ void Host_InitLocal(void)
     Host_InitCommands();
 
     Cvar_RegisterVariable(&host_framerate);
-    Cvar_RegisterVariable(&host_speeds);
 
     Cvar_RegisterVariable(&sys_ticrate);
-    Cvar_RegisterVariable(&serverprofile);
 
     Cvar_RegisterVariable(&fraglimit);
     Cvar_RegisterVariable(&timelimit);
@@ -598,13 +594,8 @@ Host_Frame
 Runs all active servers
 ==================
 */
-void _Host_Frame(float time)
+void Host_Frame(float time)
 {
-    static double time1 = 0;
-    static double time2 = 0;
-    static double time3 = 0;
-    int pass1, pass2, pass3;
-
     if (setjmp(host_abortserver))
         return; // something bad happened, or the server disconnected
 
@@ -660,14 +651,7 @@ void _Host_Frame(float time)
         CL_ReadFromServer();
     }
 
-    // update video
-    if (host_speeds.value)
-        time1 = Sys_FloatTime();
-
     SCR_UpdateScreen();
-
-    if (host_speeds.value)
-        time2 = Sys_FloatTime();
 
     // update audio
     if (cls.signon == SIGNONS) {
@@ -678,49 +662,7 @@ void _Host_Frame(float time)
 
     CDAudio_Update();
 
-    if (host_speeds.value) {
-        pass1 = (time1 - time3) * 1000;
-        time3 = Sys_FloatTime();
-        pass2 = (time2 - time1) * 1000;
-        pass3 = (time3 - time2) * 1000;
-        Con_Printf("%3i tot %3i server %3i gfx %3i snd\n", pass1 + pass2 + pass3, pass1, pass2, pass3);
-    }
-
     host_framecount++;
-}
-
-void Host_Frame(float time)
-{
-    double time1, time2;
-    static double timetotal;
-    static int timecount;
-    int i, c, m;
-
-    if (!serverprofile.value) {
-        _Host_Frame(time);
-        return;
-    }
-
-    time1 = Sys_FloatTime();
-    _Host_Frame(time);
-    time2 = Sys_FloatTime();
-
-    timetotal += time2 - time1;
-    timecount++;
-
-    if (timecount < 1000)
-        return;
-
-    m = timetotal * 1000 / timecount;
-    timecount = 0;
-    timetotal = 0;
-    c = 0;
-    for (i = 0; i < svs.maxclients; i++) {
-        if (svs.clients[i].active)
-            c++;
-    }
-
-    Con_Printf("serverprofile: %2i clients %2i msec\n", c, m);
 }
 
 /*
