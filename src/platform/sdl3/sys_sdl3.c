@@ -134,6 +134,7 @@ int Sys_FileTime(char *path)
 
 void Sys_mkdir(char *path)
 {
+    (void)path;
 }
 
 /*
@@ -146,6 +147,8 @@ SYSTEM IO
 
 void Sys_MakeCodeWriteable(unsigned long startaddr, unsigned long length)
 {
+    (void)startaddr;
+    (void)length;
 }
 
 void Sys_Error(char *error, ...)
@@ -210,7 +213,7 @@ void Sys_LowFPPrecision(void)
 static uint8_t quake_heap[8 * 1024 * 1024];
 static quakeparms_t parms;
 
-void main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     // parms.memsize = 8*1024*1024;
     // parms.membase = malloc (parms.memsize);

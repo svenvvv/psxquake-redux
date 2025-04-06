@@ -27,8 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //  1 pixel per triangle
 
 #define BMODEL_FULLY_CLIPPED                       \
-    0x10 // value returned by R_BmodelCheckBBox () \
-        //  if bbox is trivially rejected
+    0x10 // value returned by R_BmodelCheckBBox () if bbox is trivially rejected
 
 //===========================================================================
 // viewmodel lighting
@@ -190,8 +189,7 @@ extern fixed16_t sadjust, tadjust;
 extern fixed16_t bbextents, bbextentt;
 
 #define MAXBVERTINDEXES                                \
-    1000 // new clipped vertices when clipping bmodels \
-        //  to the world BSP
+    1000 // new clipped vertices when clipping bmodels to the world BSP
 extern mvertex_t *r_ptverts, *r_ptvertsmax;
 
 extern vec3_t sbaseaxis[3], tbaseaxis[3];

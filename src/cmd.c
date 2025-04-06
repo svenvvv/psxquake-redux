@@ -381,7 +381,7 @@ typedef struct cmd_function_s {
 
 #define MAX_ARGS 80
 
-static int cmd_argc;
+static unsigned cmd_argc;
 static char *cmd_argv[MAX_ARGS];
 static char *cmd_null_string = "";
 static char *cmd_args = NULL;
@@ -449,7 +449,7 @@ Parses the given string into command line tokens.
 */
 void Cmd_TokenizeString(char *text)
 {
-    int i;
+    unsigned i;
 
     // clear the args from the last string
     for (i = 0; i < cmd_argc; i++)

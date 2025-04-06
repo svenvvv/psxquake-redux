@@ -154,10 +154,19 @@ void VID_Shutdown(void)
 
 void D_BeginDirectRect(int x, int y, byte *pbitmap, int width, int height)
 {
+    (void)x;
+    (void)y;
+    (void)pbitmap;
+    (void)width;
+    (void)height;
 }
 
 void D_EndDirectRect(int x, int y, int width, int height)
 {
+    (void)x;
+    (void)y;
+    (void)width;
+    (void)height;
 }
 
 void GL_BeginRendering(int *x, int *y, int *width, int *height)

@@ -424,7 +424,7 @@ void Host_ShutdownServer(qboolean crash)
     } while (count);
 
     // make sure all the clients know we're disconnecting
-    buf.data = message;
+    buf.data = (byte*) message;
     buf.maxsize = 4;
     buf.cursize = 0;
     MSG_WriteByte(&buf, svc_disconnect);
@@ -752,7 +752,7 @@ void Host_Init(quakeparms_t *parms)
     Cbuf_Init();
     Cmd_Init();
     V_Init();
-    COM_Init(parms->basedir);
+    COM_Init();
     Host_InitLocal();
     W_LoadWadFile("gfx.wad");
     Key_Init();

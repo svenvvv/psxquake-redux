@@ -134,11 +134,15 @@ void *Z_Malloc(int size)
 {
     void *buf;
 
+#ifdef PARANOID
     Z_CheckHeap(); // DEBUG
+#endif
     buf = Z_TagMalloc(size, 1);
     if (!buf)
         Sys_Error("Z_Malloc: failed on allocation of %i bytes", size);
+#ifdef PARANOID
     Q_memset(buf, 0, size);
+#endif
 
     return buf;
 }
@@ -255,11 +259,11 @@ typedef struct {
     char name[8];
 } hunk_t;
 
-byte *hunk_base;
-int hunk_size;
+static byte *hunk_base;
+static int hunk_size;
 
-int hunk_low_used;
-int hunk_high_used;
+static int hunk_low_used;
+static int hunk_high_used;
 
 qboolean hunk_tempactive;
 int hunk_tempmark;

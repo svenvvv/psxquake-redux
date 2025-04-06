@@ -58,7 +58,7 @@ void InsertLinkAfter(link_t *l, link_t *after);
 // (type *)STRUCT_FROM_LINK(link_t *link, type, member)
 // ent = STRUCT_FROM_LINK(link,entity_t,order)
 // FIXME: remove this mess!
-#define STRUCT_FROM_LINK(l, t, m) ((t *)((byte *)l - (int)&(((t *)0)->m)))
+#define STRUCT_FROM_LINK(l, t, m) ((t *)((void *)l - (void*)&(((t *)0)->m)))
 
 //============================================================================
 
@@ -142,7 +142,7 @@ extern int com_argc;
 extern char **com_argv;
 
 int COM_CheckParm(char *parm);
-void COM_Init(char *path);
+void COM_Init(void);
 void COM_InitArgv(int argc, char **argv);
 
 char *COM_SkipPath(char *pathname);

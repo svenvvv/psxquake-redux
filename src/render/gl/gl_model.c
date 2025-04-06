@@ -608,8 +608,10 @@ void Mod_LoadTexinfo(lump_t *l)
     loadmodel->numtexinfo = count;
 
     for (i = 0; i < count; i++, in++, out++) {
-        for (j = 0; j < 8; j++)
+        for (j = 0; j < 4; j++) {
             out->vecs[0][j] = LittleFloat(in->vecs[0][j]);
+            out->vecs[1][j] = LittleFloat(in->vecs[1][j]);
+        }
         len1 = Length(out->vecs[0]);
         len2 = Length(out->vecs[1]);
         len1 = (len1 + len2) / 2;
@@ -1137,7 +1139,10 @@ void Mod_LoadBrushModel(model_t *mod, void *buffer)
         if (i < mod->numsubmodels - 1) { // duplicate the basic information
             char name[10];
 
-            sprintf(name, "*%i", i + 1);
+            int fmt_len = snprintf(name, sizeof(name), "*%i", i + 1);
+            if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+                Sys_Error("Mod_LoadBrushModel: failed to format filename, %d\n", fmt_len);
+            }
             loadmodel = Mod_FindName(name);
             *loadmodel = *mod;
             strcpy(loadmodel->name, name);
@@ -1174,8 +1179,8 @@ Mod_LoadAliasFrame
 */
 void *Mod_LoadAliasFrame(void *pin, maliasframedesc_t *frame)
 {
-    trivertx_t *pframe, *pinframe;
-    int i, j;
+    trivertx_t *pinframe;
+    int i;
     daliasframe_t *pdaliasframe;
 
     pdaliasframe = (daliasframe_t *)pin;
@@ -1331,7 +1336,6 @@ void *Mod_LoadAllSkins(int numskins, daliasskintype_t *pskintype)
     int i, j, k;
     char name[32];
     int s;
-    byte *copy;
     byte *skin;
     byte *texels;
     daliasskingroup_t *pinskingroup;
@@ -1355,7 +1359,10 @@ void *Mod_LoadAllSkins(int numskins, daliasskintype_t *pskintype)
             pheader->texels[i] = texels - (byte *)pheader;
             memcpy(texels, (byte *)(pskintype + 1), s);
             //		}
-            sprintf(name, "%s_%i", loadmodel->name, i);
+            int fmt_len = snprintf(name, sizeof(name), "%s_%i", loadmodel->name, i);
+            if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+                Sys_Error("Mod_LoadAllSkins: failed to format name, %d", fmt_len);
+            }
             pheader->gl_texturenum[i][0] = pheader->gl_texturenum[i][1] = pheader->gl_texturenum[i][2] =
                 pheader->gl_texturenum[i][3] =
                     GL_LoadTexture(name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype + 1), true, false);
@@ -1376,7 +1383,10 @@ void *Mod_LoadAllSkins(int numskins, daliasskintype_t *pskintype)
                     pheader->texels[i] = texels - (byte *)pheader;
                     memcpy(texels, (byte *)(pskintype), s);
                 }
-                sprintf(name, "%s_%i_%i", loadmodel->name, i, j);
+                int fmt_len = snprintf(name, sizeof(name), "%s_%i_%i", loadmodel->name, i, j);
+                if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+                    Sys_Error("Mod_LoadAllSkins: failed to format name, %d\n", fmt_len);
+                }
                 pheader->gl_texturenum[i][j & 3] =
                     GL_LoadTexture(name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype), true, false);
                 pskintype = (daliasskintype_t *)((byte *)(pskintype) + s);
@@ -1403,7 +1413,7 @@ void Mod_LoadAliasModel(model_t *mod, void *buffer)
     mdl_t *pinmodel;
     stvert_t *pinstverts;
     dtriangle_t *pintriangles;
-    int version, numframes, numskins;
+    int version, numframes;
     int size;
     daliasframetype_t *pframetype;
     daliasskintype_t *pskintype;
@@ -1551,9 +1561,7 @@ void *Mod_LoadSpriteFrame(void *pin, mspriteframe_t **ppframe, int framenum)
 {
     dspriteframe_t *pinframe;
     mspriteframe_t *pspriteframe;
-    int i, width, height, size, origin[2];
-    unsigned short *ppixout;
-    byte *ppixin;
+    int width, height, size, origin[2];
     char name[64];
 
     pinframe = (dspriteframe_t *)pin;
@@ -1578,7 +1586,10 @@ void *Mod_LoadSpriteFrame(void *pin, mspriteframe_t **ppframe, int framenum)
     pspriteframe->left = origin[0];
     pspriteframe->right = width + origin[0];
 
-    sprintf(name, "%s_%i", loadmodel->name, framenum);
+    int fmt_len = snprintf(name, sizeof(name), "%s_%i", loadmodel->name, framenum);
+    if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+        Sys_Error("Mod_LoadSpriteFrame(): name too long, %d\n", fmt_len);
+    }
     pspriteframe->gl_texturenum = GL_LoadTexture(name, width, height, (byte *)(pinframe + 1), true, true);
 
     return (void *)((byte *)pinframe + sizeof(dspriteframe_t) + size);

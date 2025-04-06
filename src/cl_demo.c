@@ -216,7 +216,10 @@ void CL_Record_f(void)
     } else
         track = -1;
 
-    sprintf(name, "%s/%s", com_gamedir, Cmd_Argv(1));
+    int len = snprintf(name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv(1));
+    if (len < 0 || len >= sizeof(name)) {
+        Sys_Error("failed to format record filepath, %d", len);
+    }
 
     //
     // start the map up

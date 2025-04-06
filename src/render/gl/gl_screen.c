@@ -247,7 +247,6 @@ Internal use only
 */
 static void SCR_CalcRefdef(void)
 {
-    vrect_t vrect;
     float size;
     int h;
     qboolean full = false;
@@ -566,7 +565,10 @@ void SCR_ScreenShot_f(void)
     for (i = 0; i <= 99; i++) {
         pcxname[5] = i / 10 + '0';
         pcxname[6] = i % 10 + '0';
-        sprintf(checkname, "%s/%s", com_gamedir, pcxname);
+        int fmt_len = snprintf(checkname, sizeof(checkname), "%s/%s", com_gamedir, pcxname);
+        if (fmt_len < 0 || fmt_len >= sizeof(checkname)) {
+            Sys_Error("SCR_ScreenShot_f Can't find checkname for %s", pcxname);
+        }
         if (Sys_FileTime(checkname) == -1)
             break; // file doesn't exist
     }
@@ -768,9 +770,6 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen(void)
 {
-    static float oldscr_viewsize;
-    vrect_t vrect;
-
     if (block_drawing)
         return;
 

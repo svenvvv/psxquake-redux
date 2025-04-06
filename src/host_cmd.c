@@ -536,7 +536,11 @@ void Host_Loadgame_f(void)
 
     cls.demonum = -1; // stop demo loop in case this fails
 
-    sprintf(name, "%s/%s", com_gamedir, Cmd_Argv(1));
+    // Minus 4 chars since we'll need to concat the file ext as well
+    int fmt_len = snprintf(name, sizeof(name) - 4, "%s/%s", com_gamedir, Cmd_Argv(1));
+    if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+        Sys_Error("Host_Loadgame_f: failed to format filename, %d\n", fmt_len);
+    }
     COM_DefaultExtension(name, ".sav");
 
     // we can't call SCR_BeginLoadingPlaque, because too much stack space has
@@ -928,7 +932,7 @@ void Host_Say(qboolean teamonly)
     client_t *save;
     int j;
     char *p;
-    unsigned char text[64];
+    char text[64];
     qboolean fromServer = false;
 
     if (cmd_source == src_command) {
@@ -1384,7 +1388,7 @@ Host_Give_f
 void Host_Give_f(void)
 {
     char *t;
-    int v, w;
+    int v;
     eval_t *val;
 
     if (cmd_source == src_command) {

@@ -56,17 +56,19 @@ char com_cmdline[CMDLINE_LENGTH];
 qboolean standard_quake = true, rogue, hipnotic;
 
 // this graphic needs to be in the pak file to use registered features
-unsigned short pop[] = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6600, 0x0000,
-                         0x0000, 0x0000, 0x6600, 0x0000, 0x0000, 0x0066, 0x0000, 0x0000, 0x0000, 0x0000, 0x0067, 0x0000,
-                         0x0000, 0x6665, 0x0000, 0x0000, 0x0000, 0x0000, 0x0065, 0x6600, 0x0063, 0x6561, 0x0000, 0x0000,
-                         0x0000, 0x0000, 0x0061, 0x6563, 0x0064, 0x6561, 0x0000, 0x0000, 0x0000, 0x0000, 0x0061, 0x6564,
-                         0x0064, 0x6564, 0x0000, 0x6469, 0x6969, 0x6400, 0x0064, 0x6564, 0x0063, 0x6568, 0x6200, 0x0064,
-                         0x6864, 0x0000, 0x6268, 0x6563, 0x0000, 0x6567, 0x6963, 0x0064, 0x6764, 0x0063, 0x6967, 0x6500,
-                         0x0000, 0x6266, 0x6769, 0x6a68, 0x6768, 0x6a69, 0x6766, 0x6200, 0x0000, 0x0062, 0x6566, 0x6666,
-                         0x6666, 0x6666, 0x6562, 0x0000, 0x0000, 0x0000, 0x0062, 0x6364, 0x6664, 0x6362, 0x0000, 0x0000,
-                         0x0000, 0x0000, 0x0000, 0x0062, 0x6662, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0061,
-                         0x6661, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6500, 0x0000, 0x0000, 0x0000,
-                         0x0000, 0x0000, 0x0000, 0x0000, 0x6400, 0x0000, 0x0000, 0x0000 };
+static unsigned short const  pop[] = {
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6600, 0x0000,
+    0x0000, 0x0000, 0x6600, 0x0000, 0x0000, 0x0066, 0x0000, 0x0000, 0x0000, 0x0000, 0x0067, 0x0000,
+    0x0000, 0x6665, 0x0000, 0x0000, 0x0000, 0x0000, 0x0065, 0x6600, 0x0063, 0x6561, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0061, 0x6563, 0x0064, 0x6561, 0x0000, 0x0000, 0x0000, 0x0000, 0x0061, 0x6564,
+    0x0064, 0x6564, 0x0000, 0x6469, 0x6969, 0x6400, 0x0064, 0x6564, 0x0063, 0x6568, 0x6200, 0x0064,
+    0x6864, 0x0000, 0x6268, 0x6563, 0x0000, 0x6567, 0x6963, 0x0064, 0x6764, 0x0063, 0x6967, 0x6500,
+    0x0000, 0x6266, 0x6769, 0x6a68, 0x6768, 0x6a69, 0x6766, 0x6200, 0x0000, 0x0062, 0x6566, 0x6666,
+    0x6666, 0x6666, 0x6562, 0x0000, 0x0000, 0x0000, 0x0062, 0x6364, 0x6664, 0x6362, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0000, 0x0062, 0x6662, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0061,
+    0x6661, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6500, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0000, 0x0000, 0x6400, 0x0000, 0x0000, 0x0000
+};
 
 /*
 
@@ -389,7 +391,7 @@ char *MSG_ReadString(void)
             break;
         string[l] = c;
         l++;
-    } while (l < sizeof(string) - 1);
+    } while (l < (int)sizeof(string) - 1);
 
     string[l] = 0;
 
@@ -771,7 +773,7 @@ void COM_InitArgv(int argc, char **argv)
 COM_Init
 ================
 */
-void COM_Init(char *basedir)
+void COM_Init(void)
 {
     byte swaptest[2] = { 1, 0 };
 
@@ -876,7 +878,6 @@ typedef struct {
 
 #define MAX_FILES_IN_PACK 2048
 
-char com_cachedir[MAX_OSPATH];
 char com_gamedir[MAX_OSPATH];
 
 typedef struct searchpath_s {
@@ -918,7 +919,10 @@ void COM_WriteFile(char *filename, void *data, int len)
     int handle;
     char name[MAX_OSPATH];
 
-    sprintf(name, "%s/%s", com_gamedir, filename);
+    int fmt_len = snprintf(name, sizeof(name), "%s/%s", com_gamedir, filename);
+    if (fmt_len < 0 || fmt_len >= sizeof(name)) {
+        Sys_Error("Failed to format WriteFile path, %d", fmt_len);
+    }
 
     handle = Sys_FileOpenWrite(name);
     if (handle == -1) {
@@ -970,7 +974,7 @@ void COM_CopyFile(char *netpath, char *cachepath)
     out = Sys_FileOpenWrite(cachepath);
 
     while (remaining) {
-        if (remaining < sizeof(buf))
+        if (remaining < (int) sizeof(buf))
             count = remaining;
         else
             count = sizeof(buf);
@@ -995,10 +999,9 @@ int COM_FindFile(char *filename, int *handle, FILE **file)
 {
     searchpath_t *search;
     char netpath[MAX_OSPATH];
-    char cachepath[MAX_OSPATH];
     pack_t *pak;
     int i;
-    int findtime, cachetime;
+    int findtime;
 
     if (file && handle)
         Sys_Error("COM_FindFile: both handle and file set");
@@ -1040,31 +1043,14 @@ int COM_FindFile(char *filename, int *handle, FILE **file)
                     continue;
             }
 
-            sprintf(netpath, "%s/%s", search->filename, filename);
+            int fmt_len = snprintf(netpath, sizeof(netpath), "%s/%s", search->filename, filename);
+            if (fmt_len < 0 || fmt_len >= sizeof(netpath)) {
+                Sys_Error("COM_FindFile: failed to format path, %d\n", fmt_len);
+            }
 
             findtime = Sys_FileTime(netpath);
             if (findtime == -1)
                 continue;
-
-            // see if the file needs to be updated in the cache
-            if (!com_cachedir[0])
-                strcpy(cachepath, netpath);
-            else {
-#if defined(_WIN32)
-                if ((strlen(netpath) < 2) || (netpath[1] != ':'))
-                    sprintf(cachepath, "%s%s", com_cachedir, netpath);
-                else
-                    sprintf(cachepath, "%s%s", com_cachedir, netpath + 2);
-#else
-                sprintf(cachepath, "%s%s", com_cachedir, netpath);
-#endif
-
-                cachetime = Sys_FileTime(cachepath);
-
-                if (cachetime < findtime)
-                    COM_CopyFile(netpath, cachepath);
-                strcpy(netpath, cachepath);
-            }
 
             Sys_Printf("FindFile: %s\n", netpath);
             com_filesize = Sys_FileOpenRead(netpath, &i);
@@ -1357,22 +1343,6 @@ void COM_InitFilesystem(void)
         if ((basedir[j - 1] == '\\') || (basedir[j - 1] == '/'))
             basedir[j - 1] = 0;
     }
-
-    //
-    // -cachedir <path>
-    // Overrides the system supplied cache directory (NULL or /qcache)
-    // -cachedir - will disable caching.
-    //
-    i = COM_CheckParm("-cachedir");
-    if (i && i < com_argc - 1) {
-        if (com_argv[i + 1][0] == '-')
-            com_cachedir[0] = 0;
-        else
-            strcpy(com_cachedir, com_argv[i + 1]);
-    } else if (host_parms.cachedir)
-        strcpy(com_cachedir, host_parms.cachedir);
-    else
-        com_cachedir[0] = 0;
 
     //
     // start up with GAMENAME by default (id1)

@@ -50,6 +50,11 @@ add_executable(quake ${COMMON_SRC})
 target_link_libraries(quake PRIVATE m)
 target_include_directories(quake PRIVATE include)
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	target_compile_options(quake PRIVATE -Wall -Wextra)
+	target_compile_options(quake PRIVATE -Wno-missing-field-initializers -Wno-sign-compare -Wno-pointer-sign)
+endif ()
+
 option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
 
 option(CONSOLE_COMPLETION "Enable console line completion" 1)
