@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 project(
 	quake1
@@ -52,8 +53,12 @@ target_link_libraries(quake PRIVATE m)
 target_include_directories(quake PRIVATE include)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-	target_compile_options(quake PRIVATE -Wall -Wextra)
+	target_compile_options(quake PRIVATE -Wall -Wextra -fstack-protector-all)
 	target_compile_options(quake PRIVATE -Wno-missing-field-initializers -Wno-sign-compare -Wno-pointer-sign)
+	target_compile_definitions(quake PRIVATE PARANOID)
+else ()
+	target_compile_options(quake PRIVATE -Os)
+	# target_compile_options(quake PRIVATE -fno-stack-protector)
 endif ()
 
 option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
