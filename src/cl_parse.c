@@ -657,10 +657,6 @@ void CL_ParseStaticSound(void)
     S_StaticSound(cl.sound_precache[sound_num], org, vol, atten);
 }
 
-#define SHOWNET(x)             \
-    if (cl_shownet.value == 2) \
-        Con_Printf("%3i:%s\n", msg_readcount - 1, x);
-
 /*
 =====================
 CL_ParseServerMessage
@@ -670,14 +666,6 @@ void CL_ParseServerMessage(void)
 {
     int cmd;
     int i;
-
-    //
-    // if recording demos, copy the message out
-    //
-    if (cl_shownet.value == 1)
-        Con_Printf("%i ", net_message.cursize);
-    else if (cl_shownet.value == 2)
-        Con_Printf("------------------\n");
 
     cl.onground = false; // unless the server says otherwise
     //
@@ -692,18 +680,14 @@ void CL_ParseServerMessage(void)
         cmd = MSG_ReadByte();
 
         if (cmd == -1) {
-            SHOWNET("END OF MESSAGE");
             return; // end of message
         }
 
         // if the high bit of the command byte is set, it is a fast update
         if (cmd & 128) {
-            SHOWNET("fast update");
             CL_ParseUpdate(cmd & 127);
             continue;
         }
-
-        SHOWNET(svc_strings[cmd]);
 
         // other commands
         switch (cmd) {

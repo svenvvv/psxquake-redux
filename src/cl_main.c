@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 cvar_t cl_name = { "_cl_name", "player", true };
 cvar_t cl_color = { "_cl_color", "0", true };
 
-cvar_t cl_shownet = { "cl_shownet", "0" }; // can be 0, 1, or 2
 cvar_t cl_nolerp = { "cl_nolerp", "0" };
 
 cvar_t lookspring = { "lookspring", "0", true };
@@ -553,9 +552,6 @@ int CL_ReadFromServer(void)
         CL_ParseServerMessage();
     } while (ret && cls.state == ca_connected);
 
-    if (cl_shownet.value)
-        Con_Printf("\n");
-
     CL_RelinkEntities();
     CL_UpdateTEnts();
 
@@ -633,7 +629,6 @@ void CL_Init(void)
     Cvar_RegisterVariable(&cl_yawspeed);
     Cvar_RegisterVariable(&cl_pitchspeed);
     Cvar_RegisterVariable(&cl_anglespeedkey);
-    Cvar_RegisterVariable(&cl_shownet);
     Cvar_RegisterVariable(&cl_nolerp);
     Cvar_RegisterVariable(&lookspring);
     Cvar_RegisterVariable(&lookstrafe);

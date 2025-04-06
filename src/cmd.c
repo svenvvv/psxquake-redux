@@ -356,7 +356,7 @@ void Cmd_Alias_f(void)
         cmd_alias = a;
     }
 #ifdef DEBUG
-    if (strlen(a) >= sizeof(a->name_debug)) {
+    if (strlen(s) >= sizeof(a->name_debug)) {
         Sys_Error("Cmd_Alias_f: name too long\n");
     }
     strcpy(a->name_debug, s);
