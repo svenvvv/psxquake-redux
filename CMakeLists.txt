@@ -44,6 +44,7 @@ set(COMMON_SRC
 		src/world.c
 		src/snd_mem.c
 		src/snd_mix.c
+		src/murmurhash2.c
 )
 
 add_executable(quake ${COMMON_SRC})
@@ -57,8 +58,10 @@ endif ()
 
 option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
 
-option(CONSOLE_COMPLETION "Enable console line completion" 1)
-target_compile_definitions(quake PRIVATE CONSOLE_COMPLETION=${CONSOLE_COMPLETION})
+option(CONSOLE_COMPLETION "Enable console line completion" 0)
+if (CONSOLE_COMPLETION)
+	target_compile_definitions(quake PRIVATE CONSOLE_COMPLETION=${CONSOLE_COMPLETION})
+endif ()
 
 set(PARTICLES_MAX 2048 CACHE STRING "Maximum number of particles")
 target_compile_definitions(quake PRIVATE MAX_PARTICLES=${PARTICLES_MAX})
@@ -72,9 +75,9 @@ set(MAX_LIGHTSTYLES 64 CACHE STRING "Maximum number of lightstyles")
 target_compile_definitions(quake PRIVATE MAX_LIGHTSTYLES=${MAX_LIGHTSTYLES})
 set(MAX_DLIGHTS 32 CACHE STRING "Maximum number of dynamic lights")
 target_compile_definitions(quake PRIVATE MAX_DLIGHTS=${MAX_DLIGHTS})
-set(MAX_TEMP_ENTITIES 64 CACHE STRING "Maximum number of temporary entities")
-target_compile_definitions(quake PRIVATE MAX_BEAMS=${MAX_BEAMS})
 set(MAX_BEAMS 24 CACHE STRING "Maximum number of beams")
+target_compile_definitions(quake PRIVATE MAX_BEAMS=${MAX_BEAMS})
+set(MAX_TEMP_ENTITIES 64 CACHE STRING "Maximum number of temporary entities")
 target_compile_definitions(quake PRIVATE MAX_TEMP_ENTITIES=${MAX_TEMP_ENTITIES})
 set(MAX_STATIC_ENTITIES 128 CACHE STRING "Maximum number of static entities")
 target_compile_definitions(quake PRIVATE MAX_STATIC_ENTITIES=${MAX_STATIC_ENTITIES})

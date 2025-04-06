@@ -20,23 +20,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cmd.c -- Quake script command processing module
 
 #include "quakedef.h"
-
-void Cmd_ForwardToServer(void);
-
-#define MAX_ALIAS_NAME 32
+#include "murmurhash2.h"
 
 typedef struct cmdalias_s {
     struct cmdalias_s *next;
-    char name[MAX_ALIAS_NAME];
+    uint32_t name_hash;
+#ifdef DEBUG
+    char name_debug[32];
+#endif
     char *value;
 } cmdalias_t;
 
-cmdalias_t *cmd_alias;
+static cmdalias_t *cmd_alias;
 
-int trashtest;
-int *trashspot;
-
-qboolean cmd_wait;
+static qboolean cmd_wait;
 
 //=============================================================================
 
@@ -62,7 +59,7 @@ void Cmd_Wait_f(void)
 =============================================================================
 */
 
-sizebuf_t cmd_text;
+static sizebuf_t cmd_text;
 
 /*
 ============
@@ -317,32 +314,40 @@ char *CopyString(char *in)
     return out;
 }
 
+static cmdalias_t * Cmd_AliasFind(uint32_t name_hash)
+{
+    for (cmdalias_t * a = cmd_alias; a; a = a->next) {
+        if (a->name_hash == name_hash) {
+            return a;
+        }
+    }
+    return NULL;
+}
+
 void Cmd_Alias_f(void)
 {
     cmdalias_t *a;
     char cmd[1024];
     int i, c;
-    char *s;
 
     if (Cmd_Argc() == 1) {
         Con_Printf("Current alias commands:\n");
         for (a = cmd_alias; a; a = a->next)
-            Con_Printf("%s : %s\n", a->name, a->value);
+#ifdef DEBUG
+            Con_Printf("%s (%x): %s\n", a->name_debug, a->name_hash, a->value);
+#else
+            Con_Printf("%x: %s\n", a->name_hash, a->value);
+#endif
         return;
     }
 
-    s = Cmd_Argv(1);
-    if (strlen(s) >= MAX_ALIAS_NAME) {
-        Con_Printf("Alias name is too long\n");
-        return;
-    }
+    char const * s = Cmd_Argv(1);
+    uint32_t alias_name_hash = MurmurHash2(s, strlen(s));
 
-    // if the alias allready exists, reuse it
-    for (a = cmd_alias; a; a = a->next) {
-        if (!strcmp(s, a->name)) {
-            Z_Free(a->value);
-            break;
-        }
+    // if the alias already exists, reuse it
+    a = Cmd_AliasFind(alias_name_hash);
+    if (a != NULL) {
+        Z_Free(a->value);
     }
 
     if (!a) {
@@ -350,7 +355,13 @@ void Cmd_Alias_f(void)
         a->next = cmd_alias;
         cmd_alias = a;
     }
-    strcpy(a->name, s);
+#ifdef DEBUG
+    if (strlen(a) >= sizeof(a->name_debug)) {
+        Sys_Error("Cmd_Alias_f: name too long\n");
+    }
+    strcpy(a->name_debug, s);
+#endif
+    a->name_hash = alias_name_hash;
 
     // copy the rest of the command line
     cmd[0] = 0; // start out with a null string
@@ -373,15 +384,22 @@ void Cmd_Alias_f(void)
 =============================================================================
 */
 
+#if defined(DEBUG) || defined(CONSOLE_COMPLETION)
+#define CMD_FUNCTION_HAS_NAME 1
+#endif
+
 typedef struct cmd_function_s {
     struct cmd_function_s *next;
-    char *name;
+#if CMD_FUNCTION_HAS_NAME
+    char *name_debug;
+#endif
+    uint32_t name_hash;
     xcommand_t function;
 } cmd_function_t;
 
 #define MAX_ARGS 80
 
-static unsigned cmd_argc;
+static int cmd_argc;
 static char *cmd_argv[MAX_ARGS];
 static char *cmd_null_string = "";
 static char *cmd_args = NULL;
@@ -389,6 +407,17 @@ static char *cmd_args = NULL;
 cmd_source_t cmd_source;
 
 static cmd_function_t *cmd_functions; // possible commands to execute
+
+static cmd_function_t * Cmd_FunctionFind(uint32_t name_hash)
+{
+    for (cmd_function_t * cmd = cmd_functions; cmd; cmd = cmd->next) {
+        if (cmd->name_hash == name_hash) {
+            return cmd;
+        }
+    }
+    return NULL;
+}
+
 
 /*
 ============
@@ -413,7 +442,7 @@ void Cmd_Init(void)
 Cmd_Argc
 ============
 */
-int Cmd_Argc(void)
+inline int Cmd_Argc(void)
 {
     return cmd_argc;
 }
@@ -505,16 +534,20 @@ void Cmd_AddCommand(char *cmd_name, xcommand_t function)
         return;
     }
 
+    uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
+
     // fail if the command already exists
-    for (cmd = cmd_functions; cmd; cmd = cmd->next) {
-        if (!Q_strcmp(cmd_name, cmd->name)) {
-            Con_Printf("Cmd_AddCommand: %s already defined\n", cmd_name);
-            return;
-        }
+    cmd = Cmd_FunctionFind(cmd_name_hash);
+    if (cmd) {
+        Con_Printf("Cmd_AddCommand: %s already defined\n", cmd_name);
+        return;
     }
 
     cmd = Hunk_Alloc(sizeof(cmd_function_t));
-    cmd->name = cmd_name;
+    cmd->name_hash = cmd_name_hash;
+#ifdef CMD_FUNCTION_HAS_NAME
+    cmd->name_debug = cmd_name;
+#endif
     cmd->function = function;
     cmd->next = cmd_functions;
     cmd_functions = cmd;
@@ -527,16 +560,11 @@ Cmd_Exists
 */
 qboolean Cmd_Exists(char *cmd_name)
 {
-    cmd_function_t *cmd;
-
-    for (cmd = cmd_functions; cmd; cmd = cmd->next) {
-        if (!Q_strcmp(cmd_name, cmd->name))
-            return true;
-    }
-
-    return false;
+    uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
+    return Cmd_FunctionFind(cmd_name_hash) != NULL;
 }
 
+#ifdef CMD_FUNCTION_HAS_NAME
 /*
 ============
 Cmd_CompleteCommand
@@ -554,11 +582,12 @@ char *Cmd_CompleteCommand(char *partial)
 
     // check functions
     for (cmd = cmd_functions; cmd; cmd = cmd->next)
-        if (!Q_strncmp(partial, cmd->name, len))
-            return cmd->name;
+        if (!Q_strncmp(partial, cmd->name_debug, len))
+            return cmd->name_debug;
 
     return NULL;
 }
+#endif
 
 /*
 ============
@@ -570,35 +599,34 @@ FIXME: lookupnoadd the token to speed search?
 */
 void Cmd_ExecuteString(char *text, cmd_source_t src)
 {
-    cmd_function_t *cmd;
-    cmdalias_t *a;
-
     cmd_source = src;
     Cmd_TokenizeString(text);
 
     // execute the command line
-    if (!Cmd_Argc())
+    if (!Cmd_Argc()) {
         return; // no tokens
+    }
+
+    uint32_t cmd_name_hash = MurmurHash2(cmd_argv[0], strlen(cmd_argv[0]));
 
     // check functions
-    for (cmd = cmd_functions; cmd; cmd = cmd->next) {
-        if (!Q_strcasecmp(cmd_argv[0], cmd->name)) {
-            cmd->function();
-            return;
-        }
+    cmd_function_t * cmd = Cmd_FunctionFind(cmd_name_hash);
+    if (cmd) {
+        cmd->function();
+        return;
     }
 
     // check alias
-    for (a = cmd_alias; a; a = a->next) {
-        if (!Q_strcasecmp(cmd_argv[0], a->name)) {
-            Cbuf_InsertText(a->value);
-            return;
-        }
+    cmdalias_t * a = Cmd_AliasFind(cmd_name_hash);
+    if (a) {
+        Cbuf_InsertText(a->value);
+        return;
     }
 
     // check cvars
-    if (!Cvar_Command())
+    if (!Cvar_Command()) {
         Con_Printf("Unknown command \"%s\"\n", Cmd_Argv(0));
+    }
 }
 
 /*
