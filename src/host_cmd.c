@@ -71,7 +71,7 @@ void Host_Status_f(void)
         print = SV_ClientPrintf;
 
     // print("host:    %s\n", Cvar_VariableString("hostname"));
-    print("version: %4.2f\n", VERSION);
+    print("version: %4u.%02u\n", VERSION_MAJOR, VERSION_MINOR);
     if (tcpipAvailable)
         print("tcp/ip:  %s\n", my_tcpip_address);
     if (ipxAvailable)
@@ -81,7 +81,7 @@ void Host_Status_f(void)
     for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
         if (!client->active)
             continue;
-        seconds = (int)(net_time - client->netconnection->connecttime);
+        seconds = (net_time - client->netconnection->connecttime) / MS_PER_S;
         minutes = seconds / 60;
         if (minutes) {
             seconds -= (minutes * 60);
@@ -195,7 +195,7 @@ Host_Ping_f
 void Host_Ping_f(void)
 {
     int i, j;
-    float total;
+    uint64_t total;
     client_t *client;
 
     if (cmd_source == src_command) {
@@ -489,7 +489,7 @@ void Host_Savegame_f(void)
         fprintf(f, "%f\n", svs.clients->spawn_parms[i]);
     fprintf(f, "%d\n", current_skill);
     fprintf(f, "%s\n", sv.name);
-    fprintf(f, "%f\n", sv.time);
+    fprintf(f, "%u\n", sv.time);
 
     // write the light styles
 
@@ -519,7 +519,8 @@ void Host_Loadgame_f(void)
     char name[MAX_OSPATH];
     FILE *f;
     char mapname[MAX_QPATH];
-    float time, tfloat;
+    uint32_t time;
+    float tfloat;
     char str[32768], *start;
     int i, r;
     edict_t *ent;
@@ -576,7 +577,7 @@ void Host_Loadgame_f(void)
 #endif
 
     fscanf(f, "%s\n", mapname);
-    fscanf(f, "%f\n", &time);
+    fscanf(f, "%u\n", &time);
 
     CL_Disconnect_f();
 
@@ -878,7 +879,7 @@ void Host_Name_f(void)
 
 void Host_Version_f(void)
 {
-    Con_Printf("Version %4.2f\n", VERSION);
+    Con_Printf("Version %4u.%02u\n", VERSION_MAJOR, VERSION_MINOR);
     Con_Printf("Exe: " __TIME__ " " __DATE__ "\n");
 }
 
@@ -1107,7 +1108,7 @@ void Host_Kill_f(void)
         return;
     }
 
-    pr_global_struct->time = sv.time;
+    pr_global_struct->time = (float) sv.time / MS_PER_S;
     pr_global_struct->self = EDICT_TO_PROG(sv_player);
     PR_ExecuteProgram(pr_global_struct->ClientKill);
 }
@@ -1206,11 +1207,11 @@ void Host_Spawn_f(void)
 
         // call the spawn function
 
-        pr_global_struct->time = sv.time;
+        pr_global_struct->time = (float) sv.time / MS_PER_S;
         pr_global_struct->self = EDICT_TO_PROG(sv_player);
         PR_ExecuteProgram(pr_global_struct->ClientConnect);
 
-        if ((Sys_FloatTime() - host_client->netconnection->connecttime) <= sv.time)
+        if ((Sys_CurrentTicks() - host_client->netconnection->connecttime) <= sv.time)
             Sys_Printf("%s entered the game\n", host_client->name);
 
         PR_ExecuteProgram(pr_global_struct->PutClientInServer);
@@ -1221,7 +1222,7 @@ void Host_Spawn_f(void)
 
     // send time of update
     MSG_WriteByte(&host_client->message, svc_time);
-    MSG_WriteFloat(&host_client->message, sv.time);
+    MSG_WriteFloat(&host_client->message, (float) sv.time / MS_PER_S);
 
     for (i = 0, client = svs.clients; i < svs.maxclients; i++, client++) {
         MSG_WriteByte(&host_client->message, svc_updatename);

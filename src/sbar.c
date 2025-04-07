@@ -440,7 +440,7 @@ Sbar_SoloScoreboard
 void Sbar_SoloScoreboard(void)
 {
     char str[80];
-    int minutes, seconds, tens, units;
+    unsigned minutes, seconds;
     int l;
 
     sprintf(str, "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
@@ -450,11 +450,10 @@ void Sbar_SoloScoreboard(void)
     Sbar_DrawString(8, 12, str);
 
     // time
-    minutes = cl.time / 60;
-    seconds = cl.time - 60 * minutes;
-    tens = seconds / 10;
-    units = seconds - 10 * tens;
-    sprintf(str, "Time :%3i:%i%i", minutes, tens, units);
+    seconds = cl.time / MS_PER_S;
+    minutes = seconds / 60;
+    seconds %= 60;
+    sprintf(str, "Time :%3u:%02u", minutes, seconds);
     Sbar_DrawString(184, 4, str);
 
     // draw level name
@@ -530,7 +529,7 @@ void Sbar_DrawInventory(void)
 {
     int i;
     char num[6];
-    float time;
+    uint32_t time;
     int flashon;
 
     if (rogue) {
@@ -546,7 +545,7 @@ void Sbar_DrawInventory(void)
     for (i = 0; i < 7; i++) {
         if (cl.items & (IT_SHOTGUN << i)) {
             time = cl.item_gettime[i];
-            flashon = (int)((cl.time - time) * 10);
+            flashon = (int)((cl.time - time) / 10);
             if (flashon >= 10) {
                 if (cl.stats[STAT_ACTIVEWEAPON] == (IT_SHOTGUN << i))
                     flashon = 1;
@@ -569,7 +568,7 @@ void Sbar_DrawInventory(void)
         for (i = 0; i < 4; i++) {
             if (cl.items & (1 << hipweapons[i])) {
                 time = cl.item_gettime[hipweapons[i]];
-                flashon = (int)((cl.time - time) * 10);
+                flashon = (int)((cl.time - time) / 10);
                 if (flashon >= 10) {
                     if (cl.stats[STAT_ACTIVEWEAPON] == (1 << hipweapons[i]))
                         flashon = 1;
@@ -630,7 +629,7 @@ void Sbar_DrawInventory(void)
     for (i = 0; i < 6; i++)
         if (cl.items & (1 << (17 + i))) {
             time = cl.item_gettime[17 + i];
-            if (time && time > cl.time - 2 && flashon) { // flash frame
+            if (time && time > cl.time - 2 * MS_PER_S && flashon) { // flash frame
                 sb_updates = 0;
             } else {
                 //MED 01/04/97 changed keys
@@ -647,12 +646,12 @@ void Sbar_DrawInventory(void)
         for (i = 0; i < 2; i++)
             if (cl.items & (1 << (24 + i))) {
                 time = cl.item_gettime[24 + i];
-                if (time && time > cl.time - 2 && flashon) { // flash frame
+                if (time && time > cl.time - 2 * MS_PER_S && flashon) { // flash frame
                     sb_updates = 0;
                 } else {
                     Sbar_DrawPic(288 + i * 16, -16, hsb_items[i]);
                 }
-                if (time && time > cl.time - 2)
+                if (time && time > cl.time - 2 * MS_PER_S)
                     sb_updates = 0;
             }
     }
@@ -663,13 +662,13 @@ void Sbar_DrawInventory(void)
             if (cl.items & (1 << (29 + i))) {
                 time = cl.item_gettime[29 + i];
 
-                if (time && time > cl.time - 2 && flashon) { // flash frame
+                if (time && time > cl.time - 2 * MS_PER_S && flashon) { // flash frame
                     sb_updates = 0;
                 } else {
                     Sbar_DrawPic(288 + i * 16, -16, rsb_items[i]);
                 }
 
-                if (time && time > cl.time - 2)
+                if (time && time > cl.time - 2 * MS_PER_S)
                     sb_updates = 0;
             }
         }
@@ -678,11 +677,11 @@ void Sbar_DrawInventory(void)
         for (i = 0; i < 4; i++) {
             if (cl.items & (1 << (28 + i))) {
                 time = cl.item_gettime[28 + i];
-                if (time && time > cl.time - 2 && flashon) { // flash frame
+                if (time && time > cl.time - 2 * MS_PER_S && flashon) { // flash frame
                     sb_updates = 0;
                 } else
                     Sbar_DrawPic(320 - 32 + i * 8, -16, sb_sigil[i]);
-                if (time && time > cl.time - 2)
+                if (time && time > cl.time - 2 * MS_PER_S)
                     sb_updates = 0;
             }
         }

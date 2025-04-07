@@ -38,7 +38,7 @@ typedef struct {
 
 typedef struct {
     char name[MAX_SCOREBOARDNAME];
-    float entertime;
+    uint32_t entertime;
     int frags;
     int colors; // two 4 bit fields
     byte translations[VID_GRADES * 256];
@@ -66,7 +66,7 @@ typedef struct {
 typedef struct {
     vec3_t origin;
     float radius;
-    float die; // stop lighting after this time
+    uint32_t die; // stop lighting after this time
     float decay; // drop this each second
     float minlight; // don't add when contributing less
     int key;
@@ -78,7 +78,7 @@ typedef struct {
 typedef struct {
     int entity;
     struct model_s *model;
-    float endtime;
+    uint32_t endtime;
     vec3_t start, end;
 } beam_t;
 
@@ -116,7 +116,7 @@ typedef struct {
     FILE *demofile;
     int td_lastframe; // to meter out one message a frame
     int td_startframe; // host_framecount at start
-    float td_starttime; // realtime at second frame of timedemo
+    uint32_t td_starttime; // realtime at second frame of timedemo
 
     // connection information
     int signon; // 0 to SIGNONS
@@ -141,8 +141,8 @@ typedef struct {
     // information for local display
     int stats[MAX_CL_STATS]; // health, etc
     int items; // inventory bit flags
-    float item_gettime[32]; // cl.time of aquiring item, for blinking
-    float faceanimtime; // use anim frame if cl.time < this
+    uint32_t item_gettime[32]; // cl.time of aquiring item, for blinking
+    uint32_t faceanimtime; // use anim frame if cl.time < this
 
     cshift_t cshifts[NUM_CSHIFTS]; // color shifts for damage, powerups
     cshift_t prev_cshifts[NUM_CSHIFTS]; // and content types
@@ -165,8 +165,8 @@ typedef struct {
     float idealpitch;
     float pitchvel;
     qboolean nodrift;
-    float driftmove;
-    double laststop;
+    uint32_t driftmove;
+    uint32_t laststop;
 
     float viewheight;
     float crouch; // local amount for smoothing stepups
@@ -176,16 +176,13 @@ typedef struct {
     qboolean inwater;
 
     int intermission; // don't change view angle, full screen, etc
-    int completed_time; // latched at intermission start
+    uint32_t completed_time; // latched at intermission start
 
-    double mtime[2]; // the timestamp of last two messages
-    double time; // clients view of time, should be between
-        // servertime and oldservertime to generate
-        // a lerp point for other data
-    double oldtime; // previous cl.time, time-oldtime is used
-        // to decay light values and smooth step ups
+    uint32_t mtime[2]; // the timestamp of last two messages
+    uint32_t time; // clients view of time, should be between servertime and oldservertime to generate a lerp point for other data
+    uint32_t oldtime; // previous cl.time, time-oldtime is used to decay light values and smooth step ups
 
-    float last_received_message; // (realtime) for net trouble icon
+    uint32_t last_received_message; // (realtime) for net trouble icon
 
     //
     // information that is static for the entire time connected to a server

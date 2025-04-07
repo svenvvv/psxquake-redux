@@ -161,15 +161,15 @@ struct cache_user_s;
 
 extern char com_gamedir[MAX_OSPATH];
 
-void COM_WriteFile(char *filename, void *data, int len);
-int COM_OpenFile(char *filename, int *hndl);
-int COM_FOpenFile(char *filename, FILE **file);
+void COM_WriteFile(char const *filename, void const *data, int len);
+int COM_OpenFile(char const *filename, int *hndl);
+int COM_FOpenFile(char const *filename, FILE **file);
 void COM_CloseFile(int h);
 
-byte *COM_LoadStackFile(char *path, void *buffer, int bufsize);
-byte *COM_LoadTempFile(char *path);
-byte *COM_LoadHunkFile(char *path);
-void COM_LoadCacheFile(char *path, struct cache_user_s *cu);
+byte *COM_LoadStackFile(char const *path, void *buffer, int bufsize);
+byte *COM_LoadTempFile(char const *path);
+byte *COM_LoadHunkFile(char const *path);
+void COM_LoadCacheFile(char const *path, struct cache_user_s *cu);
 
 extern struct cvar_s registered;
 

@@ -128,8 +128,7 @@ so the server doesn't disconnect.
 */
 void CL_KeepaliveMessage(void)
 {
-    float time;
-    static float lastmsg;
+    static uint32_t lastmsg;
     int ret;
     sizebuf_t old;
     byte olddata[8192];
@@ -164,8 +163,8 @@ void CL_KeepaliveMessage(void)
     memcpy(net_message.data, olddata, net_message.cursize);
 
     // check time
-    time = Sys_FloatTime();
-    if (time - lastmsg < 5)
+    uint32_t time = Sys_CurrentTicks();
+    if (time - lastmsg < 5 * MS_PER_S)
         return;
     lastmsg = time;
 
@@ -701,7 +700,7 @@ void CL_ParseServerMessage(void)
 
         case svc_time:
             cl.mtime[1] = cl.mtime[0];
-            cl.mtime[0] = MSG_ReadFloat();
+            cl.mtime[0] = MSG_ReadFloat() * MS_PER_S;
             break;
 
         case svc_clientdata:

@@ -61,7 +61,8 @@ static cvar_t cl_crossy = { "cl_crossy", "0", false };
 
 static cvar_t gl_cshiftpercent = { "gl_cshiftpercent", "100", false };
 
-static float v_dmg_time, v_dmg_roll, v_dmg_pitch;
+static uint32_t v_dmg_time;
+static float v_dmg_roll, v_dmg_pitch;
 
 extern int in_forward, in_forward2, in_back;
 
@@ -74,7 +75,7 @@ Used by view and sv_user
 */
 static vec3_t forward, right, up;
 
-float V_CalcRoll(vec3_t angles, vec3_t velocity)
+float V_CalcRoll(vec3_t angles, vec3_t const velocity)
 {
     float sign;
     float side;
@@ -83,7 +84,7 @@ float V_CalcRoll(vec3_t angles, vec3_t velocity)
     AngleVectors(angles, forward, right, up);
     side = DotProduct(velocity, right);
     sign = side < 0 ? -1 : 1;
-    side = fabs(side);
+    side = fabsf(side);
 
     value = cl_rollangle.value;
     //	if (cl.inwater)
@@ -107,8 +108,9 @@ float V_CalcBob(void)
 {
     float bob;
     float cycle;
+    float floattime = (float)cl.time / MS_PER_S;
 
-    cycle = cl.time - (int)(cl.time / cl_bobcycle.value) * cl_bobcycle.value;
+    cycle = floattime - (int)(floattime / cl_bobcycle.value) * cl_bobcycle.value;
     cycle /= cl_bobcycle.value;
     if (cycle < cl_bobup.value)
         cycle = M_PI * cycle / cl_bobup.value;
@@ -118,9 +120,9 @@ float V_CalcBob(void)
     // bob is proportional to velocity in the xy plane
     // (don't count Z, or jumping messes it up)
 
-    bob = sqrt(cl.velocity[0] * cl.velocity[0] + cl.velocity[1] * cl.velocity[1]) * cl_bob.value;
+    bob = sqrtf(cl.velocity[0] * cl.velocity[0] + cl.velocity[1] * cl.velocity[1]) * cl_bob.value;
     //Con_Printf ("speed: %5.1f\n", Length(cl.velocity));
-    bob = bob * 0.3 + bob * 0.7 * sin(cycle);
+    bob = bob * 0.3f + bob * 0.7f * sinf(cycle);
     if (bob > 4)
         bob = 4;
     else if (bob < -7)
@@ -179,12 +181,12 @@ void V_DriftPitch(void)
 
     // don't count small mouse motion
     if (cl.nodrift) {
-        if (fabs(cl.cmd.forwardmove) < cl_forwardspeed.value)
+        if (fabsf(cl.cmd.forwardmove) < cl_forwardspeed.value)
             cl.driftmove = 0;
         else
             cl.driftmove += host_frametime;
 
-        if (cl.driftmove > v_centermove.value) {
+        if (cl.driftmove > (unsigned)v_centermove.value * 1000U) {
             V_StartPitchDrift();
         }
         return;
@@ -197,8 +199,8 @@ void V_DriftPitch(void)
         return;
     }
 
-    move = host_frametime * cl.pitchvel;
-    cl.pitchvel += host_frametime * v_centerspeed.value;
+    move = host_frametime_float * cl.pitchvel;
+    cl.pitchvel += host_frametime_float * v_centerspeed.value;
 
     //Con_Printf ("move: %f (%f)\n", move, host_frametime);
 
@@ -225,10 +227,10 @@ void V_DriftPitch(void)
 ============================================================================== 
 */
 
-cshift_t cshift_empty = { { 130, 80, 50 }, 0 };
-cshift_t cshift_water = { { 130, 80, 50 }, 128 };
-cshift_t cshift_slime = { { 0, 25, 5 }, 150 };
-cshift_t cshift_lava = { { 255, 80, 0 }, 150 };
+static cshift_t cshift_empty = { { 130, 80, 50 }, 0 };
+static cshift_t const cshift_water = { { 130, 80, 50 }, 128 };
+static cshift_t const cshift_slime = { { 0, 25, 5 }, 150 };
+static cshift_t const cshift_lava = { { 255, 80, 0 }, 150 };
 
 cvar_t v_gamma = { "gamma", "1", true };
 
@@ -243,7 +245,7 @@ void BuildGammaTable(float g)
 {
     int i, inf;
 
-    if (g == 1.0) {
+    if (g == 1.0f) {
         for (i = 0; i < 256; i++)
             gammatable[i] = i;
         return;
@@ -291,18 +293,19 @@ void V_ParseDamage(void)
     vec3_t forward, right, up;
     entity_t *ent;
     float side;
-    float count;
+    int count;
 
     armor = MSG_ReadByte();
     blood = MSG_ReadByte();
     for (i = 0; i < 3; i++)
         from[i] = MSG_ReadCoord();
 
-    count = blood * 0.5 + armor * 0.5;
-    if (count < 10)
+    count = blood + armor / 2;
+    if (count < 10) {
         count = 10;
+    }
 
-    cl.faceanimtime = cl.time + 0.2; // but sbar face into pain frame
+    cl.faceanimtime = cl.time + 200; // but sbar face into pain frame
 
     cl.cshifts[CSHIFT_DAMAGE].percent += 3 * count;
     if (cl.cshifts[CSHIFT_DAMAGE].percent < 0)
@@ -335,12 +338,12 @@ void V_ParseDamage(void)
     AngleVectors(ent->angles, forward, right, up);
 
     side = DotProduct(from, right);
-    v_dmg_roll = count * side * v_kickroll.value;
+    v_dmg_roll = (float) count * side * v_kickroll.value;
 
     side = DotProduct(from, forward);
-    v_dmg_pitch = count * side * v_kickpitch.value;
+    v_dmg_pitch = (float) count * side * v_kickpitch.value;
 
-    v_dmg_time = v_kicktime.value;
+    v_dmg_time = (uint32_t)(v_kicktime.value / MS_PER_S);
 }
 
 /*
@@ -447,7 +450,7 @@ void V_CalcBlend(void)
         if (!gl_cshiftpercent.value)
             continue;
 
-        a2 = ((cl.cshifts[j].percent * gl_cshiftpercent.value) / 100.0) / 255.0;
+        a2 = ((cl.cshifts[j].percent * gl_cshiftpercent.value) / 100.0f) / 255.0f;
 
         //		a2 = cl.cshifts[j].percent/255.0;
         if (!a2)
@@ -460,9 +463,9 @@ void V_CalcBlend(void)
         b = b * (1 - a2) + cl.cshifts[j].destcolor[2] * a2;
     }
 
-    v_blend[0] = r / 255.0;
-    v_blend[1] = g / 255.0;
-    v_blend[2] = b / 255.0;
+    v_blend[0] = r / 255.0f;
+    v_blend[1] = g / 255.0f;
+    v_blend[2] = b / 255.0f;
     v_blend[3] = a;
     if (v_blend[3] > 1)
         v_blend[3] = 1;
@@ -504,12 +507,12 @@ void V_UpdatePalette(void)
     }
 
     // drop the damage value
-    cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime * 150;
+    cl.cshifts[CSHIFT_DAMAGE].percent -= (int) host_frametime / 6; // TODO pretty rough rounding?
     if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
         cl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
     // drop the bonus value
-    cl.cshifts[CSHIFT_BONUS].percent -= host_frametime * 100;
+    cl.cshifts[CSHIFT_BONUS].percent -= (int) host_frametime / 10;
     if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
         cl.cshifts[CSHIFT_BONUS].percent = 0;
 
@@ -653,17 +656,17 @@ void CalcGunAngle(void)
     yaw = r_refdef.viewangles[YAW];
     pitch = -r_refdef.viewangles[PITCH];
 
-    yaw = angledelta(yaw - r_refdef.viewangles[YAW]) * 0.4;
+    yaw = angledelta(yaw - r_refdef.viewangles[YAW]) * 0.4f;
     if (yaw > 10)
         yaw = 10;
     if (yaw < -10)
         yaw = -10;
-    pitch = angledelta(-pitch - r_refdef.viewangles[PITCH]) * 0.4;
+    pitch = angledelta(-pitch - r_refdef.viewangles[PITCH]) * 0.4f;
     if (pitch > 10)
         pitch = 10;
     if (pitch < -10)
         pitch = -10;
-    move = host_frametime * 20;
+    move = (float) host_frametime / 50;
     if (yaw > oldyaw) {
         if (oldyaw + move < yaw)
             yaw = oldyaw + move;
@@ -686,9 +689,10 @@ void CalcGunAngle(void)
     cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
     cl.viewent.angles[PITCH] = -(r_refdef.viewangles[PITCH] + pitch);
 
-    cl.viewent.angles[ROLL] -= v_idlescale.value * sin(cl.time * v_iroll_cycle.value) * v_iroll_level.value;
-    cl.viewent.angles[PITCH] -= v_idlescale.value * sin(cl.time * v_ipitch_cycle.value) * v_ipitch_level.value;
-    cl.viewent.angles[YAW] -= v_idlescale.value * sin(cl.time * v_iyaw_cycle.value) * v_iyaw_level.value;
+    float const floattime = (float) cl.time / MS_PER_S;
+    cl.viewent.angles[ROLL] -= v_idlescale.value * sinf(floattime * v_iroll_cycle.value) * v_iroll_level.value;
+    cl.viewent.angles[PITCH] -= v_idlescale.value * sinf(floattime * v_ipitch_cycle.value) * v_ipitch_level.value;
+    cl.viewent.angles[YAW] -= v_idlescale.value * sinf(floattime * v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
 /*
@@ -728,9 +732,10 @@ Idle swaying
 */
 void V_AddIdle(void)
 {
-    r_refdef.viewangles[ROLL] += v_idlescale.value * sin(cl.time * v_iroll_cycle.value) * v_iroll_level.value;
-    r_refdef.viewangles[PITCH] += v_idlescale.value * sin(cl.time * v_ipitch_cycle.value) * v_ipitch_level.value;
-    r_refdef.viewangles[YAW] += v_idlescale.value * sin(cl.time * v_iyaw_cycle.value) * v_iyaw_level.value;
+    float const floattime = (float) cl.time / MS_PER_S;
+    r_refdef.viewangles[ROLL] += v_idlescale.value * sinf(floattime * v_iroll_cycle.value) * v_iroll_level.value;
+    r_refdef.viewangles[PITCH] += v_idlescale.value * sinf(floattime * v_ipitch_cycle.value) * v_ipitch_level.value;
+    r_refdef.viewangles[YAW] += v_idlescale.value * sinf(floattime * v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
 /*
@@ -748,8 +753,8 @@ void V_CalcViewRoll(void)
     r_refdef.viewangles[ROLL] += side;
 
     if (v_dmg_time > 0) {
-        r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime.value * v_dmg_roll;
-        r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime.value * v_dmg_pitch;
+        r_refdef.viewangles[ROLL] += ((float)v_dmg_time / MS_PER_S) / v_kicktime.value * v_dmg_roll;
+        r_refdef.viewangles[PITCH] += ((float)v_dmg_time / MS_PER_S) / v_kicktime.value * v_dmg_pitch;
         v_dmg_time -= host_frametime;
     }
 
@@ -824,9 +829,9 @@ void V_CalcRefdef(void)
     // never let it sit exactly on a node line, because a water plane can
     // dissapear when viewed with the eye exactly on it.
     // the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
-    r_refdef.vieworg[0] += 1.0 / 32;
-    r_refdef.vieworg[1] += 1.0 / 32;
-    r_refdef.vieworg[2] += 1.0 / 32;
+    r_refdef.vieworg[0] += 1.0f / 32;
+    r_refdef.vieworg[1] += 1.0f / 32;
+    r_refdef.vieworg[2] += 1.0f / 32;
 
     VectorCopy(cl.viewangles, r_refdef.viewangles);
     V_CalcViewRoll();
@@ -854,7 +859,7 @@ void V_CalcRefdef(void)
     view->origin[2] += cl.viewheight;
 
     for (i = 0; i < 3; i++) {
-        view->origin[i] += forward[i] * bob * 0.4;
+        view->origin[i] += forward[i] * bob * 0.4f;
         //		view->origin[i] += right[i]*bob*0.4;
         //		view->origin[i] += up[i]*bob*0.8;
     }
@@ -873,7 +878,7 @@ void V_CalcRefdef(void)
     else if (scr_viewsize.value == 90)
         view->origin[2] += 1;
     else if (scr_viewsize.value == 80)
-        view->origin[2] += 0.5;
+        view->origin[2] += 0.5f;
 
     view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
     view->frame = cl.stats[STAT_WEAPONFRAME];
@@ -884,14 +889,14 @@ void V_CalcRefdef(void)
 
     // smooth out stair step ups
     if (cl.onground && ent->origin[2] - oldz > 0) {
-        float steptime;
+        int64_t steptime;
 
         steptime = cl.time - cl.oldtime;
         if (steptime < 0)
             //FIXME		I_Error ("steptime < 0");
             steptime = 0;
 
-        oldz += steptime * 80;
+        oldz += (float)(steptime * 80) / MS_PER_S;
         if (oldz > ent->origin[2])
             oldz = ent->origin[2];
         if (ent->origin[2] - oldz > 12)
@@ -984,6 +989,6 @@ void V_Init(void)
     Cvar_RegisterVariable(&v_kickroll);
     Cvar_RegisterVariable(&v_kickpitch);
 
-    BuildGammaTable(1.0); // no gamma yet
+    BuildGammaTable(1.0f); // no gamma yet
     Cvar_RegisterVariable(&v_gamma);
 }

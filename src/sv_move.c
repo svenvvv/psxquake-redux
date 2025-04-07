@@ -67,8 +67,8 @@ realcheck:
     start[2] = mins[2];
 
     // the midpoint must be within 16 of the bottom
-    start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
-    start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
+    start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5f;
+    start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5f;
     stop[2] = start[2] - 2 * STEPSIZE;
     trace = SV_Move(start, vec3_origin, vec3_origin, stop, true, ent);
 
@@ -104,7 +104,7 @@ possible, no move is done, false is returned, and
 pr_global_struct->trace_normal is set to the normal of the blocking wall
 =============
 */
-qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
+qboolean SV_movestep(edict_t *ent, vec3_t const move, qboolean relink)
 {
     float dz;
     vec3_t oldorg, neworg, end;
@@ -225,8 +225,8 @@ qboolean SV_StepDirection(edict_t *ent, float yaw, float dist)
     PF_changeyaw();
 
     yaw = yaw * M_PI * 2 / 360;
-    move[0] = cos(yaw) * dist;
-    move[1] = sin(yaw) * dist;
+    move[0] = cosf(yaw) * dist;
+    move[1] = sinf(yaw) * dist;
     move[2] = 0;
 
     VectorCopy(ent->v.origin, oldorigin);
@@ -262,7 +262,7 @@ SV_NewChaseDir
 
 ================
 */
-#define DI_NODIR -1
+#define DI_NODIR (-1)
 void SV_NewChaseDir(edict_t *actor, edict_t *enemy, float dist)
 {
     float deltax, deltay;

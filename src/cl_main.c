@@ -302,7 +302,7 @@ void CL_DecayLights(void)
 {
     int i;
     dlight_t *dl;
-    float time;
+    uint32_t time;
 
     time = cl.time - cl.oldtime;
 
@@ -311,7 +311,7 @@ void CL_DecayLights(void)
         if (dl->die < cl.time || !dl->radius)
             continue;
 
-        dl->radius -= time * dl->decay;
+        dl->radius -= (time * dl->decay) / MS_PER_S;
         if (dl->radius < 0)
             dl->radius = 0;
     }
@@ -327,7 +327,8 @@ should be put at.
 */
 float CL_LerpPoint(void)
 {
-    float f, frac;
+    uint32_t f;
+    float frac;
 
     f = cl.mtime[0] - cl.mtime[1];
 
@@ -336,20 +337,20 @@ float CL_LerpPoint(void)
         return 1;
     }
 
-    if (f > 0.1) { // dropped packet, or start of demo
-        cl.mtime[1] = cl.mtime[0] - 0.1;
-        f = 0.1;
+    if (f > 100) { // dropped packet, or start of demo
+        cl.mtime[1] = cl.mtime[0] - 100;
+        f = 100;
     }
-    frac = (cl.time - cl.mtime[1]) / f;
+    frac = (float) (cl.time - cl.mtime[1]) / (float) f;
     //Con_Printf ("frac: %f\n",frac);
     if (frac < 0) {
-        if (frac < -0.01) {
+        if (frac < -10) {
             cl.time = cl.mtime[1];
             //				Con_Printf ("low frac\n");
         }
         frac = 0;
-    } else if (frac > 1) {
-        if (frac > 1.01) {
+    } else if (frac > 1 * MS_PER_S) {
+        if (frac > 1010) {
             cl.time = cl.mtime[0];
             //				Con_Printf ("high frac\n");
         }
@@ -397,7 +398,7 @@ void CL_RelinkEntities(void)
         }
     }
 
-    bobjrotate = anglemod(100 * cl.time);
+    bobjrotate = anglemod((float)cl.time / 10.0f);
 
     // start on the entity after the world
     for (i = 1, ent = cl_entities + 1; i < cl.num_entities; i++, ent++) {
@@ -461,34 +462,34 @@ void CL_RelinkEntities(void)
             VectorMA(dl->origin, 18, fv, dl->origin);
             dl->radius = 200 + (rand() & 31);
             dl->minlight = 32;
-            dl->die = cl.time + 0.1;
+            dl->die = cl.time + 100;
         }
         if (ent->effects & EF_BRIGHTLIGHT) {
             dl = CL_AllocDlight(i);
             VectorCopy(ent->origin, dl->origin);
             dl->origin[2] += 16;
             dl->radius = 400 + (rand() & 31);
-            dl->die = cl.time + 0.001;
+            dl->die = cl.time + 1;
         }
         if (ent->effects & EF_DIMLIGHT) {
             dl = CL_AllocDlight(i);
             VectorCopy(ent->origin, dl->origin);
             dl->radius = 200 + (rand() & 31);
-            dl->die = cl.time + 0.001;
+            dl->die = cl.time + 1;
         }
 #ifdef QUAKE2
         if (ent->effects & EF_DARKLIGHT) {
             dl = CL_AllocDlight(i);
             VectorCopy(ent->origin, dl->origin);
             dl->radius = 200.0 + (rand() & 31);
-            dl->die = cl.time + 0.001;
+            dl->die = cl.time + 1;
             dl->dark = true;
         }
         if (ent->effects & EF_LIGHT) {
             dl = CL_AllocDlight(i);
             VectorCopy(ent->origin, dl->origin);
             dl->radius = 200;
-            dl->die = cl.time + 0.001;
+            dl->die = cl.time + 1;
         }
 #endif
 
@@ -505,7 +506,7 @@ void CL_RelinkEntities(void)
             dl = CL_AllocDlight(i);
             VectorCopy(ent->origin, dl->origin);
             dl->radius = 200;
-            dl->die = cl.time + 0.01;
+            dl->die = cl.time + 10;
         } else if (ent->model->flags & EF_GRENADE)
             R_RocketTrail(oldorg, ent->origin, 1);
         else if (ent->model->flags & EF_TRACER3)

@@ -118,11 +118,11 @@ in a frame.  Not used for pushmove objects, because they must be exact.
 Returns false if the entity removed itself.
 =============
 */
-qboolean SV_RunThink(edict_t *ent)
+static qboolean SV_RunThink(edict_t *ent)
 {
-    float thinktime;
+    int64_t thinktime;
 
-    thinktime = ent->v.nextthink;
+    thinktime = (int64_t)(ent->v.nextthink * MS_PER_S);
     if (thinktime <= 0 || thinktime > sv.time + host_frametime)
         return true;
 
@@ -131,7 +131,7 @@ qboolean SV_RunThink(edict_t *ent)
             // it is possible to start that way
             // by a trigger with a local time.
     ent->v.nextthink = 0;
-    pr_global_struct->time = thinktime;
+    pr_global_struct->time = (float) thinktime / MS_PER_S;
     pr_global_struct->self = EDICT_TO_PROG(ent);
     pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
     PR_ExecuteProgram(ent->v.think);
@@ -152,7 +152,7 @@ void SV_Impact(edict_t *e1, edict_t *e2)
     old_self = pr_global_struct->self;
     old_other = pr_global_struct->other;
 
-    pr_global_struct->time = sv.time;
+    pr_global_struct->time = (float) sv.time / MS_PER_S;
     if (e1->v.touch && e1->v.solid != SOLID_NOT) {
         pr_global_struct->self = EDICT_TO_PROG(e1);
         pr_global_struct->other = EDICT_TO_PROG(e2);
@@ -177,9 +177,9 @@ Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
 */
-#define STOP_EPSILON 0.1
+#define STOP_EPSILON 0.1f
 
-int ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+static int ClipVelocity(vec3_t const in, vec3_t const normal, vec3_t out, float overbounce)
 {
     float backoff;
     float change;
@@ -216,7 +216,7 @@ If steptrace is not NULL, the trace of any vertical wall hit will be stored
 ============
 */
 #define MAX_CLIP_PLANES 5
-int SV_FlyMove(edict_t *ent, float time, trace_t *steptrace)
+int SV_FlyMove(edict_t *ent, uint32_t time, trace_t *steptrace)
 {
     int bumpcount, numbumps;
     vec3_t dir;
@@ -237,7 +237,7 @@ int SV_FlyMove(edict_t *ent, float time, trace_t *steptrace)
     VectorCopy(ent->v.velocity, primal_velocity);
     numplanes = 0;
 
-    time_left = time;
+    time_left = (float) time / MS_PER_S;
 
     for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
         if (!ent->v.velocity[0] && !ent->v.velocity[1] && !ent->v.velocity[2])
@@ -358,9 +358,9 @@ void SV_AddGravity(edict_t *ent)
     if (val && val->_float)
         ent_gravity = val->_float;
     else
-        ent_gravity = 1.0;
+        ent_gravity = 1.0f;
 #endif
-    ent->v.velocity[2] -= ent_gravity * sv_gravity.value * host_frametime;
+    ent->v.velocity[2] -= ent_gravity * sv_gravity.value * host_frametime_float;
 }
 
 /*
@@ -378,7 +378,7 @@ SV_PushEntity
 Does not change the entities velocity at all
 ============
 */
-trace_t SV_PushEntity(edict_t *ent, vec3_t push)
+trace_t SV_PushEntity(edict_t *ent, vec3_t const push)
 {
     trace_t trace;
     vec3_t end;
@@ -408,7 +408,7 @@ SV_PushMove
 
 ============
 */
-void SV_PushMove(edict_t *pusher, float movetime)
+void SV_PushMove(edict_t *pusher, uint32_t movetimeMs)
 {
     int i, e;
     edict_t *check, *block;
@@ -417,6 +417,8 @@ void SV_PushMove(edict_t *pusher, float movetime)
     int num_moved;
     edict_t *moved_edict[MAX_EDICTS];
     vec3_t moved_from[MAX_EDICTS];
+
+    float const movetime = (float) movetimeMs / MS_PER_S;
 
     if (!pusher->v.velocity[0] && !pusher->v.velocity[1] && !pusher->v.velocity[2]) {
         pusher->v.ltime += movetime;
@@ -640,15 +642,12 @@ SV_Physics_Pusher
 */
 void SV_Physics_Pusher(edict_t *ent)
 {
-    float thinktime;
-    float oldltime;
-    float movetime;
+    int32_t const thinktime = (int32_t)(ent->v.nextthink * MS_PER_S);
+    int32_t const oldltime = (int32_t)(ent->v.ltime * MS_PER_S);
+    int32_t movetime;
 
-    oldltime = ent->v.ltime;
-
-    thinktime = ent->v.nextthink;
-    if (thinktime < ent->v.ltime + host_frametime) {
-        movetime = thinktime - ent->v.ltime;
+    if (thinktime < oldltime + host_frametime) {
+        movetime = thinktime - oldltime;
         if (movetime < 0)
             movetime = 0;
     } else
@@ -663,14 +662,12 @@ void SV_Physics_Pusher(edict_t *ent)
             SV_PushMove(ent, movetime); // advances ent->v.ltime if not blocked
     }
 
-    if (thinktime > oldltime && thinktime <= ent->v.ltime) {
+    if (thinktime > oldltime && thinktime <= (int32_t)(ent->v.ltime * MS_PER_S)) {
         ent->v.nextthink = 0;
-        pr_global_struct->time = sv.time;
+        pr_global_struct->time = (float) sv.time / MS_PER_S;
         pr_global_struct->self = EDICT_TO_PROG(ent);
         pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
         PR_ExecuteProgram(ent->v.think);
-        if (ent->free)
-            return;
     }
 }
 
@@ -815,7 +812,7 @@ Try fixing by pushing one pixel in each direction.
 This is a hack, but in the interest of good gameplay...
 ======================
 */
-int SV_TryUnstick(edict_t *ent, vec3_t oldvel)
+static int SV_TryUnstick(edict_t *ent, vec3_t const oldvel)
 {
     int i;
     vec3_t oldorg;
@@ -869,7 +866,7 @@ int SV_TryUnstick(edict_t *ent, vec3_t oldvel)
         ent->v.velocity[0] = oldvel[0];
         ent->v.velocity[1] = oldvel[1];
         ent->v.velocity[2] = 0;
-        clip = SV_FlyMove(ent, 0.1, &steptrace);
+        clip = SV_FlyMove(ent, 100, &steptrace);
 
         if (fabs(oldorg[1] - ent->v.origin[1]) > 4 || fabs(oldorg[0] - ent->v.origin[0]) > 4) {
             //Con_DPrintf ("unstuck!\n");
@@ -938,7 +935,7 @@ void SV_WalkMove(edict_t *ent)
     VectorCopy(vec3_origin, upmove);
     VectorCopy(vec3_origin, downmove);
     upmove[2] = STEPSIZE;
-    downmove[2] = -STEPSIZE + oldvel[2] * host_frametime;
+    downmove[2] = -STEPSIZE + oldvel[2] * host_frametime_float;
 
     // move up
     SV_PushEntity(ent, upmove); // FIXME: don't link?
@@ -952,8 +949,7 @@ void SV_WalkMove(edict_t *ent)
     // check for stuckness, possibly due to the limited precision of floats
     // in the clipping hulls
     if (clip) {
-        if (fabs(oldorg[1] - ent->v.origin[1]) < 0.03125 &&
-            fabs(oldorg[0] - ent->v.origin[0]) < 0.03125) { // stepping up didn't make any progress
+        if (fabs(oldorg[1] - ent->v.origin[1]) < 0.03125f && fabs(oldorg[0] - ent->v.origin[0]) < 0.03125f) { // stepping up didn't make any progress
             clip = SV_TryUnstick(ent, oldvel);
         }
     }
@@ -965,7 +961,7 @@ void SV_WalkMove(edict_t *ent)
     // move down
     downtrace = SV_PushEntity(ent, downmove); // FIXME: don't link?
 
-    if (downtrace.plane.normal[2] > 0.7) {
+    if (downtrace.plane.normal[2] > 0.7f) {
         if (ent->v.solid == SOLID_BSP) {
             ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
             ent->v.groundentity = EDICT_TO_PROG(downtrace.ent);
@@ -994,7 +990,7 @@ void SV_Physics_Client(edict_t *ent, int num)
     //
     // call standard client pre-think
     //
-    pr_global_struct->time = sv.time;
+    pr_global_struct->time = (float) sv.time / MS_PER_S;
     pr_global_struct->self = EDICT_TO_PROG(ent);
     PR_ExecuteProgram(pr_global_struct->PlayerPreThink);
 
@@ -1042,7 +1038,7 @@ void SV_Physics_Client(edict_t *ent, int num)
     case MOVETYPE_NOCLIP:
         if (!SV_RunThink(ent))
             return;
-        VectorMA(ent->v.origin, host_frametime, ent->v.velocity, ent->v.origin);
+        VectorMA(ent->v.origin, host_frametime_float, ent->v.velocity, ent->v.origin);
         break;
 
     default:
@@ -1054,7 +1050,7 @@ void SV_Physics_Client(edict_t *ent, int num)
     //
     SV_LinkEdict(ent, true);
 
-    pr_global_struct->time = sv.time;
+    pr_global_struct->time = (float) sv.time / MS_PER_S;
     pr_global_struct->self = EDICT_TO_PROG(ent);
     PR_ExecuteProgram(pr_global_struct->PlayerPostThink);
 }
@@ -1104,8 +1100,8 @@ void SV_Physics_Noclip(edict_t *ent)
     if (!SV_RunThink(ent))
         return;
 
-    VectorMA(ent->v.angles, host_frametime, ent->v.avelocity, ent->v.angles);
-    VectorMA(ent->v.origin, host_frametime, ent->v.velocity, ent->v.origin);
+    VectorMA(ent->v.angles, host_frametime_float, ent->v.avelocity, ent->v.angles);
+    VectorMA(ent->v.origin, host_frametime_float, ent->v.velocity, ent->v.origin);
 
     SV_LinkEdict(ent, false);
 }
@@ -1213,13 +1209,13 @@ void SV_Physics_Toss(edict_t *ent)
 #endif
 
     // move angles
-    VectorMA(ent->v.angles, host_frametime, ent->v.avelocity, ent->v.angles);
+    VectorMA(ent->v.angles, host_frametime_float, ent->v.avelocity, ent->v.angles);
 
 // move origin
 #ifdef QUAKE2
     VectorAdd(ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
 #endif
-    VectorScale(ent->v.velocity, host_frametime, move);
+    VectorScale(ent->v.velocity, host_frametime_float, move);
     trace = SV_PushEntity(ent, move);
 #ifdef QUAKE2
     VectorSubtract(ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
@@ -1424,7 +1420,7 @@ void SV_Physics(void)
     // let the progs know that a new frame has started
     pr_global_struct->self = EDICT_TO_PROG(sv.edicts);
     pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
-    pr_global_struct->time = sv.time;
+    pr_global_struct->time = (float) sv.time / MS_PER_S;
     PR_ExecuteProgram(pr_global_struct->StartFrame);
 
     //SV_CheckAllEnts ();

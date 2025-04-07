@@ -170,11 +170,11 @@ void Sys_Quit(void)
     exit(0);
 }
 
-double Sys_FloatTime(void)
+uint32_t Sys_CurrentTicks(void)
 {
-    static double t;
+    static uint32_t t;
 
-    t += 0.1;
+    t += 100;
 
     return t;
 }
@@ -214,6 +214,6 @@ void main(int argc, char **argv)
     printf("Host_Init\n");
     Host_Init(&parms);
     while (1) {
-        Host_Frame(0.1);
+        Host_Frame(100);
     }
 }

@@ -225,7 +225,7 @@ texture_t *R_TextureAnimation(texture_t *base)
     if (!base->anim_total)
         return base;
 
-    reletive = (int)(cl.time * 10) % base->anim_total;
+    reletive = (int)(cl.time / 100) % base->anim_total;
 
     count = 0;
     while (base->anim_min > reletive || base->anim_max <= reletive) {
@@ -249,7 +249,7 @@ texture_t *R_TextureAnimation(texture_t *base)
 
 extern int solidskytexture;
 extern int alphaskytexture;
-extern float speedscale; // for top sky and bottom sky
+extern uint32_t speedscale; // for top sky and bottom sky
 
 void DrawGLWaterPoly(glpoly_t *p);
 void DrawGLWaterPolyLightmap(glpoly_t *p);
@@ -479,15 +479,15 @@ void R_DrawSequentialPoly(msurface_t *s)
     if (s->flags & SURF_DRAWSKY) {
         GL_DisableMultitexture();
         GL_Bind(solidskytexture);
-        speedscale = realtime * 8;
-        speedscale -= (int)speedscale & ~127;
+        speedscale = realtime;
+        // speedscale -= (int)speedscale & ~127;
 
         EmitSkyPolys(s);
 
         glEnable(GL_BLEND);
         GL_Bind(alphaskytexture);
-        speedscale = realtime * 16;
-        speedscale -= (int)speedscale & ~127;
+        speedscale = realtime * 2;
+        // speedscale -= (int)speedscale & ~127;
         EmitSkyPolys(s);
 
         glDisable(GL_BLEND);
@@ -521,13 +521,14 @@ void R_DrawSequentialPoly(msurface_t *s)
         }
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
         glBegin(GL_TRIANGLE_FAN);
+        float realtime_f = (float) realtime / MS_PER_S;
         v = p->verts[0];
         for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
             qglMTexCoord2fSGIS(TEXTURE0_SGIS, v[3], v[4]);
             qglMTexCoord2fSGIS(TEXTURE1_SGIS, v[5], v[6]);
 
-            nv[0] = v[0] + 8 * sin(v[1] * 0.05 + realtime) * sin(v[2] * 0.05 + realtime);
-            nv[1] = v[1] + 8 * sin(v[0] * 0.05 + realtime) * sin(v[2] * 0.05 + realtime);
+            nv[0] = v[0] + 8 * sinf(v[1] * 0.05f + realtime_f) * sinf(v[2] * 0.05f + realtime_f);
+            nv[1] = v[1] + 8 * sinf(v[0] * 0.05f + realtime_f) * sinf(v[2] * 0.05f + realtime_f);
             nv[2] = v[2];
 
             glVertex3fv(nv);
@@ -561,6 +562,7 @@ void DrawGLWaterPoly(glpoly_t *p)
     int i;
     float *v;
     vec3_t nv;
+    float realtime_f = (float) realtime / MS_PER_S;
 
     GL_DisableMultitexture();
 
@@ -569,8 +571,8 @@ void DrawGLWaterPoly(glpoly_t *p)
     for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
         glTexCoord2f(v[3], v[4]);
 
-        nv[0] = v[0] + 8 * sin(v[1] * 0.05 + realtime) * sin(v[2] * 0.05 + realtime);
-        nv[1] = v[1] + 8 * sin(v[0] * 0.05 + realtime) * sin(v[2] * 0.05 + realtime);
+        nv[0] = v[0] + 8 * sinf(v[1] * 0.05f + realtime_f) * sinf(v[2] * 0.05f + realtime_f);
+        nv[1] = v[1] + 8 * sinf(v[0] * 0.05f + realtime_f) * sinf(v[2] * 0.05f + realtime_f);
         nv[2] = v[2];
 
         glVertex3fv(nv);
@@ -583,6 +585,7 @@ void DrawGLWaterPolyLightmap(glpoly_t *p)
     int i;
     float *v;
     vec3_t nv;
+    float realtime_f = (float) realtime / MS_PER_S;
 
     GL_DisableMultitexture();
 
@@ -591,8 +594,8 @@ void DrawGLWaterPolyLightmap(glpoly_t *p)
     for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
         glTexCoord2f(v[5], v[6]);
 
-        nv[0] = v[0] + 8 * sin(v[1] * 0.05 + realtime) * sin(v[2] * 0.05 + realtime);
-        nv[1] = v[1] + 8 * sin(v[0] * 0.05 + realtime) * sin(v[2] * 0.05 + realtime);
+        nv[0] = v[0] + 8 * sinf(v[1] * 0.05f + realtime_f) * sinf(v[2] * 0.05f + realtime_f);
+        nv[1] = v[1] + 8 * sinf(v[0] * 0.05f + realtime_f) * sinf(v[2] * 0.05f + realtime_f);
         nv[2] = v[2];
 
         glVertex3fv(nv);

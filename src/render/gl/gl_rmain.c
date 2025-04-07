@@ -139,13 +139,14 @@ void R_RotateForEntity(entity_t *e)
 R_GetSpriteFrame
 ================
 */
-mspriteframe_t *R_GetSpriteFrame(entity_t *currententity)
+static mspriteframe_t const *R_GetSpriteFrame(entity_t const *currententity)
 {
-    msprite_t *psprite;
-    mspritegroup_t *pspritegroup;
-    mspriteframe_t *pspriteframe;
+    msprite_t const *psprite;
+    mspritegroup_t const *pspritegroup;
+    mspriteframe_t const *pspriteframe;
     int i, numframes, frame;
-    float *pintervals, fullinterval, targettime, time;
+    float const *pintervals;
+    uint32_t time, fullinterval, targettime;
 
     psprite = currententity->model->cache.data;
     frame = currententity->frame;
@@ -161,16 +162,16 @@ mspriteframe_t *R_GetSpriteFrame(entity_t *currententity)
         pspritegroup = (mspritegroup_t *)psprite->frames[frame].frameptr;
         pintervals = pspritegroup->intervals;
         numframes = pspritegroup->numframes;
-        fullinterval = pintervals[numframes - 1];
+        fullinterval = pintervals[numframes - 1] * MS_PER_S;
 
         time = cl.time + currententity->syncbase;
 
         // when loading in Mod_LoadSpriteGroup, we guaranteed all interval values
         // are positive, so we don't have to worry about division by 0
-        targettime = time - ((int)(time / fullinterval)) * fullinterval;
+        targettime = time - (time / fullinterval) * fullinterval;
 
         for (i = 0; i < (numframes - 1); i++) {
-            if (pintervals[i] > targettime)
+            if (fullinterval > targettime)
                 break;
         }
 
@@ -189,7 +190,7 @@ R_DrawSpriteModel
 void R_DrawSpriteModel(entity_t *e)
 {
     vec3_t point;
-    mspriteframe_t *frame;
+    mspriteframe_t const *frame;
     float *up, *right;
     vec3_t v_forward, v_right, v_up;
     msprite_t *psprite;
@@ -383,7 +384,7 @@ R_SetupAliasFrame
 void R_SetupAliasFrame(int frame, aliashdr_t *paliashdr)
 {
     int pose, numposes;
-    float interval;
+    uint32_t interval;
 
     if ((frame >= paliashdr->numframes) || (frame < 0)) {
         Con_DPrintf("R_AliasSetupFrame: no such frame %d\n", frame);
@@ -394,7 +395,7 @@ void R_SetupAliasFrame(int frame, aliashdr_t *paliashdr)
     numposes = paliashdr->frames[frame].numposes;
 
     if (numposes > 1) {
-        interval = paliashdr->frames[frame].interval;
+        interval = paliashdr->frames[frame].interval * MS_PER_S;
         pose += (int)(cl.time / interval) % numposes;
     }
 
@@ -503,7 +504,7 @@ void R_DrawAliasModel(entity_t *e)
         glScalef(paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
     }
 
-    anim = (int)(cl.time * 10) & 3;
+    anim = (int)(cl.time / 100) & 3;
     GL_Bind(paliashdr->gl_texturenum[currententity->skinnum][anim]);
 
     // we can't dynamically colormap textures, so they are cached
@@ -1016,7 +1017,7 @@ r_refdef must be set before the first call
 */
 void R_RenderView(void)
 {
-    double time1, time2;
+    uint32_t time1;
 
     if (r_norefresh.value)
         return;
@@ -1026,7 +1027,7 @@ void R_RenderView(void)
 
     if (r_speeds.value) {
         glFinish();
-        time1 = Sys_FloatTime();
+        time1 = Sys_CurrentTicks();
         c_brush_polys = 0;
         c_alias_polys = 0;
     }
@@ -1063,7 +1064,6 @@ void R_RenderView(void)
 
     if (r_speeds.value) {
         //		glFinish ();
-        time2 = Sys_FloatTime();
-        Con_Printf("%3i ms  %4i wpoly %4i epoly\n", (int)((time2 - time1) * 1000), c_brush_polys, c_alias_polys);
+        Con_Printf("%3i ms  %4i wpoly %4i epoly\n", Sys_CurrentTicks() - time1, c_brush_polys, c_alias_polys);
     }
 }

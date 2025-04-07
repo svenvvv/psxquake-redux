@@ -21,14 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#define	GLTEST			// experimental stuff
 
+#include <stdint.h>
+
 #define QUAKE_GAME // as opposed to utilities
 
-#define VERSION 1.09
-#define GLQUAKE_VERSION 1.00
-#define D3DQUAKE_VERSION 0.01
-#define WINQUAKE_VERSION 0.996
-#define LINUX_VERSION 1.30
-#define X11_VERSION 1.10
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 0
 
 //define	PARANOID			// speed sapping error checking
 
@@ -280,12 +278,12 @@ extern quakeparms_t host_parms;
 extern cvar_t sys_ticrate;
 
 extern qboolean host_initialized; // true if into command execution
-extern double host_frametime;
+extern uint32_t host_frametime;
+extern float host_frametime_float; // host_frametime, but as a float in seconds
 extern byte *host_basepal;
 extern byte *host_colormap;
 extern int host_framecount; // incremented every frame, never reset
-extern double realtime; // not bounded in any way, changed at
-    // start of every frame, never reset
+extern uint32_t realtime; // not bounded in any way, changed at start of every frame, never reset
 
 void Host_ClearMemory(void);
 void Host_ServerFrame(void);
@@ -296,7 +294,7 @@ __attribute__ ((format (printf, 1, 2)))
 void Host_Error(char *error, ...);
 __attribute__ ((format (printf, 1, 2)))
 void Host_EndGame(char *message, ...);
-void Host_Frame(float time);
+void Host_Frame(uint32_t time);
 void Host_Quit_f(void);
 __attribute__ ((format (printf, 1, 2)))
 void Host_ClientCommands(char *fmt, ...);

@@ -45,11 +45,11 @@ static qboolean listening = false;
 qboolean slistInProgress = false;
 qboolean slistSilent = false;
 qboolean slistLocal = true;
-static double slistStartTime;
+static uint32_t slistStartTime;
 static int slistLastShown;
 
-static void Slist_Send(void);
-static void Slist_Poll(void);
+static void Slist_Send(void*);
+static void Slist_Poll(void*);
 PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send };
 PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll };
 
@@ -84,12 +84,11 @@ cvar_t idgods = { "idgods", "0" };
 
 int net_driverlevel;
 
-double net_time;
+uint32_t net_time;
 
-double SetNetTime(void)
+static void SetNetTime(void)
 {
-    net_time = Sys_FloatTime();
-    return net_time;
+    net_time = Sys_CurrentTicks();
 }
 
 /*
@@ -277,15 +276,15 @@ void NET_Slist_f(void)
     }
 
     slistInProgress = true;
-    slistStartTime = Sys_FloatTime();
+    slistStartTime = Sys_CurrentTicks();
 
-    SchedulePollProcedure(&slistSendProcedure, 0.0);
-    SchedulePollProcedure(&slistPollProcedure, 0.1);
+    SchedulePollProcedure(&slistSendProcedure, 0);
+    SchedulePollProcedure(&slistPollProcedure, 100);
 
     hostCacheCount = 0;
 }
 
-static void Slist_Send(void)
+static void Slist_Send(void *)
 {
     for (net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++) {
         if (!slistLocal && net_driverlevel == 0)
@@ -295,11 +294,11 @@ static void Slist_Send(void)
         dfunc.SearchForHosts(true);
     }
 
-    if ((Sys_FloatTime() - slistStartTime) < 0.5)
-        SchedulePollProcedure(&slistSendProcedure, 0.75);
+    if ((Sys_CurrentTicks() - slistStartTime) < 500)
+        SchedulePollProcedure(&slistSendProcedure, 750);
 }
 
-static void Slist_Poll(void)
+static void Slist_Poll(void *)
 {
     for (net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++) {
         if (!slistLocal && net_driverlevel == 0)
@@ -312,8 +311,8 @@ static void Slist_Poll(void)
     if (!slistSilent)
         PrintSlist();
 
-    if ((Sys_FloatTime() - slistStartTime) < 1.5) {
-        SchedulePollProcedure(&slistPollProcedure, 0.1);
+    if ((Sys_CurrentTicks() - slistStartTime) < 1500) {
+        SchedulePollProcedure(&slistPollProcedure, 100);
         return;
     }
 
@@ -574,9 +573,9 @@ qboolean NET_CanSendMessage(qsocket_t *sock)
     return r;
 }
 
-int NET_SendToAll(sizebuf_t *data, int blocktime)
+int NET_SendToAll(sizebuf_t *data, uint32_t blocktime)
 {
-    double start;
+    uint32_t start;
     int i;
     int count = 0;
     qboolean state1[MAX_SCOREBOARD];
@@ -601,7 +600,7 @@ int NET_SendToAll(sizebuf_t *data, int blocktime)
         }
     }
 
-    start = Sys_FloatTime();
+    start = Sys_CurrentTicks();
     while (count) {
         count = 0;
         for (i = 0, host_client = svs.clients; i < svs.maxclients; i++, host_client++) {
@@ -626,7 +625,7 @@ int NET_SendToAll(sizebuf_t *data, int blocktime)
                 continue;
             }
         }
-        if ((Sys_FloatTime() - start) > blocktime)
+        if ((Sys_CurrentTicks() - start) > blocktime)
             break;
     }
     return count;
@@ -771,11 +770,11 @@ void NET_Poll(void)
     }
 }
 
-void SchedulePollProcedure(PollProcedure *proc, double timeOffset)
+void SchedulePollProcedure(PollProcedure *proc, uint32_t timeOffsetMs)
 {
     PollProcedure *pp, *prev;
 
-    proc->nextTime = Sys_FloatTime() + timeOffset;
+    proc->nextTime = Sys_CurrentTicks() + timeOffsetMs;
     for (pp = pollProcedureList, prev = NULL; pp; pp = pp->next) {
         if (pp->nextTime >= proc->nextTime)
             break;

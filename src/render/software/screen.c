@@ -57,7 +57,7 @@ vrect_t scr_vrect;
 
 qboolean scr_disabled_for_loading;
 qboolean scr_drawloading;
-float scr_disabled_time;
+uint32_t scr_disabled_time;
 qboolean scr_skipupdate;
 
 qboolean block_drawing;
@@ -71,8 +71,8 @@ CENTER PRINTING
 */
 
 char scr_centerstring[1024];
-float scr_centertime_start; // for slow victory printing
-float scr_centertime_off;
+uint32_t scr_centertime_start; // for slow victory printing
+uint32_t scr_centertime_off;
 int scr_center_lines;
 int scr_erase_lines;
 int scr_erase_center;
@@ -88,7 +88,7 @@ for a few moments
 void SCR_CenterPrint(char *str)
 {
     strncpy(scr_centerstring, str, sizeof(scr_centerstring) - 1);
-    scr_centertime_off = scr_centertime.value;
+    scr_centertime_off = (uint32_t) (scr_centertime.value * MS_PER_S);
     scr_centertime_start = cl.time;
 
     // count the number of lines for centering
@@ -128,7 +128,7 @@ void SCR_DrawCenterString(void)
 
     // the finale prints the characters one at a time
     if (cl.intermission)
-        remaining = scr_printspeed.value * (cl.time - scr_centertime_start);
+        remaining = (scr_printspeed.value * MS_PER_S) * (cl.time - scr_centertime_start);
     else
         remaining = 9999;
 
@@ -355,7 +355,7 @@ void SCR_DrawTurtle(void)
     if (!scr_showturtle.value)
         return;
 
-    if (host_frametime < 0.1) {
+    if (host_frametime < 100) {
         count = 0;
         return;
     }
@@ -374,7 +374,7 @@ SCR_DrawNet
 */
 void SCR_DrawNet(void)
 {
-    if (realtime - cl.last_received_message < 0.3)
+    if (realtime - cl.last_received_message < 300)
         return;
     if (cls.demoplayback)
         return;
@@ -443,12 +443,12 @@ void SCR_SetUpToDrawConsole(void)
         scr_conlines = 0; // none visible
 
     if (scr_conlines < scr_con_current) {
-        scr_con_current -= scr_conspeed.value * host_frametime;
+        scr_con_current -= scr_conspeed.value * host_frametime_float;
         if (scr_conlines > scr_con_current)
             scr_con_current = scr_conlines;
 
     } else if (scr_conlines > scr_con_current) {
-        scr_con_current += scr_conspeed.value * host_frametime;
+        scr_con_current += scr_conspeed.value * host_frametime_float;
         if (scr_conlines < scr_con_current)
             scr_con_current = scr_conlines;
     }
@@ -640,7 +640,7 @@ void SCR_UpdateScreen(void)
     scr_copyeverything = 0;
 
     if (scr_disabled_for_loading) {
-        if (realtime - scr_disabled_time > 60) {
+        if (realtime - scr_disabled_time > 60 * MS_PER_S) {
             scr_disabled_for_loading = false;
             Con_Printf("load failed.\n");
         } else

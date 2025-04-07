@@ -65,13 +65,13 @@ For program optimization
 void R_TimeRefresh_f(void)
 {
     int i;
-    float start, stop, time;
+    uint32_t start, stop, time;
     int startangle;
     vrect_t vr;
 
     startangle = r_refdef.viewangles[1];
 
-    start = Sys_FloatTime();
+    start = Sys_CurrentTicks();
     for (i = 0; i < 128; i++) {
         r_refdef.viewangles[1] = i / 128.0 * 360.0;
 
@@ -88,9 +88,9 @@ void R_TimeRefresh_f(void)
         vr.pnext = NULL;
         VID_Update(&vr);
     }
-    stop = Sys_FloatTime();
+    stop = Sys_CurrentTicks();
     time = stop - start;
-    Con_Printf("%f seconds (%f fps)\n", time, 128 / time);
+    Con_Printf("%f seconds (%f fps)\n", time / MS_PER_S, (128 * MS_PER_S) / time);
 
     r_refdef.viewangles[1] = startangle;
 }
@@ -142,14 +142,14 @@ extern float mouse_x, mouse_y;
 void R_TimeGraph(void)
 {
     static int timex;
-    int a;
-    float r_time2;
+    unsigned a;
+    uint32_t r_time2;
     static byte r_timings[MAX_TIMINGS];
     int x;
 
-    r_time2 = Sys_FloatTime();
+    r_time2 = Sys_CurrentTicks();
 
-    a = (r_time2 - r_time1) / 0.01;
+    a = (r_time2 - r_time1) / 10;
     //a = fabs(mouse_y * 0.05);
     //a = (int)((r_refdef.vieworg[2] + 1024)/1)%(int)r_graphheight.value;
     //a = fabs(velocity[0])/20;
@@ -182,14 +182,14 @@ R_PrintTimes
 */
 void R_PrintTimes(void)
 {
-    float r_time2;
-    float ms;
+    uint32_t r_time2;
+    uint32_t ms;
 
-    r_time2 = Sys_FloatTime();
+    r_time2 = Sys_CurrentTicks();
 
-    ms = 1000 * (r_time2 - r_time1);
+    ms = r_time2 - r_time1;
 
-    Con_Printf("%5.1f ms %3i/%3i/%3i poly %3i surf\n", ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
+    Con_Printf("%5u ms %3i/%3i/%3i poly %3i surf\n", ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
     c_surf = 0;
 }
 
@@ -200,20 +200,20 @@ R_PrintDSpeeds
 */
 void R_PrintDSpeeds(void)
 {
-    float ms, dp_time, r_time2, rw_time, db_time, se_time, de_time, dv_time;
+    uint32_t ms, dp_time, r_time2, rw_time, db_time, se_time, de_time, dv_time;
 
-    r_time2 = Sys_FloatTime();
+    r_time2 = Sys_CurrentTicks();
 
-    dp_time = (dp_time2 - dp_time1) * 1000;
-    rw_time = (rw_time2 - rw_time1) * 1000;
-    db_time = (db_time2 - db_time1) * 1000;
-    se_time = (se_time2 - se_time1) * 1000;
-    de_time = (de_time2 - de_time1) * 1000;
-    dv_time = (dv_time2 - dv_time1) * 1000;
-    ms = (r_time2 - r_time1) * 1000;
+    dp_time = dp_time2 - dp_time1;
+    rw_time = rw_time2 - rw_time1;
+    db_time = db_time2 - db_time1;
+    se_time = se_time2 - se_time1;
+    de_time = de_time2 - de_time1;
+    dv_time = dv_time2 - dv_time1;
+    ms = r_time2 - r_time1;
 
-    Con_Printf("%3i %4.1fp %3iw %4.1fb %3is %4.1fe %4.1fv\n", (int)ms, dp_time, (int)rw_time, db_time, (int)se_time,
-               de_time, dv_time);
+    Con_Printf("%3i %4up %3uw %4ub %3us %4ue %4uv\n",
+        ms, dp_time, rw_time, db_time, se_time, de_time, dv_time);
 }
 
 /*

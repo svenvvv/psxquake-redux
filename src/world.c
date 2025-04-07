@@ -39,8 +39,6 @@ typedef struct {
     edict_t *passedict;
 } moveclip_t;
 
-int SV_HullPointContents(hull_t *hull, int num, vec3_t p);
-
 /*
 ===============================================================================
 
@@ -95,7 +93,7 @@ To keep everything totally uniform, bounding boxes are turned into small
 BSP trees instead of being compared directly.
 ===================
 */
-hull_t *SV_HullForBox(vec3_t mins, vec3_t maxs)
+static hull_t *SV_HullForBox(vec3_t const mins, vec3_t const maxs)
 {
     box_planes[0].dist = maxs[0];
     box_planes[1].dist = mins[0];
@@ -117,7 +115,7 @@ Offset is filled in to contain the adjustment that must be added to the
 testing object's origin to get a point to use with the returned hull.
 ================
 */
-hull_t *SV_HullForEntity(edict_t *ent, vec3_t mins, vec3_t maxs, vec3_t offset)
+static hull_t *SV_HullForEntity(edict_t const *ent, vec3_t const mins, vec3_t const maxs, vec3_t offset)
 {
     model_t *model;
     vec3_t size;
@@ -185,7 +183,7 @@ SV_CreateAreaNode
 
 ===============
 */
-areanode_t *SV_CreateAreaNode(int depth, vec3_t mins, vec3_t maxs)
+static areanode_t *SV_CreateAreaNode(int depth, vec3_t const mins, vec3_t const maxs)
 {
     areanode_t *anode;
     vec3_t size;
@@ -209,7 +207,7 @@ areanode_t *SV_CreateAreaNode(int depth, vec3_t mins, vec3_t maxs)
     else
         anode->axis = 1;
 
-    anode->dist = 0.5 * (maxs[anode->axis] + mins[anode->axis]);
+    anode->dist = 0.5f * (maxs[anode->axis] + mins[anode->axis]);
     VectorCopy(mins, mins1);
     VectorCopy(mins, mins2);
     VectorCopy(maxs, maxs1);
@@ -257,7 +255,7 @@ void SV_UnlinkEdict(edict_t *ent)
 SV_TouchLinks
 ====================
 */
-void SV_TouchLinks(edict_t *ent, areanode_t *node)
+static void SV_TouchLinks(edict_t *ent, areanode_t const *node)
 {
     link_t *l, *next;
     edict_t *touch;
@@ -280,7 +278,7 @@ void SV_TouchLinks(edict_t *ent, areanode_t *node)
 
         pr_global_struct->self = EDICT_TO_PROG(touch);
         pr_global_struct->other = EDICT_TO_PROG(ent);
-        pr_global_struct->time = sv.time;
+        pr_global_struct->time = (float) sv.time / MS_PER_S;
         PR_ExecuteProgram(touch->v.touch);
 
         pr_global_struct->self = old_self;
@@ -303,7 +301,7 @@ SV_FindTouchedLeafs
 
 ===============
 */
-void SV_FindTouchedLeafs(edict_t *ent, mnode_t *node)
+static void SV_FindTouchedLeafs(edict_t *ent, mnode_t const *node)
 {
     mplane_t *splitplane;
     mleaf_t *leaf;
@@ -455,7 +453,7 @@ SV_HullPointContents
 
 ==================
 */
-int SV_HullPointContents(hull_t *hull, int num, vec3_t p)
+static int SV_HullPointContents(hull_t const *hull, int num, vec3_t const p)
 {
     float d;
     dclipnode_t *node;
@@ -534,7 +532,7 @@ LINE TESTING IN HULLS
 */
 
 // 1/32 epsilon to keep floating point happy
-#define DIST_EPSILON (0.03125)
+#define DIST_EPSILON (0.03125f)
 
 /*
 ==================
@@ -635,7 +633,7 @@ qboolean SV_RecursiveHullCheck(hull_t *hull, int num, float p1f, float p2f, vec3
 
     while (SV_HullPointContents(hull, hull->firstclipnode, mid) ==
            CONTENTS_SOLID) { // shouldn't really happen, but does occasionally
-        frac -= 0.1;
+        frac -= 0.1f;
         if (frac < 0) {
             trace->fraction = midf;
             VectorCopy(mid, trace->endpos);
@@ -661,7 +659,7 @@ Handles selection or creation of a clipping hull, and offseting (and
 eventually rotation) of the end points
 ==================
 */
-trace_t SV_ClipMoveToEntity(edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
+static trace_t SV_ClipMoveToEntity(edict_t *ent, vec3_t const start, vec3_t const mins, vec3_t const maxs, vec3_t const end)
 {
     trace_t trace;
     vec3_t offset;
@@ -748,7 +746,7 @@ SV_ClipToLinks
 Mins and maxs enclose the entire area swept by the move
 ====================
 */
-void SV_ClipToLinks(areanode_t *node, moveclip_t *clip)
+void SV_ClipToLinks(areanode_t const *node, moveclip_t *clip)
 {
     link_t *l, *next;
     edict_t *touch;
@@ -797,8 +795,7 @@ void SV_ClipToLinks(areanode_t *node, moveclip_t *clip)
                 clip->trace.startsolid = true;
             } else
                 clip->trace = trace;
-        } else if (trace.startsolid)
-            clip->trace.startsolid = true;
+        }
     }
 
     // recurse down both sides
@@ -816,7 +813,8 @@ void SV_ClipToLinks(areanode_t *node, moveclip_t *clip)
 SV_MoveBounds
 ==================
 */
-void SV_MoveBounds(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, vec3_t boxmins, vec3_t boxmaxs)
+static void SV_MoveBounds(vec3_t const start, vec3_t const mins, vec3_t const maxs,
+                          vec3_t const end, vec3_t boxmins, vec3_t boxmaxs)
 {
 #if 0
 // debug to test against everything

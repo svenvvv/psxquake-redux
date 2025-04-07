@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <SDL3/SDL.h>
 
+static uint64_t start_ticks;
+
 /*
 ===============================================================================
 
@@ -65,7 +67,7 @@ int filelength(FILE *f)
     return end;
 }
 
-int Sys_FileOpenRead(char *path, int *hndl)
+int Sys_FileOpenRead(char const *path, int *hndl)
 {
     FILE *f;
     int i;
@@ -83,7 +85,7 @@ int Sys_FileOpenRead(char *path, int *hndl)
     return filelength(f);
 }
 
-int Sys_FileOpenWrite(char *path)
+int Sys_FileOpenWrite(char const *path)
 {
     FILE *f;
     int i;
@@ -114,12 +116,12 @@ int Sys_FileRead(int handle, void *dest, int count)
     return fread(dest, 1, count, sys_handles[handle]);
 }
 
-int Sys_FileWrite(int handle, void *data, int count)
+int Sys_FileWrite(int handle, void const *data, int count)
 {
     return fwrite(data, 1, count, sys_handles[handle]);
 }
 
-int Sys_FileTime(char *path)
+int Sys_FileTime(char const *path)
 {
     FILE *f;
 
@@ -132,7 +134,7 @@ int Sys_FileTime(char *path)
     return -1;
 }
 
-void Sys_mkdir(char *path)
+void Sys_mkdir(char const *path)
 {
     (void)path;
 }
@@ -145,7 +147,7 @@ SYSTEM IO
 ===============================================================================
 */
 
-void Sys_Error(char *error, ...)
+void Sys_Error(char const *error, ...)
 {
     va_list argptr;
 
@@ -158,7 +160,7 @@ void Sys_Error(char *error, ...)
     exit(1);
 }
 
-void Sys_Printf(char *fmt, ...)
+void Sys_Printf(char const *fmt, ...)
 {
     va_list argptr;
 
@@ -172,13 +174,9 @@ void Sys_Quit(void)
     exit(0);
 }
 
-double Sys_FloatTime(void)
+uint32_t Sys_CurrentTicks(void)
 {
-    static double t;
-
-    t += 0.1;
-
-    return t;
+    return SDL_GetTicks() - start_ticks;
 }
 
 char *Sys_ConsoleInput(void)
@@ -209,15 +207,31 @@ int main(int argc, char **argv)
     parms.membase = quake_heap;
     parms.basedir = ".";
 
+    start_ticks = SDL_GetTicks();
+
     COM_InitArgv(argc, argv);
 
     parms.argc = com_argc;
     parms.argv = com_argv;
 
-    printf("Host_Init\n");
     Host_Init(&parms);
 
+    uint32_t oldtime = Sys_CurrentTicks() - 1;
     while (1) {
-        Host_Frame(0.1f);
+        uint32_t newtime = Sys_CurrentTicks();
+        uint32_t time = Sys_CurrentTicks() - oldtime;
+        uint32_t tickrate_ms = (unsigned) sys_ticrate.value * MS_PER_S;
+
+        if (cls.state == ca_dedicated) {
+            time = tickrate_ms;
+        }
+
+        if (time > tickrate_ms * 2) {
+            oldtime = newtime;
+        } else {
+            oldtime += time;
+        }
+
+        Host_Frame(time);
     }
 }

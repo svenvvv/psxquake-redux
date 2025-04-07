@@ -41,7 +41,7 @@ typedef struct entity_s {
 
     entity_state_t baseline; // to fill in defaults in updates
 
-    double msgtime; // time of last update
+    uint32_t msgtime; // time of last update
     vec3_t msg_origins[2]; // last two updates (0 is newest)
     vec3_t origin;
     vec3_t msg_angles[2]; // last two updates (0 is newest)
@@ -49,7 +49,7 @@ typedef struct entity_s {
     struct model_s *model; // NULL = no model
     struct efrag_s *efrag; // linked list of efrags
     int frame;
-    float syncbase; // for client-side animations
+    uint32_t syncbase; // for client-side animations
     byte *colormap;
     int effects; // light, particals, etc
     int skinnum; // for Alias models
@@ -127,11 +127,11 @@ void R_RocketTrail(vec3_t start, vec3_t end, int type);
 void R_DarkFieldParticles(entity_t *ent);
 #endif
 void R_EntityParticles(entity_t *ent);
-void R_BlobExplosion(vec3_t org);
-void R_ParticleExplosion(vec3_t org);
-void R_ParticleExplosion2(vec3_t org, int colorStart, int colorLength);
-void R_LavaSplash(vec3_t org);
-void R_TeleportSplash(vec3_t org);
+void R_BlobExplosion(vec3_t const org);
+void R_ParticleExplosion(vec3_t const org);
+void R_ParticleExplosion2(vec3_t const org, int colorStart, int colorLength);
+void R_LavaSplash(vec3_t const org);
+void R_TeleportSplash(vec3_t const org);
 
 void R_PushDlights(void);
 

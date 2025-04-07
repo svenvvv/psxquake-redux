@@ -112,8 +112,8 @@ typedef struct particle_s {
     // drivers never touch the following fields
     struct particle_s *next;
     vec3_t vel;
-    float ramp;
-    float die;
+    uint32_t ramp;
+    uint32_t die;
     ptype_t type;
 } particle_t;
 

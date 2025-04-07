@@ -134,7 +134,7 @@ void M_DrawCharacter(int cx, int line, int num)
     Draw_Character(cx + ((vid.width - 320) >> 1), line, num);
 }
 
-void M_Print(int cx, int cy, char *str)
+void M_Print(int cx, int cy, char const *str)
 {
     while (*str) {
         M_DrawCharacter(cx, cy, (*str) + 128);
@@ -143,7 +143,7 @@ void M_Print(int cx, int cy, char *str)
     }
 }
 
-void M_PrintWhite(int cx, int cy, char *str)
+void M_PrintWhite(int cx, int cy, char const *str)
 {
     while (*str) {
         M_DrawCharacter(cx, cy, *str);
@@ -152,12 +152,12 @@ void M_PrintWhite(int cx, int cy, char *str)
     }
 }
 
-void M_DrawTransPic(int x, int y, qpic_t *pic)
+void M_DrawTransPic(int x, int y, qpic_t const *pic)
 {
     Draw_TransPic(x + ((vid.width - 320) >> 1), y, pic);
 }
 
-void M_DrawPic(int x, int y, qpic_t *pic)
+void M_DrawPic(int x, int y, qpic_t const *pic)
 {
     Draw_Pic(x + ((vid.width - 320) >> 1), y, pic);
 }
@@ -301,7 +301,7 @@ void M_Main_Draw(void)
     M_DrawPic((320 - p->width) / 2, 4, p);
     M_DrawTransPic(72, 32, Draw_CachePic("gfx/mainmenu.lmp"));
 
-    f = (int)(host_time * 10) % 6;
+    f = (int)(host_time / 100) % 6;
 
     M_DrawTransPic(54, 32 + m_main_cursor * 20, Draw_CachePic(va("gfx/menudot%i.lmp", f + 1)));
 }
@@ -371,7 +371,7 @@ void M_Menu_SinglePlayer_f(void)
 
 void M_SinglePlayer_Draw(void)
 {
-    int f;
+    unsigned f;
     qpic_t *p;
 
     M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
@@ -379,7 +379,7 @@ void M_SinglePlayer_Draw(void)
     M_DrawPic((320 - p->width) / 2, 4, p);
     M_DrawTransPic(72, 32, Draw_CachePic("gfx/sp_menu.lmp"));
 
-    f = (int)(host_time * 10) % 6;
+    f = (host_time / 100) % 6;
 
     M_DrawTransPic(54, 32 + m_singleplayer_cursor * 20, Draw_CachePic(va("gfx/menudot%i.lmp", f + 1)));
 }
@@ -606,7 +606,7 @@ void M_Menu_MultiPlayer_f(void)
 
 void M_MultiPlayer_Draw(void)
 {
-    int f;
+    unsigned f;
     qpic_t *p;
 
     M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
@@ -614,7 +614,7 @@ void M_MultiPlayer_Draw(void)
     M_DrawPic((320 - p->width) / 2, 4, p);
     M_DrawTransPic(72, 32, Draw_CachePic("gfx/mp_menu.lmp"));
 
-    f = (int)(host_time * 10) % 6;
+    f = (int)(host_time / 100) % 6;
 
     M_DrawTransPic(54, 32 + m_multiplayer_cursor * 20, Draw_CachePic(va("gfx/menudot%i.lmp", f + 1)));
 
@@ -862,7 +862,7 @@ void M_Menu_Net_f(void)
 
 void M_Net_Draw(void)
 {
-    int f;
+    unsigned f;
     qpic_t *p;
 
     M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
@@ -928,7 +928,7 @@ void M_Net_Draw(void)
     M_Print(f, 158, net_helpMessage[m_net_cursor * 4 + 2]);
     M_Print(f, 166, net_helpMessage[m_net_cursor * 4 + 3]);
 
-    f = (int)(host_time * 10) % 6;
+    f = (int)(host_time / 100) % 6;
     M_DrawTransPic(54, 32 + m_net_cursor * 20, Draw_CachePic(va("gfx/menudot%i.lmp", f + 1)));
 }
 
@@ -1485,7 +1485,7 @@ int m_quit_prevstate;
 qboolean wasInMenus;
 
 #ifndef _WIN32
-char *quitMessage[] = {
+static char const * const quitMessage[] = {
     /* .........1.........2.... */
     "  Are you gonna quit    ", "  this game just like   ", "   everything else?     ", "                        ",
 
@@ -2218,7 +2218,7 @@ typedef struct {
     char *description;
 } level_t;
 
-level_t levels[] = { { "start", "Entrance" }, // 0
+static level_t const levels[] = { { "start", "Entrance" }, // 0
 
                      { "e1m1", "Slipgate Complex" }, // 1
                      { "e1m2", "Castle of the Damned" },
@@ -2264,7 +2264,7 @@ level_t levels[] = { { "start", "Entrance" }, // 0
                      { "dm6", "The Dark Zone" } };
 
 //MED 01/06/97 added hipnotic levels
-level_t hipnoticlevels[] = {
+static level_t const hipnoticlevels[] = {
     { "start", "Command HQ" }, // 0
 
     { "hip1m1", "The Pumping Station" }, // 1
@@ -2292,7 +2292,7 @@ level_t hipnoticlevels[] = {
 
 //PGM 01/07/97 added rogue levels
 //PGM 03/02/97 added dmatch level
-level_t roguelevels[] = {
+static level_t const roguelevels[] = {
     { "start", "Split Decision" },  { "r1m1", "Deviant's Domain" },     { "r1m2", "Dread Portal" },
     { "r1m3", "Judgement Call" },   { "r1m4", "Cave of Death" },        { "r1m5", "Towers of Wrath" },
     { "r1m6", "Temple of Pain" },   { "r1m7", "Tomb of the Overlord" }, { "r2m1", "Tempus Fugit" },
@@ -2307,27 +2307,27 @@ typedef struct {
     int levels;
 } episode_t;
 
-episode_t episodes[] = { { "Welcome to Quake", 0, 1 }, { "Doomed Dimension", 1, 8 }, { "Realm of Black Magic", 9, 7 },
+static episode_t const episodes[] = { { "Welcome to Quake", 0, 1 }, { "Doomed Dimension", 1, 8 }, { "Realm of Black Magic", 9, 7 },
                          { "Netherworld", 16, 7 },     { "The Elder World", 23, 8 }, { "Final Level", 31, 1 },
                          { "Deathmatch Arena", 32, 6 } };
 
 //MED 01/06/97  added hipnotic episodes
-episode_t hipnoticepisodes[] = { { "Scourge of Armagon", 0, 1 },   { "Fortress of the Dead", 1, 5 },
+static episode_t const hipnoticepisodes[] = { { "Scourge of Armagon", 0, 1 },   { "Fortress of the Dead", 1, 5 },
                                  { "Dominion of Darkness", 6, 6 }, { "The Rift", 12, 4 },
                                  { "Final Level", 16, 1 },         { "Deathmatch Arena", 17, 1 } };
 
 //PGM 01/07/97 added rogue episodes
 //PGM 03/02/97 added dmatch episode
-episode_t rogueepisodes[] = { { "Introduction", 0, 1 },
+static episode_t const rogueepisodes[] = { { "Introduction", 0, 1 },
                               { "Hell's Fortress", 1, 7 },
                               { "Corridors of Time", 8, 8 },
                               { "Deathmatch Arena", 16, 1 } };
 
-int startepisode;
-int startlevel;
-int maxplayers;
-qboolean m_serverInfoMessage = false;
-double m_serverInfoMessageTime;
+static int startepisode;
+static int startlevel;
+static int maxplayers;
+static qboolean m_serverInfoMessage = false;
+static uint32_t m_serverInfoMessageTime;
 
 void M_Menu_GameOptions_f(void)
 {
@@ -2461,7 +2461,7 @@ void M_GameOptions_Draw(void)
     M_DrawCharacter(144, gameoptions_cursor_table[gameoptions_cursor], 12 + ((int)(realtime * 4) & 1));
 
     if (m_serverInfoMessage) {
-        if ((realtime - m_serverInfoMessageTime) < 5.0) {
+        if ((realtime - m_serverInfoMessageTime) < 5 * MS_PER_S) {
             x = (320 - 26 * 8) / 2;
             M_DrawTextBox(x, 138, 24, 4);
             x += 8;
@@ -2638,8 +2638,8 @@ void M_GameOptions_Key(int key)
 //=============================================================================
 /* SEARCH MENU */
 
-qboolean searchComplete = false;
-double searchCompleteTime;
+static qboolean searchComplete = false;
+static uint32_t searchCompleteTime;
 
 void M_Menu_Search_f(void)
 {
@@ -2679,7 +2679,7 @@ void M_Search_Draw(void)
     }
 
     M_PrintWhite((320 / 2) - ((22 * 8) / 2), 64, "No Quake servers found");
-    if ((realtime - searchCompleteTime) < 3.0)
+    if ((realtime - searchCompleteTime) < 3 * MS_PER_S)
         return;
 
     M_Menu_LanConfig_f();

@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // sys.h -- non-portable functions
 
+#include <stdint.h>
+
+#define MS_PER_S 1000U
+
 //
 // file IO
 //
@@ -26,34 +30,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // returns the file size
 // return -1 if file is not present
 // the file should be in BINARY mode for stupid OSs that care
-int Sys_FileOpenRead(char *path, int *hndl);
+int Sys_FileOpenRead(char const *path, int *hndl);
 
-int Sys_FileOpenWrite(char *path);
+int Sys_FileOpenWrite(char const *path);
 void Sys_FileClose(int handle);
 void Sys_FileSeek(int handle, int position);
 int Sys_FileRead(int handle, void *dest, int count);
-int Sys_FileWrite(int handle, void *data, int count);
-int Sys_FileTime(char *path);
-void Sys_mkdir(char *path);
+int Sys_FileWrite(int handle, void const *data, int count);
+int Sys_FileTime(char const *path);
+void Sys_mkdir(char const *path);
 
 //
 // system IO
 //
 __attribute__ ((format (printf, 2, 3)))
-void Sys_DebugLog(char *file, char *fmt, ...);
+void Sys_DebugLog(char const *file, char const *fmt, ...);
 
 __attribute__((noreturn))
 __attribute__ ((format (printf, 1, 2)))
-void Sys_Error(char *error, ...);
+void Sys_Error(char const *error, ...);
 // an error will cause the entire program to exit
 
 __attribute__ ((format (printf, 1, 2)))
-void Sys_Printf(char *fmt, ...);
+void Sys_Printf(char const *fmt, ...);
 // send text to the console
 
 void Sys_Quit(void);
 
-double Sys_FloatTime(void);
+uint32_t Sys_CurrentTicks(void);
 
 char *Sys_ConsoleInput(void);
 

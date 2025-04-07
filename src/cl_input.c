@@ -284,7 +284,7 @@ float CL_KeyState(kbutton_t *key)
 
     if (impulsedown && !impulseup) {
         if (down) {
-            val = 0.5; // pressed and held this frame
+            val = 0.5f; // pressed and held this frame
         } else {
             val = 0; //	I_Error ();
         }
@@ -298,16 +298,16 @@ float CL_KeyState(kbutton_t *key)
     }
     if (!impulsedown && !impulseup) {
         if (down) {
-            val = 1.0; // held the entire frame
+            val = 1.0f; // held the entire frame
         } else {
             val = 0; // up the entire frame
         }
     }
     if (impulsedown && impulseup) {
         if (down) {
-            val = 0.75; // released and re-pressed this frame
+            val = 0.75f; // released and re-pressed this frame
         } else {
-            val = 0.25; // pressed and released this frame
+            val = 0.25f; // pressed and released this frame
         }
     }
 
@@ -343,9 +343,9 @@ void CL_AdjustAngles(void)
     float up, down;
 
     if (in_speed.state & 1)
-        speed = host_frametime * cl_anglespeedkey.value;
+        speed = host_frametime_float * cl_anglespeedkey.value;
     else
-        speed = host_frametime;
+        speed = host_frametime_float;
 
     if (!(in_strafe.state & 1)) {
         cl.viewangles[YAW] -= speed * cl_yawspeed.value * CL_KeyState(&in_right);
@@ -447,7 +447,7 @@ void CL_SendMove(usercmd_t *cmd)
     //
     MSG_WriteByte(&buf, clc_move);
 
-    MSG_WriteFloat(&buf, cl.mtime[0]); // so server can get ping times
+    MSG_WriteFloat(&buf, (float) cl.mtime[0] / MS_PER_S); // so server can get ping times
 
     for (i = 0; i < 3; i++)
         MSG_WriteAngle(&buf, cl.viewangles[i]);

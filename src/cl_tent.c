@@ -84,7 +84,7 @@ void CL_ParseBeam(model_t *m)
         if (b->entity == ent) {
             b->entity = ent;
             b->model = m;
-            b->endtime = cl.time + 0.2;
+            b->endtime = cl.time + 200;
             VectorCopy(start, b->start);
             VectorCopy(end, b->end);
             return;
@@ -95,7 +95,7 @@ void CL_ParseBeam(model_t *m)
         if (!b->model || b->endtime < cl.time) {
             b->entity = ent;
             b->model = m;
-            b->endtime = cl.time + 0.2;
+            b->endtime = cl.time + 200;
             VectorCopy(start, b->start);
             VectorCopy(end, b->end);
             return;
@@ -193,7 +193,7 @@ void CL_ParseTEnt(void)
         dl = CL_AllocDlight(0);
         VectorCopy(pos, dl->origin);
         dl->radius = 350;
-        dl->die = cl.time + 0.5;
+        dl->die = cl.time + 500;
         dl->decay = 300;
         S_StartSound(-1, 0, cl_sfx_r_exp3, pos, 1, 1);
         break;
@@ -249,7 +249,7 @@ void CL_ParseTEnt(void)
         dl = CL_AllocDlight(0);
         VectorCopy(pos, dl->origin);
         dl->radius = 350;
-        dl->die = cl.time + 0.5;
+        dl->die = cl.time + 500;
         dl->decay = 300;
         S_StartSound(-1, 0, cl_sfx_r_exp3, pos, 1, 1);
         break;
@@ -276,7 +276,7 @@ void CL_ParseTEnt(void)
         dl = CL_AllocDlight(-1);
         VectorCopy(endpos, dl->origin);
         dl->radius = 350;
-        dl->die = cl.time + 0.5;
+        dl->die = cl.time + 500;
         dl->decay = 300;
         break;
 #endif

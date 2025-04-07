@@ -310,16 +310,16 @@ CL_FinishTimeDemo
 void CL_FinishTimeDemo(void)
 {
     int frames;
-    float time;
+    uint32_t time;
 
     cls.timedemo = false;
 
     // the first frame didn't count
-    frames = (host_framecount - cls.td_startframe) - 1;
+    frames = (host_framecount - cls.td_startframe) - 1 * MS_PER_S;
     time = realtime - cls.td_starttime;
     if (!time)
-        time = 1;
-    Con_Printf("%i frames %5.1f seconds %5.1f fps\n", frames, time, frames / time);
+        time = 1 * MS_PER_S;
+    Con_Printf("%i frames %6u mseconds %6u fps\n", frames, time, frames / time / MS_PER_S);
 }
 
 /*

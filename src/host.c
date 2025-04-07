@@ -37,10 +37,11 @@ quakeparms_t host_parms;
 
 qboolean host_initialized; // true if into command execution
 
-double host_frametime;
-double host_time;
-double realtime; // without any filtering or bounding
-double oldrealtime; // last frame run
+uint32_t host_frametime; // frametime in millis
+float host_frametime_float; // host_frametime, but as a float in seconds
+uint32_t host_time;
+uint32_t realtime; // without any filtering or bounding
+static uint32_t oldrealtime; // last frame run
 int host_framecount;
 
 int host_hunklevel;
@@ -213,7 +214,7 @@ void Host_InitLocal(void)
 
     Host_FindMaxClients();
 
-    host_time = 1.0; // so a think at time 0 won't get called
+    host_time = 1 * MS_PER_S; // so a think at time 0 won't get called
 }
 
 /*
@@ -380,7 +381,7 @@ void Host_ShutdownServer(qboolean crash)
     int count;
     sizebuf_t buf;
     char message[4];
-    double start;
+    uint32_t start;
 
     if (!sv.active)
         return;
@@ -392,7 +393,7 @@ void Host_ShutdownServer(qboolean crash)
         CL_Disconnect();
 
     // flush any pending messages - like the score!!!
-    start = Sys_FloatTime();
+    start = Sys_CurrentTicks();
     do {
         count = 0;
         for (i = 0, host_client = svs.clients; i < svs.maxclients; i++, host_client++) {
@@ -406,7 +407,7 @@ void Host_ShutdownServer(qboolean crash)
                 }
             }
         }
-        if ((Sys_FloatTime() - start) > 3.0)
+        if (Sys_CurrentTicks() - start > 3 * MS_PER_S)
             break;
     } while (count);
 
@@ -415,7 +416,7 @@ void Host_ShutdownServer(qboolean crash)
     buf.maxsize = 4;
     buf.cursize = 0;
     MSG_WriteByte(&buf, svc_disconnect);
-    count = NET_SendToAll(&buf, 5);
+    count = NET_SendToAll(&buf, 5 * MS_PER_S);
     if (count)
         Con_Printf("Host_ShutdownServer: NET_SendToAll failed for %u clients\n", count);
 
@@ -460,25 +461,28 @@ Host_FilterTime
 Returns false if the time is too short to run a frame
 ===================
 */
-qboolean Host_FilterTime(float time)
+static qboolean Host_FilterTime(uint32_t time)
 {
     realtime += time;
 
-    if (!cls.timedemo && realtime - oldrealtime < 1.0 / 72.0)
+    if (!cls.timedemo && realtime - oldrealtime < 1000 / 72)
         return false; // framerate is too high
 
     host_frametime = realtime - oldrealtime;
     oldrealtime = realtime;
 
     if (host_framerate.value > 0)
-        host_frametime = host_framerate.value;
+        host_frametime = (uint32_t) (host_framerate.value * MS_PER_S);
     else {
         // don't allow really long or short frames
-        if (host_frametime > 0.1)
-            host_frametime = 0.1;
-        if (host_frametime < 0.001)
-            host_frametime = 0.001;
+        if (host_frametime > 100)
+            host_frametime = 100;
+        if (host_frametime < 1)
+            host_frametime = 1;
     }
+
+    // TODO: remove this. It's here just to simplify the float to fixed transition
+    host_frametime_float = (float) host_frametime / MS_PER_S;
 
     return true;
 }
@@ -502,63 +506,10 @@ void Host_GetConsoleCommands(void)
     }
 }
 
-/*
-==================
-Host_ServerFrame
-
-==================
-*/
-#ifdef FPS_20
-
-void _Host_ServerFrame(void)
-{
-    // run the world state
-    pr_global_struct->frametime = host_frametime;
-
-    // read client messages
-    SV_RunClients();
-
-    // move things around and think
-    // always pause in single player if in console or menus
-    if (!sv.paused && (svs.maxclients > 1 || key_dest == key_game))
-        SV_Physics();
-}
-
-void Host_ServerFrame(void)
-{
-    float save_host_frametime;
-    float temp_host_frametime;
-
-    // run the world state
-    pr_global_struct->frametime = host_frametime;
-
-    // set the time and clear the general datagram
-    SV_ClearDatagram();
-
-    // check for new clients
-    SV_CheckForNewClients();
-
-    temp_host_frametime = save_host_frametime = host_frametime;
-    while (temp_host_frametime > (1.0 / 72.0)) {
-        if (temp_host_frametime > 0.05)
-            host_frametime = 0.05;
-        else
-            host_frametime = temp_host_frametime;
-        temp_host_frametime -= host_frametime;
-        _Host_ServerFrame();
-    }
-    host_frametime = save_host_frametime;
-
-    // send all messages to the clients
-    SV_SendClientMessages();
-}
-
-#else
-
 void Host_ServerFrame(void)
 {
     // run the world state
-    pr_global_struct->frametime = host_frametime;
+    pr_global_struct->frametime = host_frametime_float;
 
     // set the time and clear the general datagram
     SV_ClearDatagram();
@@ -577,8 +528,6 @@ void Host_ServerFrame(void)
     // send all messages to the clients
     SV_SendClientMessages();
 }
-
-#endif
 
 /*
 ==================
@@ -587,7 +536,7 @@ Host_Frame
 Runs all active servers
 ==================
 */
-void Host_Frame(float time)
+void Host_Frame(uint32_t time)
 {
     if (setjmp(host_abortserver))
         return; // something bad happened, or the server disconnected

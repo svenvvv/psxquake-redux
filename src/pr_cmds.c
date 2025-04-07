@@ -726,7 +726,7 @@ void PF_checkclient(void)
     vec3_t view;
 
     // find a new check if on a new frame
-    if (sv.time - sv.lastchecktime >= 0.1) {
+    if (sv.time - sv.lastchecktime >= 100) {
         sv.lastcheck = PF_newcheckclient(sv.lastcheck);
         sv.lastchecktime = sv.time;
     }
@@ -1311,7 +1311,7 @@ void PF_aim(void)
         if (teamplay.value && ent->v.team > 0 && ent->v.team == check->v.team)
             continue; // don't aim at teammate
         for (j = 0; j < 3; j++)
-            end[j] = check->v.origin[j] + 0.5 * (check->v.mins[j] + check->v.maxs[j]);
+            end[j] = check->v.origin[j] + 0.5f * (check->v.mins[j] + check->v.maxs[j]);
         VectorSubtract(end, start, dir);
         VectorNormalize(dir);
         dist = DotProduct(dir, pr_global_struct->v_forward);
@@ -1727,7 +1727,7 @@ void PF_Fixme(void)
     PR_RunError("unimplemented bulitin");
 }
 
-builtin_t pr_builtin[] = { PF_Fixme,
+static builtin_t const pr_builtin[] = { PF_Fixme,
                            PF_makevectors, // void(entity e)	makevectors 		= #1;
                            PF_setorigin, // void(entity e, vector o) setorigin	= #2;
                            PF_setmodel, // void(entity e, string m) setmodel	= #3;
@@ -1820,5 +1820,5 @@ builtin_t pr_builtin[] = { PF_Fixme,
 
                            PF_setspawnparms };
 
-builtin_t *pr_builtins = pr_builtin;
-int pr_numbuiltins = sizeof(pr_builtin) / sizeof(pr_builtin[0]);
+builtin_t const *pr_builtins = pr_builtin;
+int const pr_numbuiltins = sizeof(pr_builtin) / sizeof(pr_builtin[0]);

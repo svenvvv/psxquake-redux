@@ -40,7 +40,7 @@ typedef struct edict_s {
 
     entity_state_t baseline;
 
-    float freetime; // sv.time when the object was freed
+    uint32_t freetime; // sv.time when the object was freed
     entvars_t v; // C exported fields from progs
     // other fields from progs come immediately after
 } edict_t;
@@ -112,8 +112,8 @@ int NUM_FOR_EDICT(edict_t *e);
 extern int type_size[8];
 
 typedef void (*builtin_t)(void);
-extern builtin_t *pr_builtins;
-extern int pr_numbuiltins;
+extern builtin_t const *pr_builtins;
+extern int const pr_numbuiltins;
 
 extern int pr_argc;
 

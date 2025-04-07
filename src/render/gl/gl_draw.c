@@ -170,7 +170,7 @@ byte menuplyr_pixels[4096];
 int pic_texels;
 int pic_count;
 
-qpic_t *Draw_PicFromWad(char *name)
+qpic_t *Draw_PicFromWad(char const *name)
 {
     qpic_t *p;
     glpic_t *gl;
@@ -214,7 +214,7 @@ qpic_t *Draw_PicFromWad(char *name)
 Draw_CachePic
 ================
 */
-qpic_t *Draw_CachePic(char *path)
+qpic_t *Draw_CachePic(char const *path)
 {
     cachepic_t *pic;
     int i;
@@ -375,11 +375,7 @@ void Draw_Init(void)
     SwapPic(cb);
 
     // hack the version number directly into the pic
-#if defined(__linux__)
-    sprintf(ver, "(Linux %2.2f, gl %4.2f) %4.2f", (float)LINUX_VERSION, (float)GLQUAKE_VERSION, (float)VERSION);
-#else
-    sprintf(ver, "(gl %4.2f) %4.2f", (float)GLQUAKE_VERSION, (float)VERSION);
-#endif
+    sprintf(ver, "(PSXQuake-next) %4u.%02u", VERSION_MAJOR, VERSION_MINOR);
     dest = cb->data + 320 * 186 + 320 - 11 - 8 * strlen(ver);
     y = strlen(ver);
     for (x = 0; x < y; x++)
@@ -558,7 +554,7 @@ void Draw_AlphaPic(int x, int y, qpic_t *pic, float alpha)
 Draw_Pic
 =============
 */
-void Draw_Pic(int x, int y, qpic_t *pic)
+void Draw_Pic(int x, int y, qpic_t const *pic)
 {
     glpic_t *gl;
 
@@ -584,7 +580,7 @@ void Draw_Pic(int x, int y, qpic_t *pic)
 Draw_TransPic
 =============
 */
-void Draw_TransPic(int x, int y, qpic_t *pic)
+void Draw_TransPic(int x, int y, qpic_t const *pic)
 {
     if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 || (unsigned)(y + pic->height) > vid.height) {
         Sys_Error("Draw_TransPic: bad coordinates");
@@ -600,7 +596,7 @@ Draw_TransPicTranslate
 Only used for the player color selection menu
 =============
 */
-void Draw_TransPicTranslate(int x, int y, qpic_t *pic, byte *translation)
+void Draw_TransPicTranslate(int x, int y, qpic_t const *pic, byte const *translation)
 {
     int v, u;
     unsigned trans[64 * 64], *dest;

@@ -27,7 +27,7 @@ extern int skytexturenum;
 
 int solidskytexture;
 int alphaskytexture;
-float speedscale; // for top sky and bottom sky
+uint32_t speedscale; // for top sky and bottom sky
 
 msurface_t *warpface;
 
@@ -227,14 +227,14 @@ void EmitSkyPolys(msurface_t *fa)
             dir[2] *= 3; // flatten the sphere
 
             length = dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
-            length = sqrt(length);
+            length = sqrtf(length);
             length = 6 * 63 / length;
 
             dir[0] *= length;
             dir[1] *= length;
 
-            s = (speedscale + dir[0]) * (1.0 / 128);
-            t = (speedscale + dir[1]) * (1.0 / 128);
+            s = ((float) speedscale / MS_PER_S + dir[0]) * (1.0f / 128);
+            t = ((float) speedscale / MS_PER_S + dir[1]) * (1.0f / 128);
 
             glTexCoord2f(s, t);
             glVertex3fv(v);
@@ -257,15 +257,15 @@ void EmitBothSkyLayers(msurface_t *fa)
     GL_DisableMultitexture();
 
     GL_Bind(solidskytexture);
-    speedscale = realtime * 8;
-    speedscale -= (int)speedscale & ~127;
+    speedscale = realtime;
+    // speedscale -= (int)speedscale & ~127;
 
     EmitSkyPolys(fa);
 
     glEnable(GL_BLEND);
     GL_Bind(alphaskytexture);
-    speedscale = realtime * 16;
-    speedscale -= (int)speedscale & ~127;
+    speedscale = realtime * 2;
+    // speedscale -= (int)speedscale & ~127;
 
     EmitSkyPolys(fa);
 
@@ -286,16 +286,16 @@ void R_DrawSkyChain(msurface_t *s)
 
     // used when gl_texsort is on
     GL_Bind(solidskytexture);
-    speedscale = realtime * 8;
-    speedscale -= (int)speedscale & ~127;
+    speedscale = realtime * 2;
+    // speedscale -= (int)speedscale & ~127;
 
     for (fa = s; fa; fa = fa->texturechain)
         EmitSkyPolys(fa);
 
     glEnable(GL_BLEND);
     GL_Bind(alphaskytexture);
-    speedscale = realtime * 16;
-    speedscale -= (int)speedscale & ~127;
+    speedscale = realtime * 2;
+    // speedscale -= (int)speedscale & ~127;
 
     for (fa = s; fa; fa = fa->texturechain)
         EmitSkyPolys(fa);

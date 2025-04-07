@@ -108,7 +108,7 @@ vrect_t scr_vrect;
 
 qboolean scr_disabled_for_loading;
 qboolean scr_drawloading;
-float scr_disabled_time;
+uint32_t scr_disabled_time;
 
 qboolean block_drawing;
 
@@ -121,8 +121,8 @@ CENTER PRINTING
 */
 
 char scr_centerstring[1024];
-float scr_centertime_start; // for slow victory printing
-float scr_centertime_off;
+uint32_t scr_centertime_start; // for slow victory printing
+uint32_t scr_centertime_off;
 int scr_center_lines;
 int scr_erase_lines;
 int scr_erase_center;
@@ -138,7 +138,7 @@ for a few moments
 void SCR_CenterPrint(char *str)
 {
     strncpy(scr_centerstring, str, sizeof(scr_centerstring) - 1);
-    scr_centertime_off = scr_centertime.value;
+    scr_centertime_off = (unsigned) (scr_centertime.value * MS_PER_S);
     scr_centertime_start = cl.time;
 
     // count the number of lines for centering
@@ -160,7 +160,7 @@ void SCR_DrawCenterString(void)
 
     // the finale prints the characters one at a time
     if (cl.intermission)
-        remaining = scr_printspeed.value * (cl.time - scr_centertime_start);
+        remaining = (int) ((scr_printspeed.value * MS_PER_S) * (float) (cl.time - scr_centertime_start));
     else
         remaining = 9999;
 
@@ -168,7 +168,7 @@ void SCR_DrawCenterString(void)
     start = scr_centerstring;
 
     if (scr_center_lines <= 4)
-        y = vid.height * 0.35;
+        y = vid.height * 0.35f;
     else
         y = 48;
 
@@ -226,9 +226,9 @@ float CalcFov(float fov_x, float width, float height)
     if (fov_x < 1 || fov_x > 179)
         Sys_Error("Bad fov: %f", fov_x);
 
-    x = width / tan(fov_x / 360 * M_PI);
+    x = width / tanf(fov_x / 360 * M_PI);
 
-    a = atan(height / x);
+    a = atanf(height / x);
 
     a = a * 360 / M_PI;
 
@@ -284,7 +284,7 @@ static void SCR_CalcRefdef(void)
 
     if (scr_viewsize.value >= 100.0) {
         full = true;
-        size = 100.0;
+        size = 100.0f;
     } else
         size = scr_viewsize.value;
     if (cl.intermission) {
@@ -292,13 +292,13 @@ static void SCR_CalcRefdef(void)
         size = 100;
         sb_lines = 0;
     }
-    size /= 100.0;
+    size /= 100.0f;
 
     h = vid.height - sb_lines;
 
     r_refdef.vrect.width = vid.width * size;
     if (r_refdef.vrect.width < 96) {
-        size = 96.0 / r_refdef.vrect.width;
+        size = 96.0f / r_refdef.vrect.width;
         r_refdef.vrect.width = 96; // min for icons
     }
 
@@ -405,7 +405,7 @@ void SCR_DrawTurtle(void)
     if (!scr_showturtle.value)
         return;
 
-    if (host_frametime < 0.1) {
+    if (host_frametime < 100) {
         count = 0;
         return;
     }
@@ -424,7 +424,7 @@ SCR_DrawNet
 */
 void SCR_DrawNet(void)
 {
-    if (realtime - cl.last_received_message < 0.3)
+    if (realtime - cl.last_received_message < 300)
         return;
     if (cls.demoplayback)
         return;
@@ -493,12 +493,12 @@ void SCR_SetUpToDrawConsole(void)
         scr_conlines = 0; // none visible
 
     if (scr_conlines < scr_con_current) {
-        scr_con_current -= scr_conspeed.value * host_frametime;
+        scr_con_current -= scr_conspeed.value * host_frametime_float;
         if (scr_conlines > scr_con_current)
             scr_con_current = scr_conlines;
 
     } else if (scr_conlines > scr_con_current) {
-        scr_con_current += scr_conspeed.value * host_frametime;
+        scr_con_current += scr_conspeed.value * host_frametime_float;
         if (scr_conlines < scr_con_current)
             scr_con_current = scr_conlines;
     }
@@ -703,7 +703,7 @@ void SCR_UpdateScreen(void)
     scr_copyeverything = 0;
 
     if (scr_disabled_for_loading) {
-        if (realtime - scr_disabled_time > 60) {
+        if (realtime - scr_disabled_time > 60 * MS_PER_S) {
             scr_disabled_for_loading = false;
             Con_Printf("load failed.\n");
         } else
