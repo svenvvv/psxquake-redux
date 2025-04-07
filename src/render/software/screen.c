@@ -70,12 +70,12 @@ CENTER PRINTING
 ===============================================================================
 */
 
-char scr_centerstring[1024];
-uint32_t scr_centertime_start; // for slow victory printing
+static char scr_centerstring[1024];
+static uint32_t scr_centertime_start; // for slow victory printing
 uint32_t scr_centertime_off;
-int scr_center_lines;
-int scr_erase_lines;
-int scr_erase_center;
+static int scr_center_lines;
+static int scr_erase_lines;
+static int scr_erase_center;
 
 /*
 ==============

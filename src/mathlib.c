@@ -62,7 +62,7 @@ void PerpendicularVector(vec3_t dst, const vec3_t src)
 	** find the smallest magnitude axially aligned vector
 	*/
     for (pos = 0, i = 0; i < 3; i++) {
-        if (fabs(src[i]) < minelem) {
+        if (fabsf(src[i]) < minelem) {
             pos = i;
             minelem = fabs(src[i]);
         }
@@ -153,7 +153,7 @@ float anglemod(float a)
 	else
 		a += 360*( 1 + (int)(-a/360) );
 #endif
-    a = (360.0 / 65536) * ((int)(a * (65536 / 360.0)) & 65535);
+    a = (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
     return a;
 }
 

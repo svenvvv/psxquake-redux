@@ -265,7 +265,7 @@ int SV_FlyMove(edict_t *ent, uint32_t time, trace_t *steptrace)
         if (!trace.ent)
             Sys_Error("SV_FlyMove: !trace.ent");
 
-        if (trace.plane.normal[2] > 0.7) {
+        if (trace.plane.normal[2] > 0.7f) {
             blocked |= 1; // floor
             if (trace.ent->v.solid == SOLID_BSP) {
                 ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
@@ -749,7 +749,7 @@ qboolean SV_CheckWater(edict_t *ent)
 #endif
         ent->v.watertype = cont;
         ent->v.waterlevel = 1;
-        point[2] = ent->v.origin[2] + (ent->v.mins[2] + ent->v.maxs[2]) * 0.5;
+        point[2] = ent->v.origin[2] + (ent->v.mins[2] + ent->v.maxs[2]) * 0.5f;
         cont = SV_PointContents(point);
         if (cont <= CONTENTS_WATER) {
             ent->v.waterlevel = 2;
@@ -787,7 +787,7 @@ void SV_WallFriction(edict_t *ent, trace_t *trace)
     AngleVectors(ent->v.v_angle, forward, right, up);
     d = DotProduct(trace->plane.normal, forward);
 
-    d += 0.5;
+    d += 0.5f;
     if (d >= 0)
         return;
 
@@ -949,7 +949,7 @@ void SV_WalkMove(edict_t *ent)
     // check for stuckness, possibly due to the limited precision of floats
     // in the clipping hulls
     if (clip) {
-        if (fabs(oldorg[1] - ent->v.origin[1]) < 0.03125f && fabs(oldorg[0] - ent->v.origin[0]) < 0.03125f) { // stepping up didn't make any progress
+        if (fabsf(oldorg[1] - ent->v.origin[1]) < 0.03125f && fabsf(oldorg[0] - ent->v.origin[0]) < 0.03125f) { // stepping up didn't make any progress
             clip = SV_TryUnstick(ent, oldvel);
         }
     }
@@ -1237,7 +1237,7 @@ void SV_Physics_Toss(edict_t *ent)
     ClipVelocity(ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
 
     // stop if on ground
-    if (trace.plane.normal[2] > 0.7) {
+    if (trace.plane.normal[2] > 0.7f) {
 #ifdef QUAKE2
         if (ent->v.velocity[2] < 60 ||
             (ent->v.movetype != MOVETYPE_BOUNCE && ent->v.movetype != MOVETYPE_BOUNCEMISSILE))
@@ -1380,7 +1380,7 @@ void SV_Physics_Step(edict_t *ent)
 
     // freefall if not onground
     if (!((int)ent->v.flags & (FL_ONGROUND | FL_FLY | FL_SWIM))) {
-        if (ent->v.velocity[2] < sv_gravity.value * -0.1)
+        if (ent->v.velocity[2] < sv_gravity.value * -0.1f)
             hitsound = true;
         else
             hitsound = false;

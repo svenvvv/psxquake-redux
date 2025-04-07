@@ -73,7 +73,7 @@ extern PROC glVertexPointerEXT;
 
 // r_local.h -- private refresh defs
 
-#define ALIAS_BASE_SIZE_RATIO (1.0 / 11.0)
+#define ALIAS_BASE_SIZE_RATIO (1.0f / 11.0f)
 // normalizing factor so player model works out to about
 //  1 pixel per triangle
 #define MAX_LBM_HEIGHT 480
@@ -84,7 +84,7 @@ extern PROC glVertexPointerEXT;
 #define SKYSIZE (1 << SKYSHIFT)
 #define SKYMASK (SKYSIZE - 1)
 
-#define BACKFACE_EPSILON 0.01
+#define BACKFACE_EPSILON 0.01f
 
 void R_TimeRefresh_f(void);
 void R_ReadPointFile_f(void);

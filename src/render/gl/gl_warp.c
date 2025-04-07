@@ -69,8 +69,8 @@ void SubdividePolygon(int numverts, float *verts)
     BoundPoly(numverts, verts, mins, maxs);
 
     for (i = 0; i < 3; i++) {
-        m = (mins[i] + maxs[i]) * 0.5;
-        m = gl_subdivide_size.value * floor(m / gl_subdivide_size.value + 0.5);
+        m = (mins[i] + maxs[i]) * 0.5f;
+        m = gl_subdivide_size.value * floorf(m / gl_subdivide_size.value + 0.5f);
         if (maxs[i] - m < 8)
             continue;
         if (m - mins[i] < 8)
@@ -171,7 +171,7 @@ float turbsin[] = {
 #include "gl_warp_sin.h"
 
 };
-#define TURBSCALE (256.0 / (2 * M_PI))
+#define TURBSCALE (256.0f / (2 * M_PI))
 
 /*
 =============
@@ -186,6 +186,7 @@ void EmitWaterPolys(msurface_t *fa)
     float *v;
     int i;
     float s, t, os, ot;
+    float realtime_f = (float) realtime / MS_PER_S;
 
     for (p = fa->polys; p; p = p->next) {
         glBegin(GL_POLYGON);
@@ -193,11 +194,11 @@ void EmitWaterPolys(msurface_t *fa)
             os = v[3];
             ot = v[4];
 
-            s = os + turbsin[(int)((ot * 0.125 + realtime) * TURBSCALE) & 255];
-            s *= (1.0 / 64);
+            s = os + turbsin[(int)((ot * 0.125f + realtime_f) * TURBSCALE) & 255];
+            s *= (1.0f / 64);
 
-            t = ot + turbsin[(int)((os * 0.125 + realtime) * TURBSCALE) & 255];
-            t *= (1.0 / 64);
+            t = ot + turbsin[(int)((os * 0.125f + realtime_f) * TURBSCALE) & 255];
+            t *= (1.0f / 64);
 
             glTexCoord2f(s, t);
             glVertex3fv(v);

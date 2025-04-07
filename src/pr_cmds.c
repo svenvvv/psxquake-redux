@@ -387,7 +387,7 @@ void PF_vectoyaw(void)
     if (value1[1] == 0 && value1[0] == 0)
         yaw = 0;
     else {
-        yaw = (int)(atan2(value1[1], value1[0]) * 180 / M_PI);
+        yaw = (int)(atan2f(value1[1], value1[0]) * 180 / M_PI);
         if (yaw < 0)
             yaw += 360;
     }
@@ -417,12 +417,12 @@ void PF_vectoangles(void)
         else
             pitch = 270;
     } else {
-        yaw = (int)(atan2(value1[1], value1[0]) * 180 / M_PI);
+        yaw = (int)(atan2f(value1[1], value1[0]) * 180 / M_PI);
         if (yaw < 0)
             yaw += 360;
 
-        forward = sqrt(value1[0] * value1[0] + value1[1] * value1[1]);
-        pitch = (int)(atan2(value1[2], forward) * 180 / M_PI);
+        forward = sqrtf(value1[0] * value1[0] + value1[1] * value1[1]);
+        pitch = (int)(atan2f(value1[2], forward) * 180 / M_PI);
         if (pitch < 0)
             pitch += 360;
     }
@@ -861,7 +861,7 @@ void PF_findradius(void)
         if (ent->v.solid == SOLID_NOT)
             continue;
         for (j = 0; j < 3; j++)
-            eorg[j] = org[j] - (ent->v.origin[j] + (ent->v.mins[j] + ent->v.maxs[j]) * 0.5);
+            eorg[j] = org[j] - (ent->v.origin[j] + (ent->v.mins[j] + ent->v.maxs[j]) * 0.5f);
         if (Length(eorg) > rad)
             continue;
 
@@ -1114,8 +1114,8 @@ void PF_walkmove(void)
 
     yaw = yaw * M_PI * 2 / 360;
 
-    move[0] = cos(yaw) * dist;
-    move[1] = sin(yaw) * dist;
+    move[0] = cosf(yaw) * dist;
+    move[1] = sinf(yaw) * dist;
     move[2] = 0;
 
     // save program state, because SV_movestep may call other progs
@@ -1197,17 +1197,17 @@ void PF_rint(void)
     float f;
     f = G_FLOAT(OFS_PARM0);
     if (f > 0)
-        G_FLOAT(OFS_RETURN) = (int)(f + 0.5);
+        G_FLOAT(OFS_RETURN) = (int)(f + 0.5f);
     else
-        G_FLOAT(OFS_RETURN) = (int)(f - 0.5);
+        G_FLOAT(OFS_RETURN) = (int)(f - 0.5f);
 }
 void PF_floor(void)
 {
-    G_FLOAT(OFS_RETURN) = floor(G_FLOAT(OFS_PARM0));
+    G_FLOAT(OFS_RETURN) = floorf(G_FLOAT(OFS_PARM0));
 }
 void PF_ceil(void)
 {
-    G_FLOAT(OFS_RETURN) = ceil(G_FLOAT(OFS_PARM0));
+    G_FLOAT(OFS_RETURN) = ceilf(G_FLOAT(OFS_PARM0));
 }
 
 /*

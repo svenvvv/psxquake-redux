@@ -339,7 +339,7 @@ void GL_DrawAliasShadow(aliashdr_t *paliashdr, int posenum)
     verts += posenum * paliashdr->poseverts;
     order = (int *)((byte *)paliashdr + paliashdr->commands);
 
-    height = -lheight + 1.0;
+    height = -lheight + 1.0f;
 
     while (1) {
         // get the vertex count and primitive type
@@ -470,12 +470,12 @@ void R_DrawAliasModel(entity_t *e)
     if (!strcmp(clmodel->name, "progs/flame2.mdl") || !strcmp(clmodel->name, "progs/flame.mdl"))
         ambientlight = shadelight = 256;
 
-    shadedots = r_avertexnormal_dots[((int)(e->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
-    shadelight = shadelight / 200.0;
+    shadedots = r_avertexnormal_dots[((int)(e->angles[1] * (SHADEDOT_QUANT / 360.0f))) & (SHADEDOT_QUANT - 1)];
+    shadelight = shadelight / 200.0f;
 
     an = e->angles[1] / 180 * M_PI;
-    shadevector[0] = cos(-an);
-    shadevector[1] = sin(-an);
+    shadevector[0] = cosf(-an);
+    shadevector[1] = sinf(-an);
     shadevector[2] = 1;
     VectorNormalize(shadevector);
 
@@ -652,7 +652,7 @@ void R_DrawViewModel(void)
     diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] = (float)shadelight / 128;
 
     // hack the depth range to prevent view model from poking into walls
-    glDepthRange(gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
+    glDepthRange(gldepthmin, gldepthmin + 0.3f * (gldepthmax - gldepthmin));
     R_DrawAliasModel(currententity);
     glDepthRange(gldepthmin, gldepthmax);
 }
@@ -905,7 +905,7 @@ R_Clear
 */
 void R_Clear(void)
 {
-    if (r_mirroralpha.value != 1.0) {
+    if (r_mirroralpha.value != 1.0f) {
         if (gl_clear.value)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         else
@@ -964,8 +964,8 @@ void R_Mirror(void)
     d = DotProduct(vpn, mirror_plane->normal);
     VectorMA(vpn, -2 * d, mirror_plane->normal, vpn);
 
-    r_refdef.viewangles[0] = -asin(vpn[2]) / M_PI * 180;
-    r_refdef.viewangles[1] = atan2(vpn[1], vpn[0]) / M_PI * 180;
+    r_refdef.viewangles[0] = -asinf(vpn[2]) / M_PI * 180;
+    r_refdef.viewangles[1] = atan2f(vpn[1], vpn[0]) / M_PI * 180;
     r_refdef.viewangles[2] = -r_refdef.viewangles[2];
 
     ent = &cl_entities[cl.viewentity];

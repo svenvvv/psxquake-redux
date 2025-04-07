@@ -120,12 +120,12 @@ CENTER PRINTING
 ===============================================================================
 */
 
-char scr_centerstring[1024];
-uint32_t scr_centertime_start; // for slow victory printing
-uint32_t scr_centertime_off;
-int scr_center_lines;
-int scr_erase_lines;
-int scr_erase_center;
+static char scr_centerstring[1024];
+static uint32_t scr_centertime_start; // for slow victory printing
+int32_t scr_centertime_off;
+static int scr_center_lines;
+static int scr_erase_lines;
+static int scr_erase_center;
 
 /*
 ==============
@@ -160,7 +160,7 @@ void SCR_DrawCenterString(void)
 
     // the finale prints the characters one at a time
     if (cl.intermission)
-        remaining = (int) ((scr_printspeed.value * MS_PER_S) * (float) (cl.time - scr_centertime_start));
+        remaining = (int)(scr_printspeed.value * MS_PER_S) * (cl.time - scr_centertime_start);
     else
         remaining = 9999;
 
@@ -282,7 +282,7 @@ static void SCR_CalcRefdef(void)
     else
         sb_lines = 24 + 16 + 8;
 
-    if (scr_viewsize.value >= 100.0) {
+    if (scr_viewsize.value >= 100.0f) {
         full = true;
         size = 100.0f;
     } else

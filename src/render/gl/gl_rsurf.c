@@ -85,7 +85,7 @@ void R_AddDynamicLights(msurface_t *surf)
 
         rad = cl_dlights[lnum].radius;
         dist = DotProduct(cl_dlights[lnum].origin, surf->plane->normal) - surf->plane->dist;
-        rad -= fabs(dist);
+        rad -= fabsf(dist);
         minlight = cl_dlights[lnum].minlight;
         if (rad < minlight)
             continue;
@@ -904,7 +904,7 @@ void R_DrawWaterSurfaces(void)
     msurface_t *s;
     texture_t *t;
 
-    if (r_wateralpha.value == 1.0 && gl_texsort.value)
+    if (r_wateralpha.value == 1.0f && gl_texsort.value)
         return;
 
     //
@@ -913,7 +913,7 @@ void R_DrawWaterSurfaces(void)
 
     glLoadMatrixf(r_world_matrix);
 
-    if (r_wateralpha.value < 1.0) {
+    if (r_wateralpha.value < 1.0f) {
         glEnable(GL_BLEND);
         glColor4f(1, 1, 1, r_wateralpha.value);
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -951,7 +951,7 @@ void R_DrawWaterSurfaces(void)
         }
     }
 
-    if (r_wateralpha.value < 1.0) {
+    if (r_wateralpha.value < 1.0f) {
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
         glColor4f(1, 1, 1, 1);
@@ -992,11 +992,11 @@ void DrawTextureChains(void)
             continue;
         if (i == skytexturenum)
             R_DrawSkyChain(s);
-        else if (i == mirrortexturenum && r_mirroralpha.value != 1.0) {
+        else if (i == mirrortexturenum && r_mirroralpha.value != 1.0f) {
             R_MirrorChain(s);
             continue;
         } else {
-            if ((s->flags & SURF_DRAWTURB) && r_wateralpha.value != 1.0)
+            if ((s->flags & SURF_DRAWTURB) && r_wateralpha.value != 1.0f)
                 continue; // draw translucent water later
             for (; s; s = s->texturechain)
                 R_RenderBrushPoly(s);
@@ -1118,7 +1118,7 @@ void R_RecursiveWorldNode(mnode_t *node)
     mplane_t *plane;
     msurface_t *surf, **mark;
     mleaf_t *pleaf;
-    double dot;
+    float dot;
 
     if (node->contents == CONTENTS_SOLID)
         return; // solid

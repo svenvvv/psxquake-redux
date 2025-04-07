@@ -192,10 +192,10 @@ qpic_t *Draw_PicFromWad(char const *name)
                 scrap_texels[texnum][(y + i) * BLOCK_WIDTH + x + j] = p->data[k];
         texnum += scrap_texnum;
         gl->texnum = texnum;
-        gl->sl = (x + 0.01) / (float)BLOCK_WIDTH;
-        gl->sh = (x + p->width - 0.01) / (float)BLOCK_WIDTH;
-        gl->tl = (y + 0.01) / (float)BLOCK_WIDTH;
-        gl->th = (y + p->height - 0.01) / (float)BLOCK_WIDTH;
+        gl->sl = (x + 0.01f) / (float)BLOCK_WIDTH;
+        gl->sh = (x + p->width - 0.01f) / (float)BLOCK_WIDTH;
+        gl->tl = (y + 0.01f) / (float)BLOCK_WIDTH;
+        gl->th = (y + p->height - 0.01f) / (float)BLOCK_WIDTH;
 
         pic_count++;
         pic_texels += p->width * p->height;

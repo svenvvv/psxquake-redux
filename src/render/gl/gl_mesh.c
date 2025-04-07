@@ -249,8 +249,8 @@ void BuildTris(void)
             t = stverts[k].t;
             if (!triangles[besttris[0]].facesfront && stverts[k].onseam)
                 s += pheader->skinwidth / 2; // on back side
-            s = (s + 0.5) / pheader->skinwidth;
-            t = (t + 0.5) / pheader->skinheight;
+            s = (s + 0.5f) / pheader->skinwidth;
+            t = (t + 0.5f) / pheader->skinheight;
 
             *(float *)&commands[numcommands++] = s;
             *(float *)&commands[numcommands++] = t;

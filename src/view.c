@@ -115,7 +115,7 @@ float V_CalcBob(void)
     if (cycle < cl_bobup.value)
         cycle = M_PI * cycle / cl_bobup.value;
     else
-        cycle = M_PI + M_PI * (cycle - cl_bobup.value) / (1.0 - cl_bobup.value);
+        cycle = M_PI + M_PI * (cycle - cl_bobup.value) / (1.0f - cl_bobup.value);
 
     // bob is proportional to velocity in the xy plane
     // (don't count Z, or jumping messes it up)

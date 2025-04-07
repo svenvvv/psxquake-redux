@@ -748,7 +748,7 @@ void NET_Poll(void)
 
     if (!configRestored) {
         if (serialAvailable) {
-            if (config_com_modem.value == 1.0)
+            if (config_com_modem.value == 1.0f)
                 useModem = true;
             else
                 useModem = false;
