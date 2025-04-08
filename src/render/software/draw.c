@@ -49,7 +49,7 @@ typedef struct cachepic_s {
 cachepic_t menu_cachepics[MAX_CACHED_PICS];
 int menu_numcachepics;
 
-qpic_t *Draw_PicFromWad(char *name)
+qpic_t *Draw_PicFromWad(char const *name)
 {
     return W_GetLumpName(name);
 }
@@ -59,7 +59,7 @@ qpic_t *Draw_PicFromWad(char *name)
 Draw_CachePic
 ================
 */
-qpic_t *Draw_CachePic(char *path)
+qpic_t *Draw_CachePic(char const *path)
 {
     cachepic_t *pic;
     int i;
@@ -265,9 +265,10 @@ void Draw_DebugChar(char num)
 Draw_Pic
 =============
 */
-void Draw_Pic(int x, int y, qpic_t *pic)
+void Draw_Pic(int x, int y, qpic_t const *pic)
 {
-    byte *dest, *source;
+    byte *dest;
+    byte const *source;
     unsigned short *pusdest;
     int v, u;
 
@@ -305,9 +306,10 @@ void Draw_Pic(int x, int y, qpic_t *pic)
 Draw_TransPic
 =============
 */
-void Draw_TransPic(int x, int y, qpic_t *pic)
+void Draw_TransPic(int x, int y, qpic_t const *pic)
 {
-    byte *dest, *source, tbyte;
+    byte *dest, tbyte;
+    byte const *source;
     unsigned short *pusdest;
     int v, u;
 
@@ -377,9 +379,10 @@ void Draw_TransPic(int x, int y, qpic_t *pic)
 Draw_TransPicTranslate
 =============
 */
-void Draw_TransPicTranslate(int x, int y, qpic_t *pic, byte *translation)
+void Draw_TransPicTranslate(int x, int y, qpic_t const *pic, byte const *translation)
 {
-    byte *dest, *source, tbyte;
+    byte *dest, tbyte;
+    byte const *source;
     unsigned short *pusdest;
     int v, u;
 
@@ -483,20 +486,9 @@ void Draw_ConsoleBackground(int lines)
 
     conback = Draw_CachePic("gfx/conback.lmp");
 
-// hack the version number directly into the pic
-#ifdef _WIN32
-    sprintf(ver, "(WinQuake) %4.2f", (float)VERSION);
+    // hack the version number directly into the pic
+    sprintf(ver, "(PSXQuake-next sw) %u.%02u", VERSION_MAJOR, VERSION_MINOR);
     dest = conback->data + 320 * 186 + 320 - 11 - 8 * strlen(ver);
-#elif defined(X11)
-    sprintf(ver, "(X11 Quake %2.2f) %4.2f", (float)X11_VERSION, (float)VERSION);
-    dest = conback->data + 320 * 186 + 320 - 11 - 8 * strlen(ver);
-#elif defined(__linux__)
-    sprintf(ver, "(Linux Quake %2.2f) %4.2f", (float)LINUX_VERSION, (float)VERSION);
-    dest = conback->data + 320 * 186 + 320 - 11 - 8 * strlen(ver);
-#else
-    dest = conback->data + 320 - 43 + 320 * 186;
-    sprintf(ver, "%4.2f", VERSION);
-#endif
 
     for (x = 0; x < strlen(ver); x++)
         Draw_CharToConback(ver[x], dest + (x << 3));

@@ -25,9 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 int iskyspeed = 8;
 int iskyspeed2 = 2;
-float skyspeed, skyspeed2;
+int32_t skyspeed, skyspeed2;
 
-float skytime;
+int32_t skytime;
 
 byte *r_skysource;
 
@@ -36,9 +36,9 @@ int r_skydirect; // not used?
 
 // TODO: clean up these routines
 
-byte bottomsky[128 * 131];
-byte bottommask[128 * 131];
-byte newsky[128 * 256]; // newsky and topsky both pack in here, 128 bytes
+static byte bottomsky[128 * 131];
+static byte bottommask[128 * 131];
+static byte newsky[128 * 256]; // newsky and topsky both pack in here, 128 bytes
     //  of newsky on the left of each scan, 128 bytes
     //  of topsky on the right, because the low-level
     //  drawers need 256-byte scan widths
@@ -100,6 +100,9 @@ void R_MakeSky(void)
     xlast = xshift;
     ylast = yshift;
 
+    xshift /= MS_PER_S;
+    yshift /= MS_PER_S;
+
     pnewsky = (unsigned *)&newsky[0];
 
     for (y = 0; y < SKYSIZE; y++) {
@@ -150,6 +153,9 @@ void R_GenSkyTile(void *pdest)
 
     xshift = skytime * skyspeed;
     yshift = skytime * skyspeed;
+
+    xshift /= MS_PER_S;
+    yshift /= MS_PER_S;
 
     pnewsky = (unsigned *)&newsky[0];
     pd = (unsigned *)pdest;
@@ -203,6 +209,9 @@ void R_GenSkyTile16(void *pdest)
     xshift = skytime * skyspeed;
     yshift = skytime * skyspeed;
 
+    xshift /= MS_PER_S;
+    yshift /= MS_PER_S;
+
     pnewsky = (byte *)&newsky[0];
     pd = (unsigned short *)pdest;
 
@@ -231,7 +240,7 @@ R_SetSkyFrame
 void R_SetSkyFrame(void)
 {
     int g, s1, s2;
-    float temp;
+    int temp;
 
     skyspeed = iskyspeed;
     skyspeed2 = iskyspeed2;
@@ -241,7 +250,7 @@ void R_SetSkyFrame(void)
     s2 = iskyspeed2 / g;
     temp = SKYSIZE * s1 * s2;
 
-    skytime = cl.time - ((int)(cl.time / temp) * temp);
+    skytime = (int)cl.time - ((int)cl.time / temp) * temp;
 
     r_skymade = 0;
 }

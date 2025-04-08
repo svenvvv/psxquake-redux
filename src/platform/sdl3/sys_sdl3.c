@@ -220,13 +220,12 @@ int main(int argc, char **argv)
     while (1) {
         uint32_t newtime = Sys_CurrentTicks();
         uint32_t time = Sys_CurrentTicks() - oldtime;
-        uint32_t tickrate_ms = (unsigned) sys_ticrate.value * MS_PER_S;
 
         if (cls.state == ca_dedicated) {
-            time = tickrate_ms;
+            time = sys_ticrate_ms.value;
         }
 
-        if (time > tickrate_ms * 2) {
+        if (time > (unsigned) sys_ticrate_ms.value * 2) {
             oldtime = newtime;
         } else {
             oldtime += time;

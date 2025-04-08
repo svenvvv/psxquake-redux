@@ -72,7 +72,7 @@ CENTER PRINTING
 
 static char scr_centerstring[1024];
 static uint32_t scr_centertime_start; // for slow victory printing
-uint32_t scr_centertime_off;
+int32_t scr_centertime_off;
 static int scr_center_lines;
 static int scr_erase_lines;
 static int scr_erase_center;
@@ -88,7 +88,7 @@ for a few moments
 void SCR_CenterPrint(char *str)
 {
     strncpy(scr_centerstring, str, sizeof(scr_centerstring) - 1);
-    scr_centertime_off = (uint32_t) (scr_centertime.value * MS_PER_S);
+    scr_centertime_off = (scr_centertime.value * MS_PER_S);
     scr_centertime_start = cl.time;
 
     // count the number of lines for centering

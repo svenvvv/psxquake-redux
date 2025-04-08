@@ -19,10 +19,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // console.c
 
+#ifndef PSXQUAKE
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
 #include <fcntl.h>
+#endif
+
 #include "quakedef.h"
 
 static int con_linewidth;
@@ -315,18 +318,16 @@ void Con_Print(char *txt)
 Con_DebugLog
 ================
 */
-void Con_DebugLog(char *file, char *fmt, ...)
+void Con_DebugLog(char const *file, char const *fmt, ...)
 {
     va_list argptr;
-    static char data[1024];
-    int fd;
+    char data[1024];
 
     va_start(argptr, fmt);
     vsprintf(data, fmt, argptr);
     va_end(argptr);
-    fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-    write(fd, data, strlen(data));
-    close(fd);
+
+    Con_Printf("Con_DebugLog: %s\n", data);
 }
 
 /*

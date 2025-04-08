@@ -62,8 +62,8 @@ void SV_SetIdealPitch(void)
         return;
 
     angleval = sv_player->v.angles[YAW] * M_PI * 2 / 360;
-    sinval = sin(angleval);
-    cosval = cos(angleval);
+    sinval = sinf(angleval);
+    cosval = cosf(angleval);
 
     for (i = 0; i < MAX_FORWARD; i++) {
         top[0] = sv_player->v.origin[0] + cosval * (i + 3) * 12;

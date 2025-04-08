@@ -35,9 +35,8 @@ model_t *Mod_LoadModel(model_t *mod, qboolean crash);
 
 byte mod_novis[MAX_MAP_LEAFS / 8];
 
-#define MAX_MOD_KNOWN 256
-model_t mod_known[MAX_MOD_KNOWN];
-int mod_numknown;
+static model_t mod_known[MAX_MOD_KNOWN];
+static int mod_numknown;
 
 // values for model_t's needload
 #define NL_PRESENT 0
@@ -615,8 +614,12 @@ void Mod_LoadTexinfo(lump_t *l)
     loadmodel->numtexinfo = count;
 
     for (i = 0; i < count; i++, in++, out++) {
-        for (j = 0; j < 8; j++)
-            out->vecs[0][j] = LittleFloat(in->vecs[0][j]);
+        for (j = 0; j < 2; j++) {
+            out->vecs[j][0] = LittleFloat(in->vecs[j][0]);
+            out->vecs[j][1] = LittleFloat(in->vecs[j][1]);
+            out->vecs[j][2] = LittleFloat(in->vecs[j][2]);
+            out->vecs[j][3] = LittleFloat(in->vecs[j][3]);
+        }
         len1 = Length(out->vecs[0]);
         len2 = Length(out->vecs[1]);
         len1 = (len1 + len2) / 2;

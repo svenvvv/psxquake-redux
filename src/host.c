@@ -55,7 +55,7 @@ byte *host_colormap;
 
 cvar_t host_framerate = { "host_framerate", "0" }; // set for slow motion
 
-cvar_t sys_ticrate = { "sys_ticrate", "0.05" };
+cvar_t sys_ticrate_ms = { "sys_ticrate_ms", "50" };
 
 cvar_t fraglimit = { "fraglimit", "0", false, true };
 cvar_t timelimit = { "timelimit", "0", false, true };
@@ -197,7 +197,7 @@ void Host_InitLocal(void)
 
     Cvar_RegisterVariable(&host_framerate);
 
-    Cvar_RegisterVariable(&sys_ticrate);
+    Cvar_RegisterVariable(&sys_ticrate_ms);
 
     Cvar_RegisterVariable(&fraglimit);
     Cvar_RegisterVariable(&timelimit);

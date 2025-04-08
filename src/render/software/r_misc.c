@@ -90,7 +90,7 @@ void R_TimeRefresh_f(void)
     }
     stop = Sys_CurrentTicks();
     time = stop - start;
-    Con_Printf("%f seconds (%f fps)\n", time / MS_PER_S, (128 * MS_PER_S) / time);
+    Con_Printf("%u seconds (%u fps)\n", time / MS_PER_S, (128 * MS_PER_S) / time);
 
     r_refdef.viewangles[1] = startangle;
 }

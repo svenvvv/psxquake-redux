@@ -283,7 +283,6 @@ extern uint32_t se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 extern int r_frustum_indexes[4 * 6];
 extern int r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
 extern qboolean r_surfsonstack;
-extern cshift_t cshift_water;
 extern qboolean r_dowarpold, r_viewchanged;
 
 extern mleaf_t *r_viewleaf, *r_oldviewleaf;
