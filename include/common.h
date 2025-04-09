@@ -27,6 +27,11 @@ typedef unsigned char byte;
 #include <stdbool.h>
 #define qboolean bool
 
+#ifdef PSXQUAKE
+int strcasecmp (const char *, const char *);
+int strncasecmp (const char *, const char *, size_t);
+#endif
+
 //============================================================================
 
 typedef struct sizebuf_s {

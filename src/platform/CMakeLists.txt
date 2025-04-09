@@ -1,5 +1,7 @@
 if (PLATFORM_SDL3)
     add_subdirectory(sdl3)
+elseif (PLATFORM_PSX)
+    add_subdirectory(psx)
 else ()
     message(FATAL_ERROR "Invalid platform ${PLATFORM}")
 endif ()
