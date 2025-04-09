@@ -329,7 +329,7 @@ qboolean SV_RecursiveHullCheck(hull_t *hull, int num, float p1f, float p2f, vec3
 void R_DrawWaterSurfaces(void);
 void R_RenderBrushPoly(msurface_t *fa);
 void GL_Set2D(void);
-int GL_LoadPicTexture(qpic_t *pic);
+int GL_LoadPicTexture(char const * name, qpic_t *pic);
 void GL_SubdivideSurface(msurface_t *fa);
 void GL_MakeAliasModelDisplayLists(model_t *m, aliashdr_t *hdr);
 void R_InitParticles(void);

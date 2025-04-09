@@ -8,6 +8,7 @@ target_sources(quake PRIVATE
 if (GLQUAKE)
     target_sources(quake PRIVATE
             gl_vidpsx.c
+            gl_vidpsx_vram.c
             stub_gl.c
     )
 else ()

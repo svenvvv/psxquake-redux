@@ -33,8 +33,6 @@ unsigned d_8to24table[256]; //TODO this can be removed for PSX GL
 
 /*-----------------------------------------------------------------------*/
 
-int texture_mode = GL_LINEAR;
-
 int texture_extension_number = 1;
 
 float gldepthmin, gldepthmax;
@@ -174,21 +172,7 @@ void VID_Init(unsigned char *palette)
 
     vid.recalc_refdef = 1; // force a surface cache flush
 
-    // psx_vram_init();
-
-    // Clear VRAM for debugging
-    // for (int y = 0; y < VRAM_HEIGHT; y += 256) {
-    // 	for (int x = 0; x < VRAM_WIDTH; x += 256) {
-    // 		FILL * fill = (FILL*)rb_nextpri;
-    // 		setFill(fill);
-    // 		setXY0(fill, x, y);
-    // 		setWH(fill, 256, 256);
-    // 		setRGB0(fill, 0, 0xFF, 0);
-    // 		psx_add_prim(fill, 0);
-    // 		rb_nextpri = (void*)++fill;
-    // 	}
-    // }
-    // psx_rb_present();
+    psx_vram_init();
 }
 
 void Sys_SendKeyEvents(void)

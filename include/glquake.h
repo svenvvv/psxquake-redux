@@ -25,6 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#ifdef PSXQUAKE
+#include "psx/gl.h"
+#endif
 
 void GL_BeginRendering(int *x, int *y, int *width, int *height);
 void GL_EndRendering(void);
@@ -49,10 +52,31 @@ extern int texture_mode;
 
 extern float gldepthmin, gldepthmax;
 
+#ifdef PSXQUAKE
+psx_vram_texture *psx_LoadTexture(char const *identifier, int width, int height, byte *data, qboolean mipmap,
+                                  qboolean alpha, qboolean shouldCache);
+
+__attribute__((always_inline))
+static inline int GL_LoadTexture(char const *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
+{
+    psx_vram_texture *tex = psx_LoadTexture(identifier, width, height, data, mipmap, alpha, false);
+    if (tex == NULL) {
+        return 0;
+    }
+    return tex->index;
+}
+
+__attribute__((always_inline))
+static inline int GL_LoadPicTexture(char const *name, qpic_t *pic)
+{
+    return GL_LoadTexture(name, pic->width, pic->height, pic->data, false, true);
+}
+#else
 void GL_Upload32(unsigned *data, int width, int height, qboolean mipmap, qboolean alpha);
 void GL_Upload8(byte *data, int width, int height, qboolean mipmap, qboolean alpha);
-int GL_LoadTexture(char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
-int GL_FindTexture(char *identifier);
+int GL_LoadTexture(char const *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
+int GL_FindTexture(char const *identifier);
+#endif
 
 typedef struct {
     float x, y, z;

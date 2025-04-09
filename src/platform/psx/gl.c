@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "psx/gl.h"
 #include "psx/io.h"
 #include "sys.h"
@@ -6,7 +8,8 @@ int psx_db = 0;
 struct PQRenderBuf rb[2];
 
 uint8_t *rb_nextpri;
-uint16_t psx_zlevel = 0;
+unsigned psx_zlevel;
+unsigned psx_menu_zlevel;
 
 int pricount = 0;
 
@@ -128,7 +131,10 @@ void psx_rb_present(void)
     }
 
     if (psx_zlevel >= OT_LEN) {
-        Sys_Error("psx_zlevel out of bounds, %d\n", psx_zlevel);
+        Sys_Error("psx_zlevel out of bounds, %u\n", psx_zlevel);
+    }
+    if (psx_menu_zlevel >= MENU_OT_LEN) {
+        Sys_Error("psx_menu_zlevel out of bounds, %u\n", psx_menu_zlevel);
     }
 
     DrawSync(0);
@@ -139,16 +145,36 @@ void psx_rb_present(void)
 
     rb_nextpri = cur_rb->pribuf;
     psx_zlevel = 0;
+    psx_menu_zlevel = 0;
 
-    ClearOTagR(cur_rb->ot, OT_LEN);
-    ClearOTagR(cur_rb->menu_ot, OT_LEN);
+    ClearOTagR(cur_rb->ot, ARRAY_SIZE(rb->ot));
+    ClearOTagR(cur_rb->menu_ot, ARRAY_SIZE(rb->menu_ot));
 
-    // PutDrawEnv(&cur_rb->draw);
     DrawOTag((const uint32_t *)&cur_rb->draw.dr_env);
     PqPutDispEnv(&cur_rb->disp_cache);
 
     SetDispMask(1);
 
-    DrawOTag(rb[1 - psx_db].ot + (OT_LEN - 1));
-    DrawOTag(rb[1 - psx_db].menu_ot + (MENU_OT_LEN - 1));
+    DrawOTag(rb[1 - psx_db].ot + (ARRAY_SIZE(rb->ot) - 1));
+    DrawOTag(rb[1 - psx_db].menu_ot + (ARRAY_SIZE(rb->menu_ot) - 1));
+}
+
+void psx_add_prim_internal(uint32_t * ot, int ot_len, uint32_t * prim, int prim_len, size_t z)
+{
+    pricount += 1;
+    if (z > ot_len) {
+        z = z % ot_len;
+    }
+    addPrim(ot + (ot_len - z - 1), prim);
+    rb_nextpri = (uint8_t *)prim + prim_len;
+}
+
+void psx_add_prim_internal_r(uint32_t * ot, int ot_len, uint32_t * prim, int prim_len, size_t z)
+{
+    pricount += 1;
+    if (z > ot_len) {
+        z = z % ot_len;
+    }
+    addPrim(ot + (ot_len + z), prim);
+    rb_nextpri = (uint8_t *)prim + prim_len;
 }

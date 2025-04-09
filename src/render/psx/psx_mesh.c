@@ -275,53 +275,18 @@ void GL_MakeAliasModelDisplayLists(model_t *m, aliashdr_t *hdr)
     int i, j;
     int *cmds;
     trivertx_t *verts;
-    char cache[MAX_QPATH], fullpath[MAX_OSPATH];
-    FILE *f;
 
     aliasmodel = m;
     paliashdr = hdr; // (aliashdr_t *)Mod_Extradata (m);
 
     //
-    // look for a cached version
+    // build it from scratch
     //
-    strcpy(cache, "glquake/");
-    COM_StripExtension(m->name + strlen("progs/"), cache + strlen("glquake/"));
-    strcat(cache, ".ms2");
+    Con_Printf("meshing %s...\n", m->name);
 
-    COM_FOpenFile(cache, &f);
-    if (f) {
-        fread(&numcommands, 4, 1, f);
-        fread(&numorder, 4, 1, f);
-        fread(&commands, numcommands * sizeof(commands[0]), 1, f);
-        fread(&vertexorder, numorder * sizeof(vertexorder[0]), 1, f);
-        fclose(f);
-    } else {
-        //
-        // build it from scratch
-        //
-        Con_Printf("meshing %s...\n", m->name);
-
-        BuildTris(); // trifans or lists
-
-        //
-        // save out the cached version
-        //
-        int fmt_len = snprintf(fullpath, sizeof(fullpath), "%s/%s", com_gamedir, cache);
-        if (fmt_len < 0 || fmt_len >= sizeof(fullpath)) {
-            Sys_Error("GL_MakeAliasModelDisplayLists: could not format filename, %d\n", fmt_len);
-        }
-        f = fopen(fullpath, "wb");
-        if (f) {
-            fwrite(&numcommands, 4, 1, f);
-            fwrite(&numorder, 4, 1, f);
-            fwrite(&commands, numcommands * sizeof(commands[0]), 1, f);
-            fwrite(&vertexorder, numorder * sizeof(vertexorder[0]), 1, f);
-            fclose(f);
-        }
-    }
+    BuildTris(); // trifans or lists
 
     // save the data out
-
     paliashdr->poseverts = numorder;
 
     cmds = Hunk_Alloc(numcommands * 4);

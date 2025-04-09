@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern qpic_t *draw_disc; // also used on sbar
 
 void Draw_Init(void);
-void Draw_Character(int x, int y, int num);
+void Draw_Character(int x, int y, char num);
 void Draw_DebugChar(char num);
 void Draw_Pic(int x, int y, qpic_t const *pic);
 void Draw_TransPic(int x, int y, qpic_t const *pic);
@@ -35,6 +35,6 @@ void Draw_EndDisc(void);
 void Draw_TileClear(int x, int y, int w, int h);
 void Draw_Fill(int x, int y, int w, int h, int c);
 void Draw_FadeScreen(void);
-void Draw_String(int x, int y, char *str);
+void Draw_String(int x, int y, char const *str);
 qpic_t *Draw_PicFromWad(char const *name);
 qpic_t *Draw_CachePic(char const *path);

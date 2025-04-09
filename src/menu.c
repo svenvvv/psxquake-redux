@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
-enum {
+static enum {
     m_none,
     m_main,
     m_singleplayer,
@@ -3005,4 +3005,9 @@ void M_ConfigureNetSubsystem(void)
 
     if (IPXConfig || TCPIPConfig)
         net_hostport = lanConfig_port;
+}
+
+bool M_IsOpen(void)
+{
+    return m_state != m_none;
 }

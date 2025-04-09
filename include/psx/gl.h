@@ -18,14 +18,26 @@
 // allocate textures on them anyways
 #define VRAM_PAGES (((VRAM_WIDTH / VRAM_PAGE_WIDTH) * (VRAM_HEIGHT / VRAM_PAGE_HEIGHT)) - 4)
 
-#define OT_LEN (1 * 1024)
-#define MENU_OT_LEN (128)
-#define PRIBUF_LEN (180 * 1024)
+#define PRIBUF_LEN (10 * 1024U)
 
-struct vram_texture;
+#define PSX_MENU_ZLEVEL_END (MENU_OT_LEN - 1)
 
 #include <psxgte.h>
 #include <psxgpu.h>
+
+/**
+ * Menu ordering table layers, from back-to-front.
+ */
+enum psx_menu_zlevel_layers {
+    PSX_MENU_ZLEVEL_BACKGROUND = 0,
+    PSX_MENU_ZLEVEL_IMAGES,
+    PSX_MENU_ZLEVEL_MENU,
+    PSX_MENU_ZLEVEL_TEXT,
+    PSX_MENU_ZLEVEL_ENUM_LAST,
+};
+
+#define OT_LEN (5 * 1024U)
+#define MENU_OT_LEN (PSX_MENU_ZLEVEL_ENUM_LAST)
 
 typedef struct DISPENV_CACHE_S {
     uint32_t fb_pos;
@@ -43,22 +55,22 @@ struct PQRenderBuf {
     uint8_t pribuf[PRIBUF_LEN];
 };
 
-struct vram_texpage {
+typedef struct vram_texpage_s {
     /** Page X-coordinate */
     int16_t x;
     /** Page Y-coordinate */
     int16_t y;
     /** Textures allocated on this page */
-    struct vram_texture *textures[PSX_MAX_VRAM_RECTS / VRAM_PAGES];
+    struct psx_vram_texture_s *textures[PSX_MAX_VRAM_RECTS / VRAM_PAGES];
     /** Number of textures allocated on this page */
     size_t textures_count;
     /** Unused rectangles on this page */
     RECT available_rects[PSX_MAX_VRAM_RECTS / VRAM_PAGES];
     /** Number of unused rectangles on this page */
     size_t available_rects_count;
-};
+} psx_vram_texture_page;
 
-struct vram_texture {
+typedef struct psx_vram_texture_s {
     /** Unique identifier of the texture */
     uint32_t ident;
     /** Texture index. TODO remove? */
@@ -66,26 +78,27 @@ struct vram_texture {
     /** Texture rectangle in VRAM */
     RECT rect;
     /** Parent texture page */
-    struct vram_texpage *page;
+    struct vram_texpage_s *page;
     /** Scale of the output texture in relation to the VRAM texture (we downscale) */
     int scale;
     /** Whether the texture contains transparent pixels */
     bool is_alpha;
     /** PSX texture page value */
     uint16_t tpage;
-};
+} psx_vram_texture;
 
 extern uint8_t *rb_nextpri;
 
 extern uint16_t psx_clut;
 extern uint16_t psx_clut_transparent;
-extern uint16_t psx_zlevel;
+extern unsigned psx_zlevel;
+extern unsigned psx_menu_zlevel;
 extern int psx_db;
 
 void psx_vram_init(void);
-struct vram_texture *psx_vram_get(int index);
-struct vram_texture *psx_vram_pack(char *ident, int w, int h);
-struct vram_texture *psx_vram_find(char *ident, int w, int h);
+psx_vram_texture *psx_vram_get(int index);
+psx_vram_texture *psx_vram_pack(char const *ident, int w, int h);
+psx_vram_texture *psx_vram_find(char const *ident, int w, int h);
 void psx_vram_rect(int x, int y, int w, int h);
 
 void psx_rb_init(void);
@@ -106,31 +119,18 @@ void psx_rb_present(void);
 // 	// rb_nextpri = prim;
 // }
 
-static void psx_add_prim(void *prim, int z)
-{
-    extern int pricount;
-    extern struct PQRenderBuf rb[2];
+void psx_add_prim_internal(uint32_t * ot, int ot_len, uint32_t * prim, int prim_len, size_t z);
+void psx_add_prim_internal_r(uint32_t * ot, int ot_len, uint32_t * prim, int prim_len, size_t z);
 
-    pricount += 1;
-    if (z < 0) {
-        z += OT_LEN;
-    }
+extern struct PQRenderBuf rb[2];
 
-    addPrim(rb[psx_db].ot + (OT_LEN - z - 1), prim);
-    rb_nextpri = (uint8_t *)++prim;
-}
+#define psx_add_prim(prim, z) psx_add_prim_internal(rb[psx_db].ot, OT_LEN, (uint32_t *)prim, sizeof(*prim), z)
+#define menu_add_prim_z(prim, z) \
+    psx_add_prim_internal(rb[psx_db].menu_ot, MENU_OT_LEN, (uint32_t *)prim, sizeof(*prim), z)
+#define psx_add_prim_z(prim, z)                       \
+    psx_add_prim(prim, z)
 
-static void menu_add_prim_z(void *prim, int z)
-{
-    extern int pricount;
-    extern struct PQRenderBuf rb[2];
-
-    pricount += 1;
-
-    addPrim(rb[psx_db].menu_ot + (MENU_OT_LEN - z - 1), prim);
-    rb_nextpri = (uint8_t *)++prim;
-}
-
+#if 0
 #define psx_add_prim_z(prim, z)                       \
     do {                                              \
         extern int pricount;                          \
@@ -139,8 +139,10 @@ static void menu_add_prim_z(void *prim, int z)
         addPrim(rb[psx_db].ot + z, prim);             \
         rb_nextpri = (uint8_t *)prim + sizeof(*prim); \
     } while (0);
+#endif
 
-static uint16_t psx_rgb16(uint8_t r, uint8_t g, uint8_t b, uint8_t stp)
+__attribute__((__always_inline__))
+static inline uint16_t psx_rgb16(uint8_t r, uint8_t g, uint8_t b, uint8_t stp)
 {
     uint16_t p = (stp & 1) << 15;
 
@@ -151,7 +153,8 @@ static uint16_t psx_rgb16(uint8_t r, uint8_t g, uint8_t b, uint8_t stp)
     return p;
 }
 
-static uint32_t psx_rgb24(uint8_t r, uint8_t g, uint8_t b)
+__attribute__((__always_inline__))
+static inline uint32_t psx_rgb24(uint8_t r, uint8_t g, uint8_t b)
 {
     uint32_t ret = 0;
 
@@ -166,14 +169,14 @@ static uint32_t psx_rgb24(uint8_t r, uint8_t g, uint8_t b)
 static uint8_t *psx_scratch = (uint8_t *)0x1F800000;
 
 void draw_quad_tex_subdiv(SVECTOR const verts[4], SVECTOR const *normal, uint8_t const uv[4 * 2],
-                          struct vram_texture const *tex, int subdiv);
+                         psx_vram_texture const *tex, int subdiv);
 
 void draw_tri_tex_subdiv(SVECTOR const verts[3], SVECTOR const *normal, uint8_t const uv[3 * 2],
-                         struct vram_texture const *tex, int subdiv);
+                         psx_vram_texture const *tex, int subdiv);
 
 void draw_tri(SVECTOR const verts[3], CVECTOR const *color);
 void draw_tri_tex(SVECTOR const verts[3], SVECTOR const *normal, uint8_t const uv[3 * 2],
-                  struct vram_texture const *tex);
+                  psx_vram_texture const *tex);
 void draw_quad(SVECTOR const verts[4], CVECTOR const *color);
 int draw_quad_tex(SVECTOR const verts[4], SVECTOR const *normal, uint8_t const uv[4 * 2],
-                  struct vram_texture const *tex);
+                  psx_vram_texture const *tex);

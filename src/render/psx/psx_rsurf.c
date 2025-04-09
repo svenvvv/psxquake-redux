@@ -100,91 +100,6 @@ void R_AddDynamicLights(msurface_t *surf)
 
 /*
 ===============
-R_BuildLightMap
-
-Combine and scale multiple lightmaps into the 8.8 format in blocklights
-===============
-*/
-void R_BuildLightMap(msurface_t *surf, byte *dest, int stride)
-{
-    int smax, tmax;
-    int t;
-    int i, j, size;
-    byte *lightmap;
-    unsigned scale;
-    int maps;
-    unsigned *bl;
-
-    surf->cached_dlight = (surf->dlightframe == r_framecount);
-
-    smax = (surf->extents[0] >> 4) + 1;
-    tmax = (surf->extents[1] >> 4) + 1;
-    size = smax * tmax;
-    lightmap = surf->samples;
-
-    // set to full bright if no light data
-    if (r_fullbright.value || !cl.worldmodel->lightdata) {
-        for (i = 0; i < size; i++)
-            blocklights[i] = 255 * 256;
-        goto store;
-    }
-
-    // clear to no light
-    for (i = 0; i < size; i++)
-        blocklights[i] = 0;
-
-    // add all the lightmaps
-    if (lightmap)
-        for (maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++) {
-            scale = d_lightstylevalue[surf->styles[maps]];
-            surf->cached_light[maps] = scale; // 8.8 fraction
-            for (i = 0; i < size; i++)
-                blocklights[i] += lightmap[i] * scale;
-            lightmap += size; // skip to next lightmap
-        }
-
-    // add all the dynamic lights
-    if (surf->dlightframe == r_framecount)
-        R_AddDynamicLights(surf);
-
-// bound, invert, and shift
-store:
-    switch (gl_lightmap_format) {
-    case GL_RGBA:
-        stride -= (smax << 2);
-        bl = blocklights;
-        for (i = 0; i < tmax; i++, dest += stride) {
-            for (j = 0; j < smax; j++) {
-                t = *bl++;
-                t >>= 7;
-                if (t > 255)
-                    t = 255;
-                dest[3] = 255 - t;
-                dest += 4;
-            }
-        }
-        break;
-    case GL_ALPHA:
-    case GL_LUMINANCE:
-    case GL_INTENSITY:
-        bl = blocklights;
-        for (i = 0; i < tmax; i++, dest += stride) {
-            for (j = 0; j < smax; j++) {
-                t = *bl++;
-                t >>= 7;
-                if (t > 255)
-                    t = 255;
-                dest[j] = 255 - t;
-            }
-        }
-        break;
-    default:
-        Sys_Error("Bad lightmap format");
-    }
-}
-
-/*
-===============
 R_TextureAnimation
 
 Returns the proper texture for a given time and base texture
@@ -236,8 +151,6 @@ lpMTexFUNC qglMTexCoord2fSGIS = NULL;
 lpSelTexFUNC qglSelectTextureSGIS = NULL;
 
 qboolean mtexenabled = false;
-
-void GL_SelectTexture(GLenum target);
 
 #if 0
 /*

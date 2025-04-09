@@ -768,7 +768,9 @@ void SCR_UpdateScreen(void)
         SCR_DrawPause();
         SCR_CheckDrawCenterString();
         Sbar_Draw();
-        SCR_DrawConsole();
+        if (!M_IsOpen()) {
+            SCR_DrawConsole();
+        }
         M_Draw();
     }
 
