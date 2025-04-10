@@ -654,6 +654,7 @@ psx_vram_texture *psx_LoadTexture(char const *identifier, int width, int height,
     //     return NULL;
     // }
 
+
     tex = psx_vram_pack(identifier, width, height);
     if (tex == NULL) {
         printf("Failed to pack image %ix%i, ident %s\n", width, height, identifier);
@@ -671,18 +672,22 @@ psx_vram_texture *psx_LoadTexture(char const *identifier, int width, int height,
     tex->scale = div;
     tex->is_alpha = alpha;
 
-    printf("GL_LoadTexture \"%s\" (%04x) %ix%i\n", identifier, tex->ident, width, height);
+    if (height_dma_hack != 0) {
+        tex->rect.h -= height_dma_hack;
+    }
 
-    if (tex->rect.x + tex->rect.w >= UINT8_MAX) {
-        printf("XXX %d %d = %d\n", tex->rect.x, tex->rect.w, tex->rect.x + tex->rect.w);
-        // tex->rect.w = UINT8_MAX - tex->rect.x;
-        tex->rect.w += UINT8_MAX - (tex->rect.x + tex->rect.w);
-    }
-    if (tex->rect.y + tex->rect.h >= UINT8_MAX) {
-        printf("YYY %d %d = %d\n", tex->rect.y, tex->rect.h, tex->rect.y + tex->rect.h);
-        // tex->rect.h = UINT8_MAX - tex->rect.y;
-        tex->rect.h += UINT8_MAX - (tex->rect.y + tex->rect.h);
-    }
+    // printf("GL_LoadTexture \"%s\" (%04x) %ix%i\n", identifier, tex->ident, width, height);
+
+    // if (tex->rect.x + tex->rect.w >= UINT8_MAX) {
+    //     printf("XXX %d %d = %d\n", tex->rect.x, tex->rect.w, tex->rect.x + tex->rect.w);
+    //     // tex->rect.w = UINT8_MAX - tex->rect.x;
+    //     tex->rect.w += UINT8_MAX - (tex->rect.x + tex->rect.w);
+    // }
+    // if (tex->rect.y + tex->rect.h >= UINT8_MAX) {
+    //     printf("YYY %d %d = %d\n", tex->rect.y, tex->rect.h, tex->rect.y + tex->rect.h);
+    //     // tex->rect.h = UINT8_MAX - tex->rect.y;
+    //     tex->rect.h += UINT8_MAX - (tex->rect.y + tex->rect.h);
+    // }
     printf("GL_LoadTexture \"%s\" load rect %ix%i\n", identifier, tex->rect.w, tex->rect.h);
 
     return tex;

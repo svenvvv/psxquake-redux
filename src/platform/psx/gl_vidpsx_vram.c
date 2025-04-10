@@ -50,10 +50,13 @@ psx_vram_texture *psx_vram_find(char const *ident, int w, int h)
     for (int i = 0; i < vram_textures_count; ++i) {
         psx_vram_texture *tex = &vram_textures[i];
         if (tex->ident == ident_hash) {
-            if (w > 0 && w != tex->rect.w || h > 0 && h != tex->rect.h) {
-                // TODO PSX tex->rect.h is sometimes one less than h ???
-                printf("psx_vram_find: cache mismatch 0x%X: %ix%i != %ix%i\n", tex->ident, w, h, tex->rect.w,
-                       tex->rect.h);
+            int tex_w = tex->rect.w * tex->scale;
+            int tex_h = tex->rect.h * tex->scale;
+            // Since our scaling operates on an integer scale then we might have rounding errors
+            // If the dimensional difference is close enough then don't error out
+            if (w > 0 && (w - tex_w) > 1 || h > 0 && (h - tex_h) > 1) {
+                Sys_Error("psx_vram_find: cache mismatch 0x%X: %ix%i != %ix%i\n",
+                    tex->ident, w, h, tex_w, tex_h);
             }
             return tex;
         }
