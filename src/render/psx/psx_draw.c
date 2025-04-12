@@ -24,13 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "psx/gl.h"
 
-#define GL_COLOR_INDEX8_EXT 0x80E5
-
 cvar_t gl_max_size = { "gl_max_size", "1024" };
 
 static byte *draw_chars; // 8*8 graphic characters
+static qpic_t *draw_backtile;
 qpic_t *draw_disc;
-qpic_t *draw_backtile;
 
 typedef struct {
     int texnum;
@@ -48,18 +46,6 @@ int gl_alpha_format = 4;
 
 void GL_Bind(int texnum)
 {
-#if 0
-    if (gl_nobind.value)
-        texnum = char_texture;
-    if (currenttexture == texnum)
-        return;
-    currenttexture = texnum;
-#ifdef _WIN32
-    bindTexFunc(GL_TEXTURE_2D, texnum);
-#else
-    glBindTexture(GL_TEXTURE_2D, texnum);
-#endif
-#endif
 }
 
 //=============================================================================
@@ -161,12 +147,9 @@ Draw_Init
 */
 void Draw_Init(void)
 {
-    int i;
-    qpic_t *cb;
     byte *dest;
     int x, y;
     char ver[40];
-    glpic_t *gl;
     int start;
     byte *ncdata;
 
@@ -175,18 +158,21 @@ void Draw_Init(void)
     // string into the background before turning
     // it into a texture
     draw_chars = W_GetLumpName("conchars");
-    for (i = 0; i < 256 * 64; i++)
-        if (draw_chars[i] == 0)
+    for (int i = 0; i < 256 * 64; i++) {
+        if (draw_chars[i] == 0) {
             draw_chars[i] = 255; // proper transparent color
+        }
+    }
 
     // now turn them into textures
     char_texture = psx_LoadTexture("charset", 128, 128, draw_chars, false, true, true);
 
     start = Hunk_LowMark();
 
-    cb = (qpic_t *)COM_LoadTempFile("gfx/conback.lmp");
-    if (!cb)
+    qpic_t * cb = (qpic_t *)COM_LoadTempFile("gfx/conback.lmp");
+    if (!cb) {
         Sys_Error("Couldn't load gfx/conback.lmp");
+    }
     SwapPic(cb);
 
     // hack the version number directly into the pic
@@ -195,42 +181,11 @@ void Draw_Init(void)
     for (x = 0; x < y; x++)
         Draw_CharToConback(ver[x], dest + (x << 3));
 
-#if 0
-	conback->width = vid.conwidth;
-	conback->height = vid.conheight;
-
- 	// scale console to vid size
- 	dest = ncdata = Hunk_AllocName(vid.conwidth * vid.conheight, "conback");
-
- 	for (y=0 ; y<vid.conheight ; y++, dest += vid.conwidth)
- 	{
- 		src = cb->data + cb->width * (y*cb->height/vid.conheight);
- 		if (vid.conwidth == cb->width)
- 			memcpy (dest, src, vid.conwidth);
- 		else
- 		{
- 			f = 0;
- 			fstep = cb->width*0x10000/vid.conwidth;
- 			for (x=0 ; x<vid.conwidth ; x+=4)
- 			{
- 				dest[x] = src[f>>16];
- 				f += fstep;
- 				dest[x+1] = src[f>>16];
- 				f += fstep;
- 				dest[x+2] = src[f>>16];
- 				f += fstep;
- 				dest[x+3] = src[f>>16];
- 				f += fstep;
- 			}
- 		}
- 	}
-#else
     conback->width = cb->width;
     conback->height = cb->height;
     ncdata = cb->data;
-#endif
 
-    gl = (glpic_t *)conback->data;
+    glpic_t * gl = (glpic_t *)conback->data;
     gl->texnum = GL_LoadTexture("conback", conback->width, conback->height, ncdata, false, false);
     conback->width = vid.width;
     conback->height = vid.height;
@@ -249,7 +204,7 @@ void Draw_Init(void)
  * Actual internal Draw_Character implementation.
  * This does not set the zlevel, you must set it before calling this function.
  */
-static void psx_Draw_Character(int x, int y, char num)
+static void psx_Draw_Character(int x, int y, int num)
 {
     int row, col;
 
@@ -275,11 +230,11 @@ static void psx_Draw_Character(int x, int y, char num)
 
     menu_add_prim_z(sprt, psx_menu_zlevel);
 
-    // DR_TPAGE *tp = (DR_TPAGE *)rb_nextpri;
+    DR_TPAGE *tp = (DR_TPAGE *)rb_nextpri;
 
-    // setDrawTPage(tp, 0, 1, char_texture->tpage);
+    setDrawTPage(tp, 0, 1, char_texture->tpage);
 
-    // menu_add_prim_z(tp, psx_menu_zlevel);
+    menu_add_prim_z(tp, psx_menu_zlevel);
 }
 
 /*
@@ -291,7 +246,7 @@ It can be clipped to the top of the screen to allow the console to be
 smoothly scrolled off.
 ================
 */
-void Draw_Character(int x, int y, char num)
+void Draw_Character(int x, int y, int num)
 {
     psx_menu_zlevel = PSX_MENU_ZLEVEL_TEXT;
     psx_Draw_Character(x, y, num);
@@ -310,38 +265,6 @@ void Draw_String(int x, int y, char const *str)
         str++;
         x += 8;
     }
-}
-
-/*
-=============
-Draw_AlphaPic
-=============
-*/
-void Draw_AlphaPic(int x, int y, qpic_t *pic, float alpha)
-{
-    glpic_t *gl = (glpic_t *)pic->data;
-
-#if 0
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
-    //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //	glCullFace(GL_FRONT);
-    glColor4f(1, 1, 1, alpha);
-    GL_Bind(gl->texnum);
-    glBegin(GL_QUADS);
-    glTexCoord2f(gl->sl, gl->tl);
-    glVertex2f(x, y);
-    glTexCoord2f(gl->sh, gl->tl);
-    glVertex2f(x + pic->width, y);
-    glTexCoord2f(gl->sh, gl->th);
-    glVertex2f(x + pic->width, y + pic->height);
-    glTexCoord2f(gl->sl, gl->th);
-    glVertex2f(x, y + pic->height);
-    glEnd();
-    glColor4f(1, 1, 1, 1);
-    glEnable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-#endif
 }
 
 void psx_Draw_Pic(int x, int y, qpic_t const *pic)
@@ -417,6 +340,8 @@ void Draw_TransPicTranslate(int x, int y, qpic_t const *pic, byte const *transla
         }
     }
 
+    psx_Draw_Pic(x, y, pic);
+
 #if 0
     glTexImage2D(GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, trans);
 
@@ -445,15 +370,8 @@ Draw_ConsoleBackground
 */
 void Draw_ConsoleBackground(int lines)
 {
-    unsigned y = (vid.height * 3) >> 2;
-
     psx_menu_zlevel = PSX_MENU_ZLEVEL_BACKGROUND;
-    if (lines > y) {
-        psx_Draw_Pic(0, lines - vid.height, conback);
-    } else {
-        psx_Draw_Pic(0, lines - vid.height, conback);
-        // Draw_AlphaPic(0, lines - vid.height, conback, (float)(1.2f * lines) / y);
-    }
+    psx_Draw_Pic(0, lines - vid.height, conback);
 }
 
 /*
@@ -605,24 +523,6 @@ Setup as if the screen was 320*200
 */
 void GL_Set2D(void)
 {
-#if 0
-    glViewport(glx, gly, glwidth, glheight);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, vid.width, vid.height, 0, -99999, 99999);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    //	glDisable (GL_ALPHA_TEST);
-
-    glColor4f(1, 1, 1, 1);
-#endif
 }
 
 //====================================================================
