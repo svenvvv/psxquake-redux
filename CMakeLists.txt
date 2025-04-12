@@ -49,6 +49,7 @@ set(COMMON_SRC
 option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
 option(CONSOLE_COMPLETION "Enable console line completion" 0)
 option(USE_MATHLIB "Use in-tree math library" 0)
+option(PARANOID "Enable additional run-time validation" 0)
 
 set(PLATFORM_VALUES "SDL3" "PSX")
 set(PLATFORM "SDL3" CACHE STRING "Minimum number of particles")
@@ -95,6 +96,8 @@ else ()
 	target_compile_options(quake PRIVATE -Os)
 	# target_compile_options(quake PRIVATE -fno-stack-protector)
 endif ()
+
+target_compile_options(quake PRIVATE -ffast-math)
 
 if (CONSOLE_COMPLETION)
 	target_compile_definitions(quake PRIVATE CONSOLE_COMPLETION=${CONSOLE_COMPLETION})
@@ -144,6 +147,10 @@ target_compile_definitions(quake PRIVATE MAX_TEMP_ENTITIES=${MAX_TEMP_ENTITIES})
 target_compile_definitions(quake PRIVATE MAX_STATIC_ENTITIES=${MAX_STATIC_ENTITIES})
 target_compile_definitions(quake PRIVATE MAX_MODELS=${MAX_MODELS})
 target_compile_definitions(quake PRIVATE MAX_SOUNDS=${MAX_SOUNDS})
+if (PARANOID)
+	message("Compiling with additional run-time checks")
+	target_compile_definitions(quake PRIVATE PSXQUAKE_PARANOID=1)
+endif ()
 
 add_subdirectory(src/platform)
 add_subdirectory(src/render)

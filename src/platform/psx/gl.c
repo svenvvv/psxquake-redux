@@ -11,8 +11,6 @@ uint8_t *rb_nextpri;
 unsigned psx_zlevel;
 unsigned psx_menu_zlevel;
 
-int pricount = 0;
-
 // Ripped out from PSn00bSDK, lets save some easy cycles.
 // We never change the dispenv during runtime.
 static void PsxQuakeCalcDispEnv(DISPENV const *env, DISPENV_CACHE *cache)
@@ -119,16 +117,13 @@ void psx_rb_present(void)
 {
     struct PQRenderBuf *cur_rb;
 
-    // printf("Frame pricount %d %d\n", pricount, (rb[psx_db].pribuf + sizeof(rb->pribuf)) - rb_nextpri);
-    pricount = 0;
-
-    // if (pricount > 400) {
-    //     return;
-    // }
-
+#ifdef PSXQUAKE_PARANOID
     if (rb_nextpri >= rb[psx_db].pribuf + sizeof(rb->pribuf)) {
         Sys_Error("Prim buf overflow, %d\n", rb_nextpri - (rb[psx_db].pribuf + sizeof(rb->pribuf)));
     }
+
+    // ptrdiff_t pri_diff = rb_nextpri - rb[psx_db].pribuf + sizeof(rb->pribuf);
+    // printf("pribuf len %i\n", pri_diff);
 
     if (psx_zlevel >= OT_LEN) {
         Sys_Error("psx_zlevel out of bounds, %u\n", psx_zlevel);
@@ -136,8 +131,21 @@ void psx_rb_present(void)
     if (psx_menu_zlevel >= MENU_OT_LEN) {
         Sys_Error("psx_menu_zlevel out of bounds, %u\n", psx_menu_zlevel);
     }
+#endif
+
+#ifdef PSXQUAKE_PARANOID
+    uint32_t pre_sync = Sys_CurrentTicks();
+#endif
 
     DrawSync(0);
+
+#ifdef PSXQUAKE_PARANOID
+    int sync_diff = Sys_CurrentTicks() - pre_sync;
+    if (sync_diff > 0) {
+        printf("GPU bottlenecking, DrawSync took %i\n", sync_diff);
+    }
+#endif
+
     VSync(0);
 
     psx_db = !psx_db;
@@ -161,7 +169,6 @@ void psx_rb_present(void)
 
 void psx_add_prim_internal(uint32_t * ot, int ot_len, uint32_t * prim, int prim_len, size_t z)
 {
-    pricount += 1;
     if (z > ot_len) {
         z = z % ot_len;
     }
@@ -171,7 +178,6 @@ void psx_add_prim_internal(uint32_t * ot, int ot_len, uint32_t * prim, int prim_
 
 void psx_add_prim_internal_r(uint32_t * ot, int ot_len, uint32_t * prim, int prim_len, size_t z)
 {
-    pricount += 1;
     if (z > ot_len) {
         z = z % ot_len;
     }

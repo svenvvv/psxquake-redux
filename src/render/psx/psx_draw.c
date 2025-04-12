@@ -66,7 +66,7 @@ void GL_Bind(int texnum)
 /* Support Routines */
 
 typedef struct cachepic_s {
-    char name[MAX_QPATH];
+    uint32_t name_hash;
     qpic_t pic;
 } cachepic_t;
 
@@ -98,15 +98,16 @@ qpic_t *Draw_CachePic(char const *path)
     int i;
     qpic_t *dat;
     glpic_t *gl;
+    uint32_t name_hash = MurmurHash2(path, strlen(path));
 
     for (pic = menu_cachepics, i = 0; i < menu_numcachepics; pic++, i++)
-        if (!strcmp(path, pic->name))
+        if (pic->name_hash == name_hash)
             return &pic->pic;
 
     if (menu_numcachepics == MAX_CACHED_PICS)
         Sys_Error("menu_numcachepics == MAX_CACHED_PICS");
     menu_numcachepics++;
-    strcpy(pic->name, path);
+    pic->name_hash = name_hash;
 
     //
     // load the pic from disk
@@ -274,11 +275,11 @@ static void psx_Draw_Character(int x, int y, char num)
 
     menu_add_prim_z(sprt, psx_menu_zlevel);
 
-    DR_TPAGE *tp = (DR_TPAGE *)rb_nextpri;
+    // DR_TPAGE *tp = (DR_TPAGE *)rb_nextpri;
 
-    setDrawTPage(tp, 0, 1, char_texture->tpage);
+    // setDrawTPage(tp, 0, 1, char_texture->tpage);
 
-    menu_add_prim_z(tp, psx_menu_zlevel);
+    // menu_add_prim_z(tp, psx_menu_zlevel);
 }
 
 /*
@@ -347,15 +348,17 @@ void psx_Draw_Pic(int x, int y, qpic_t const *pic)
 {
     glpic_t *gl = (glpic_t *)pic->data;
     psx_vram_texture const *tex = psx_vram_get(gl->texnum);
+#ifdef PSXQUAKE_PARANOID
     if (tex == NULL) {
         Sys_Error("psx_Draw_Pic: null texture\n");
     }
+#endif
 
     POLY_FT4 *poly = (POLY_FT4 *)rb_nextpri;
 
     setPolyFT4(poly);
     setXYWH(poly, x, y, pic->width, pic->height);
-    setUVWH(poly, tex->rect.x * 2, tex->rect.y, tex->rect.w, tex->rect.h);
+    setUVWH(poly, tex->rect.x * 2, tex->rect.y, tex->rect.w - 1, tex->rect.h);
     setRGB0(poly, 128, 128, 128);
     poly->clut = tex->is_alpha ? psx_clut_transparent : psx_clut;
     poly->tpage = tex->tpage;
@@ -376,7 +379,7 @@ Draw_TransPic
 */
 void Draw_TransPic(int x, int y, qpic_t const *pic)
 {
-#ifdef PARANOID
+#ifdef PSXQUAKE_PARANOID
     if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 || (unsigned)(y + pic->height) > vid.height) {
         Sys_Error("Draw_TransPic: bad coordinates");
     }
@@ -446,9 +449,9 @@ void Draw_ConsoleBackground(int lines)
 
     psx_menu_zlevel = PSX_MENU_ZLEVEL_BACKGROUND;
     if (lines > y) {
-        Draw_Pic(0, lines - vid.height, conback);
+        psx_Draw_Pic(0, lines - vid.height, conback);
     } else {
-        Draw_Pic(0, lines - vid.height, conback);
+        psx_Draw_Pic(0, lines - vid.height, conback);
         // Draw_AlphaPic(0, lines - vid.height, conback, (float)(1.2f * lines) / y);
     }
 }
@@ -463,20 +466,61 @@ refresh window.
 */
 void Draw_TileClear(int x, int y, int w, int h)
 {
-#if 0
-    glColor3f(1, 1, 1);
-    GL_Bind(*(int *)draw_backtile->data);
-    glBegin(GL_QUADS);
-    glTexCoord2f(x / 64.0, y / 64.0);
-    glVertex2f(x, y);
-    glTexCoord2f((x + w) / 64.0, y / 64.0);
-    glVertex2f(x + w, y);
-    glTexCoord2f((x + w) / 64.0, (y + h) / 64.0);
-    glVertex2f(x + w, y + h);
-    glTexCoord2f(x / 64.0, (y + h) / 64.0);
-    glVertex2f(x, y + h);
-    glEnd();
+    glpic_t *gl = (glpic_t *)draw_backtile->data;
+    psx_vram_texture const *tex = psx_vram_get(gl->texnum);
+#ifdef PSXQUAKE_PARANOID
+    if (tex == NULL) {
+        Sys_Error("Draw_TileClear: null tex");
+    }
+    if (tex->rect.x % 8 != 0 || tex->rect.y % 8 != 0) {
+        // TODO: currently it's up to chance whether the texture is correctly aligned.
+        // Should add support to VRAM packer to force alignment.
+        Sys_Error("Draw_TileClear: texture not aligned on grid");
+    }
 #endif
+    psx_menu_zlevel = PSX_MENU_ZLEVEL_IMAGES;
+
+    RECT twin = { 0 };
+
+    // Clear texture window
+    DR_TWIN * ptwin = (DR_TWIN*) rb_nextpri;
+    setTexWindow(ptwin, &twin);
+    menu_add_prim_z(ptwin, psx_menu_zlevel);
+
+    // Polygon
+    POLY_FT4 *poly = (POLY_FT4 *) rb_nextpri;
+
+    setPolyFT4(poly);
+    setXYWH(poly, x, y, w, h);
+
+    if (w > UINT8_MAX) {
+        w = UINT8_MAX;
+    }
+    if (h > UINT8_MAX) {
+        h = UINT8_MAX;
+    }
+
+    setUVWH(poly, 0, 0, w, h);
+    setRGB0(poly, 128, 128, 128);
+    poly->clut = psx_clut;
+    poly->tpage = tex->tpage;
+
+    menu_add_prim_z(poly, psx_menu_zlevel);
+
+    // Set texture window
+    twin = tex->rect;
+    twin.x *= 2;
+    twin.x >>= 3;
+    twin.y >>= 3;
+    // Texture window width/height are weird values
+    // According to PSn00bSDK samples they should be normal pixel dimensions divided by 3, but that doesn't work?
+    // According to https://psx-spx.consoledev.net/graphicsprocessingunitgpu/ it should be 0b11000 for 64, which does
+    // work?? 8: 0b11111, 16: 0b11110, 32: 0b11100, 64: 0b11000, 128: 0b10000, 256: 0b00000
+    twin.w = 28;
+    twin.h = 24;
+    ptwin = (DR_TWIN*) rb_nextpri;
+    setTexWindow(ptwin, &twin);
+    menu_add_prim_z(ptwin, psx_menu_zlevel);
 }
 
 /*
@@ -488,21 +532,18 @@ Fills a box of pixels with a single color
 */
 void Draw_Fill(int x, int y, int w, int h, int c)
 {
-#if 0
-    glDisable(GL_TEXTURE_2D);
-    glColor3f(host_basepal[c * 3] / 255.0, host_basepal[c * 3 + 1] / 255.0, host_basepal[c * 3 + 2] / 255.0);
+    FILL *fill = (FILL *)rb_nextpri;
 
-    glBegin(GL_QUADS);
+    setFill(fill);
+    setXY0(fill, x, y);
+    setWH(fill, w, h);
 
-    glVertex2f(x, y);
-    glVertex2f(x + w, y);
-    glVertex2f(x + w, y + h);
-    glVertex2f(x, y + h);
+    int r = host_basepal[c * 3];
+    int g = host_basepal[c * 3 + 1];
+    int b = host_basepal[c * 3 + 2];
+    setRGB0(fill, r, g, b);
 
-    glEnd();
-    glColor3f(1, 1, 1);
-    glEnable(GL_TEXTURE_2D);
-#endif
+    psx_add_prim(fill, 0);
 }
 //=============================================================================
 
@@ -521,7 +562,7 @@ void Draw_FadeScreen(void)
     setRGB0(poly, 0, 0, 0);
     setSemiTrans(poly, 1);
 
-    menu_add_prim_z(poly, psx_zlevel++);
+    menu_add_prim_z(poly, PSX_MENU_ZLEVEL_MENU - 1);
 
     Sbar_Changed();
 }
@@ -540,9 +581,7 @@ void Draw_BeginDisc(void)
 {
     if (!draw_disc)
         return;
-    // glDrawBuffer(GL_FRONT);
     Draw_Pic(vid.width - 24, 0, draw_disc);
-    // glDrawBuffer(GL_BACK);
 }
 
 /*

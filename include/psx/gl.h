@@ -18,7 +18,7 @@
 // allocate textures on them anyways
 #define VRAM_PAGES (((VRAM_WIDTH / VRAM_PAGE_WIDTH) * (VRAM_HEIGHT / VRAM_PAGE_HEIGHT)) - 4)
 
-#define PRIBUF_LEN (10 * 1024U)
+#define PRIBUF_LEN (32 * 1024U)
 
 #define PSX_MENU_ZLEVEL_END (MENU_OT_LEN - 1)
 
@@ -33,6 +33,7 @@ enum psx_menu_zlevel_layers {
     PSX_MENU_ZLEVEL_IMAGES,
     PSX_MENU_ZLEVEL_MENU,
     PSX_MENU_ZLEVEL_TEXT,
+    PSX_MENU_ZLEVEL_OVERLAY,
     PSX_MENU_ZLEVEL_ENUM_LAST,
 };
 
