@@ -209,7 +209,7 @@ void Draw_Character(int x, int y, int num)
 Draw_String
 ================
 */
-void Draw_String(int x, int y, char *str)
+void Draw_String(int x, int y, char const *str)
 {
     while (*str) {
         Draw_Character(x, y, *str);
