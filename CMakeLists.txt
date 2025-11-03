@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 project(
 	quake1
@@ -52,7 +51,7 @@ option(USE_MATHLIB "Use in-tree math library" 0)
 option(PARANOID "Enable additional run-time validation" 0)
 
 set(PLATFORM_VALUES "SDL3" "PSX")
-set(PLATFORM "SDL3" CACHE STRING "Minimum number of particles")
+set(PLATFORM "SDL3" CACHE STRING "Target platform")
 set_property(CACHE PLATFORM PROPERTY STRINGS ${PLATFORM_VALUES})
 
 message("Building for platform ${PLATFORM}")
@@ -87,13 +86,14 @@ endif ()
 
 target_include_directories(quake PRIVATE include)
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-	target_compile_options(quake PRIVATE -Wall -Wextra -fstack-protector-all)
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	target_compile_options(quake PRIVATE -Wall -Wextra)
 	target_compile_options(quake PRIVATE -Wno-missing-field-initializers -Wno-sign-compare -Wno-pointer-sign)
 	# target_compile_definitions(quake PRIVATE PARANOID)
 	target_compile_definitions(quake PRIVATE DEBUG)
 else ()
 	target_compile_options(quake PRIVATE -Os)
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 	# target_compile_options(quake PRIVATE -fno-stack-protector)
 endif ()
 
