@@ -160,7 +160,7 @@ static inline void M_DrawTransPic(int x, int y, qpic_t const *pic)
     Draw_TransPic(x + ((vid.width - 320) >> 1), y, pic);
 }
 
-inline void M_DrawPic(int x, int y, qpic_t const *pic)
+void M_DrawPic(int x, int y, qpic_t const *pic)
 {
     Draw_Pic(x + ((vid.width - 320) >> 1), y, pic);
 }
