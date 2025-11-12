@@ -78,7 +78,7 @@ Cbuf_AddText
 Adds command text at the end of the buffer
 ============
 */
-void Cbuf_AddText(char *text)
+void Cbuf_AddText(char const *text)
 {
     int l;
 
@@ -101,7 +101,7 @@ Adds a \n to the text
 FIXME: actually change the command buffer to do less copying
 ============
 */
-void Cbuf_InsertText(char *text)
+void Cbuf_InsertText(char const *text)
 {
     char *temp;
     int templen;
@@ -391,7 +391,7 @@ void Cmd_Alias_f(void)
 typedef struct cmd_function_s {
     struct cmd_function_s *next;
 #if CMD_FUNCTION_HAS_NAME
-    char *name_debug;
+    char const *name_debug;
 #endif
     uint32_t name_hash;
     xcommand_t function;
@@ -401,7 +401,7 @@ typedef struct cmd_function_s {
 
 static int cmd_argc;
 static char *cmd_argv[MAX_ARGS];
-static char *cmd_null_string = "";
+static char const *cmd_null_string = "";
 static char *cmd_args = NULL;
 
 cmd_source_t cmd_source;
@@ -476,7 +476,7 @@ Cmd_TokenizeString
 Parses the given string into command line tokens.
 ============
 */
-void Cmd_TokenizeString(char *text)
+void Cmd_TokenizeString(char const *text)
 {
     unsigned i;
 
@@ -521,7 +521,7 @@ void Cmd_TokenizeString(char *text)
 Cmd_AddCommand
 ============
 */
-void Cmd_AddCommand(char *cmd_name, xcommand_t function)
+void Cmd_AddCommand(char const *cmd_name, xcommand_t function)
 {
     cmd_function_t *cmd;
 
@@ -575,7 +575,7 @@ qboolean Cmd_ExistsHashed(uint32_t name_hash)
 Cmd_CompleteCommand
 ============
 */
-char *Cmd_CompleteCommand(char *partial)
+char const *Cmd_CompleteCommand(char *partial)
 {
     cmd_function_t *cmd;
     int len;
@@ -602,7 +602,7 @@ A complete command line has been parsed, so try to execute it
 FIXME: lookupnoadd the token to speed search?
 ============
 */
-void Cmd_ExecuteString(char *text, cmd_source_t src)
+void Cmd_ExecuteString(char const *text, cmd_source_t src)
 {
     cmd_source = src;
     Cmd_TokenizeString(text);

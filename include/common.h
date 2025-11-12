@@ -45,9 +45,9 @@ typedef struct sizebuf_s {
 void SZ_Alloc(sizebuf_t *buf, int startsize);
 void SZ_Free(sizebuf_t *buf);
 void SZ_Clear(sizebuf_t *buf);
-void *SZ_GetSpace(sizebuf_t *buf, int length);
-void SZ_Write(sizebuf_t *buf, void *data, int length);
-void SZ_Print(sizebuf_t *buf, char *data); // strcats onto the sizebuf
+byte *SZ_GetSpace(sizebuf_t *buf, int length);
+void SZ_Write(sizebuf_t *buf, void const *data, int length);
+void SZ_Print(sizebuf_t *buf, char const *data); // strcats onto the sizebuf
 
 //============================================================================
 
@@ -63,7 +63,7 @@ void InsertLinkAfter(link_t *l, link_t *after);
 // (type *)STRUCT_FROM_LINK(link_t *link, type, member)
 // ent = STRUCT_FROM_LINK(link,entity_t,order)
 // FIXME: remove this mess!
-#define STRUCT_FROM_LINK(l, t, m) ((t *)((void *)l - (void*)&(((t *)0)->m)))
+#define STRUCT_FROM_LINK(l, t, m) ((void*)l - offsetof(t, m))
 
 //============================================================================
 
@@ -101,7 +101,7 @@ void MSG_WriteByte(sizebuf_t *sb, int c);
 void MSG_WriteShort(sizebuf_t *sb, int c);
 void MSG_WriteLong(sizebuf_t *sb, int c);
 void MSG_WriteFloat(sizebuf_t *sb, float f);
-void MSG_WriteString(sizebuf_t *sb, char *s);
+void MSG_WriteString(sizebuf_t *sb, char const *s);
 void MSG_WriteCoord(sizebuf_t *sb, float f);
 void MSG_WriteAngle(sizebuf_t *sb, float f);
 
@@ -141,22 +141,22 @@ float MSG_ReadAngle(void);
 extern char com_token[1024];
 extern qboolean com_eof;
 
-char *COM_Parse(char *data);
+char const *COM_Parse(char const *data);
 
 extern int com_argc;
 extern char **com_argv;
 
-int COM_CheckParm(char *parm);
+int COM_CheckParm(char const *parm);
 void COM_Init(void);
 void COM_InitArgv(int argc, char **argv);
 
-char *COM_SkipPath(char *pathname);
-void COM_StripExtension(char *in, char *out);
+char const *COM_SkipPath(char const *pathname);
+void COM_StripExtension(char const *in, char *out);
 void COM_FileBase(char const *in, char *out, size_t out_len);
-void COM_DefaultExtension(char *path, char *extension);
+void COM_DefaultExtension(char *path, char const *extension);
 
 __attribute__ ((format (printf, 1, 2)))
-char *va(char *format, ...);
+char *va(char const *format, ...);
 // does a varargs printf into a temp buffer
 
 //============================================================================

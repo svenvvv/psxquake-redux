@@ -197,7 +197,7 @@ void Con_Init(void)
 {
 #define MAXGAMEDIRLEN 1000
     char temp[MAXGAMEDIRLEN + 1];
-    char *t2 = "/qconsole.log";
+    char const *t2 = "/qconsole.log";
 
     con_debuglog = COM_CheckParm("-condebug");
 
@@ -320,6 +320,8 @@ Con_DebugLog
 */
 void Con_DebugLog(char const *file, char const *fmt, ...)
 {
+    (void) file;
+
     va_list argptr;
     char data[1024];
 
@@ -339,7 +341,7 @@ Handles cursor positioning, line wrapping, etc
 */
 #define MAXPRINTMSG 4096
 // FIXME: make a buffer size safe vsprintf?
-void Con_Printf(char *fmt, ...)
+void Con_Printf(char const *fmt, ...)
 {
     va_list argptr;
     char msg[MAXPRINTMSG];
@@ -384,7 +386,7 @@ Con_DPrintf
 A Con_Printf that only shows up if the "developer" cvar is set
 ================
 */
-void Con_DPrintf(char *fmt, ...)
+void Con_DPrintf(char const *fmt, ...)
 {
 #ifdef DEBUG
     va_list argptr;
@@ -405,7 +407,7 @@ Con_SafePrintf
 Okay to call even when the screen can't be updated
 ==================
 */
-void Con_SafePrintf(char *fmt, ...)
+void Con_SafePrintf(char const *fmt, ...)
 {
     va_list argptr;
     char msg[1024];

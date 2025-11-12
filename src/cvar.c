@@ -28,7 +28,7 @@ static cvar_t *cvar_vars;
 Cvar_FindVar
 ============
 */
-static cvar_t *Cvar_FindVar(char *var_name)
+static cvar_t *Cvar_FindVar(char const *var_name)
 {
     cvar_t *var;
     uint32_t var_name_hash = MurmurHash2(var_name, strlen(var_name));
@@ -54,7 +54,7 @@ cvar_t *Cvar_FindVarHashed(uint32_t var_name_hash)
 Cvar_VariableValue
 ============
 */
-float Cvar_VariableValue(char *var_name)
+float Cvar_VariableValue(char const *var_name)
 {
     cvar_t *var;
 
@@ -94,7 +94,7 @@ char *Cvar_CompleteVariable(char *partial)
 Cvar_Set
 ============
 */
-static void Cvar_SetVar(cvar_t * var, char *value)
+static void Cvar_SetVar(cvar_t * var, char const *value)
 {
     qboolean changed = Q_strcmp(var->string, value);
 
@@ -109,7 +109,7 @@ static void Cvar_SetVar(cvar_t * var, char *value)
     }
 }
 
-void Cvar_Set(char *var_name, char *value)
+void Cvar_Set(char const *var_name, char const *value)
 {
     cvar_t * var = Cvar_FindVar(var_name);
     if (!var) { // there is an error in C code if this happens
@@ -125,7 +125,7 @@ void Cvar_Set(char *var_name, char *value)
 Cvar_SetValue
 ============
 */
-void Cvar_SetValue(char *var_name, float value)
+void Cvar_SetValue(char const *var_name, float value)
 {
     char val[32];
 

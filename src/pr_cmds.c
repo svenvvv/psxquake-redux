@@ -331,20 +331,20 @@ void PF_normalize(void)
 {
     float *value1;
     vec3_t newvalue;
-    float new;
+    float newvec;
 
     value1 = G_VECTOR(OFS_PARM0);
 
-    new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
-    new = sqrt(new);
+    newvec = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
+    newvec = sqrt(newvec);
 
-    if (new == 0)
+    if (newvec == 0)
         newvalue[0] = newvalue[1] = newvalue[2] = 0;
     else {
-        new = 1 / new;
-        newvalue[0] = value1[0] * new;
-        newvalue[1] = value1[1] * new;
-        newvalue[2] = value1[2] * new;
+        newvec = 1 / newvec;
+        newvalue[0] = value1[0] * newvec;
+        newvalue[1] = value1[1] * newvec;
+        newvalue[2] = value1[2] * newvec;
     }
 
     VectorCopy(newvalue, G_VECTOR(OFS_RETURN));
@@ -360,14 +360,14 @@ scalar vlen(vector)
 void PF_vlen(void)
 {
     float *value1;
-    float new;
+    float newvalue;
 
     value1 = G_VECTOR(OFS_PARM0);
 
-    new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
-    new = sqrt(new);
+    newvalue = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
+    newvalue = sqrt(newvalue);
 
-    G_FLOAT(OFS_RETURN) = new;
+    G_FLOAT(OFS_RETURN) = newvalue;
 }
 
 /*
@@ -1499,7 +1499,7 @@ void PF_WriteEntity(void)
 
 //=============================================================================
 
-int SV_ModelIndex(char *name);
+int SV_ModelIndex(char const *name);
 
 void PF_makestatic(void)
 {

@@ -99,6 +99,6 @@ void S_ExtraUpdate(void)
 {
 }
 
-void S_LocalSound(char *s)
+void S_LocalSound(char const *s)
 {
 }

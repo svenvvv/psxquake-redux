@@ -1257,15 +1257,17 @@ void M_Options_Key(int k)
 //=============================================================================
 /* KEYS MENU */
 
-char *bindnames[][2] = { { "+attack", "attack" },       { "impulse 10", "change weapon" },
-                         { "+jump", "jump / swim up" }, { "+forward", "walk forward" },
-                         { "+back", "backpedal" },      { "+left", "turn left" },
-                         { "+right", "turn right" },    { "+speed", "run" },
-                         { "+moveleft", "step left" },  { "+moveright", "step right" },
-                         { "+strafe", "sidestep" },     { "+lookup", "look up" },
-                         { "+lookdown", "look down" },  { "centerview", "center view" },
-                         { "+mlook", "mouse look" },    { "+klook", "keyboard look" },
-                         { "+moveup", "swim up" },      { "+movedown", "swim down" } };
+static char const *const bindnames[][2] = {
+    { "+attack", "attack" },    { "impulse 10", "change weapon" },
+    { "+jump", "jump / swim up" }, { "+forward", "walk forward" },
+    { "+back", "backpedal" },      { "+left", "turn left" },
+    { "+right", "turn right" },    { "+speed", "run" },
+    { "+moveleft", "step left" },  { "+moveright", "step right" },
+    { "+strafe", "sidestep" },     { "+lookup", "look up" },
+    { "+lookdown", "look down" },  { "centerview", "center view" },
+    { "+mlook", "mouse look" },    { "+klook", "keyboard look" },
+    { "+moveup", "swim up" },      { "+movedown", "swim down" }
+};
 
 #define NUMCOMMANDS (sizeof(bindnames) / sizeof(bindnames[0]))
 
@@ -1303,7 +1305,7 @@ void M_FindKeysForCommand(char *command, int *twokeys)
     }
 }
 
-void M_UnbindCommand(char *command)
+void M_UnbindCommand(char const *command)
 {
     int j;
     int l;
@@ -1647,8 +1649,8 @@ void M_SerialConfig_Draw(void)
 {
     qpic_t *p;
     int basex;
-    char *startJoin;
-    char *directModem;
+    char const *startJoin;
+    char const *directModem;
 
     M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
     p = Draw_CachePic("gfx/p_multi.lmp");
@@ -2058,8 +2060,8 @@ void M_LanConfig_Draw(void)
 {
     qpic_t *p;
     int basex;
-    char *startJoin;
-    char *protocol;
+    char const *startJoin;
+    char const *protocol;
 
     M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
     p = Draw_CachePic("gfx/p_multi.lmp");
@@ -2217,8 +2219,8 @@ void M_LanConfig_Key(int key)
 /* GAME OPTIONS MENU */
 
 typedef struct {
-    char *name;
-    char *description;
+    char const *name;
+    char const *description;
 } level_t;
 
 static level_t const levels[] = { { "start", "Entrance" }, // 0
@@ -2305,7 +2307,7 @@ static level_t const roguelevels[] = {
 };
 
 typedef struct {
-    char *description;
+    char const *description;
     int firstLevel;
     int levels;
 } episode_t;
@@ -2370,7 +2372,7 @@ void M_GameOptions_Draw(void)
 
     M_Print(0, 72, "        Teamplay");
     if (rogue) {
-        char *msg;
+        char const *msg;
 
         switch ((int)teamplay.value) {
         case 1:
@@ -2397,7 +2399,7 @@ void M_GameOptions_Draw(void)
         }
         M_Print(160, 72, msg);
     } else {
-        char *msg;
+        char const *msg;
 
         switch ((int)teamplay.value) {
         case 1:

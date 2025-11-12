@@ -297,13 +297,13 @@ void Host_InitCommands(void);
 void Host_Init(quakeparms_t *parms);
 void Host_Shutdown(void);
 __attribute__ ((format (printf, 1, 2)))
-void Host_Error(char *error, ...);
+void Host_Error(char const *error, ...);
 __attribute__ ((format (printf, 1, 2)))
-void Host_EndGame(char *message, ...);
+void Host_EndGame(char const *message, ...);
 void Host_Frame(uint32_t time);
 void Host_Quit_f(void);
 __attribute__ ((format (printf, 1, 2)))
-void Host_ClientCommands(char *fmt, ...);
+void Host_ClientCommands(char const *fmt, ...);
 void Host_ShutdownServer(qboolean crash);
 
 extern qboolean msg_suppress_1; // suppresses resolution and cache size console output

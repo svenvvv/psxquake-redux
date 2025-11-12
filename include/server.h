@@ -213,14 +213,14 @@ extern edict_t *sv_player;
 void SV_Init(void);
 
 void SV_StartParticle(vec3_t org, vec3_t dir, int color, int count);
-void SV_StartSound(edict_t *entity, int channel, char *sample, int volume, float attenuation);
+void SV_StartSound(edict_t *entity, int channel, char const *sample, int volume, float attenuation);
 
 void SV_DropClient(qboolean crash);
 
 void SV_SendClientMessages(void);
 void SV_ClearDatagram(void);
 
-int SV_ModelIndex(char *name);
+int SV_ModelIndex(char const *name);
 
 void SV_SetIdealPitch(void);
 
@@ -230,9 +230,9 @@ void SV_ClientThink(void);
 void SV_AddClientToServer(struct qsocket_s *ret);
 
 __attribute__ ((format (printf, 1, 2)))
-void SV_ClientPrintf(char *fmt, ...);
+void SV_ClientPrintf(char const *fmt, ...);
 __attribute__ ((format (printf, 1, 2)))
-void SV_BroadcastPrintf(char *fmt, ...);
+void SV_BroadcastPrintf(char const *fmt, ...);
 
 void SV_Physics(void);
 

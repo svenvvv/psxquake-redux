@@ -23,10 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define NUM_SAFE_ARGVS 7
 
-static char *largv[MAX_NUM_ARGVS + NUM_SAFE_ARGVS + 1];
-static char *argvdummy = " ";
+static char const *largv[MAX_NUM_ARGVS + NUM_SAFE_ARGVS + 1];
+static char const *argvdummy = " ";
 
-static char *safeargvs[NUM_SAFE_ARGVS] = { "-stdvid", "-nolan",   "-nosound", "-nocdaudio",
+static char const *safeargvs[NUM_SAFE_ARGVS] = { "-stdvid", "-nolan",   "-nosound", "-nocdaudio",
                                            "-nojoy",  "-nomouse", "-dibonly" };
 
 cvar_t registered = { "registered", "0" };
@@ -247,7 +247,7 @@ void MSG_WriteFloat(sizebuf_t *sb, float f)
     SZ_Write(sb, &dat.l, 4);
 }
 
-void MSG_WriteString(sizebuf_t *sb, char *s)
+void MSG_WriteString(sizebuf_t *sb, char const *s)
 {
     if (!s)
         SZ_Write(sb, "", 1);
@@ -413,7 +413,7 @@ void SZ_Clear(sizebuf_t *buf)
     buf->cursize = 0;
 }
 
-void *SZ_GetSpace(sizebuf_t *buf, int length)
+byte *SZ_GetSpace(sizebuf_t *buf, int length)
 {
     void *data;
 
@@ -432,15 +432,15 @@ void *SZ_GetSpace(sizebuf_t *buf, int length)
     data = buf->data + buf->cursize;
     buf->cursize += length;
 
-    return data;
+    return static_cast<byte*>(data);
 }
 
-void SZ_Write(sizebuf_t *buf, void *data, int length)
+void SZ_Write(sizebuf_t *buf, void const *data, int length)
 {
     Q_memcpy(SZ_GetSpace(buf, length), data, length);
 }
 
-void SZ_Print(sizebuf_t *buf, char *data)
+void SZ_Print(sizebuf_t *buf, char const *data)
 {
     int len;
 
@@ -460,9 +460,9 @@ void SZ_Print(sizebuf_t *buf, char *data)
 COM_SkipPath
 ============
 */
-char *COM_SkipPath(char *pathname)
+char const *COM_SkipPath(char const *pathname)
 {
-    char *last;
+    char const *last;
 
     last = pathname;
     while (*pathname) {
@@ -490,7 +490,7 @@ void COM_StripExtension(char *in, char *out)
 COM_FileExtension
 ============
 */
-char *COM_FileExtension(char *in)
+static char const *COM_FileExtension(char const *in)
 {
     static char exten[8];
     int i;
@@ -541,7 +541,7 @@ void COM_FileBase(char const *in, char *out, size_t out_len)
 COM_DefaultExtension
 ==================
 */
-void COM_DefaultExtension(char *path, char *extension)
+void COM_DefaultExtension(char *path, char const *extension)
 {
     char *src;
     //
@@ -566,7 +566,7 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *COM_Parse(char *data)
+char const *COM_Parse(char const *data)
 {
     int c;
     int len;
@@ -636,7 +636,7 @@ Returns the position (1 to argc-1) in the program's argument list
 where the given parameter apears, or 0 if not present
 ================
 */
-int COM_CheckParm(char *parm)
+int COM_CheckParm(char const *parm)
 {
     int i;
 
@@ -789,7 +789,7 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
-char *va(char *format, ...)
+char *va(char const *format, ...)
 {
     va_list argptr;
     static char string[MAX_OSPATH];
@@ -1251,7 +1251,7 @@ Sets com_gamedir, adds the directory to the head of the path,
 then loads and adds pak1.pak pak2.pak ... 
 ================
 */
-void COM_AddGameDirectory(char *dir)
+void COM_AddGameDirectory(char const *dir)
 {
     int i;
     searchpath_t *search;

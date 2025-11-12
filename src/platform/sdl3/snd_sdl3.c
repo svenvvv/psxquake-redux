@@ -50,7 +50,7 @@ void S_Shutdown(void)
 {
 }
 
-void S_TouchSound(char *sample)
+void S_TouchSound(char const *sample)
 {
     (void)sample;
 }
@@ -83,7 +83,7 @@ void S_StopSound(int entnum, int entchannel)
     (void)entchannel;
 }
 
-sfx_t *S_PrecacheSound(char *sample)
+sfx_t *S_PrecacheSound(char const *sample)
 {
     (void)sample;
     return NULL;
@@ -118,7 +118,7 @@ void S_ExtraUpdate(void)
 {
 }
 
-void S_LocalSound(char *s)
+void S_LocalSound(char const *s)
 {
     (void)s;
 }

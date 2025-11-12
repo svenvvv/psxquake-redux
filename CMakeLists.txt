@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 23)
 
 project(
 	quake1
-	LANGUAGES    C ASM
+	LANGUAGES    C CXX ASM
 	VERSION      1.0.0
 	DESCRIPTION  "Quake 1"
 	HOMEPAGE_URL ""
@@ -88,7 +89,8 @@ target_include_directories(quake PRIVATE include)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	target_compile_options(quake PRIVATE -Wall -Wextra)
-	target_compile_options(quake PRIVATE -Wno-missing-field-initializers -Wno-sign-compare -Wno-pointer-sign)
+	target_compile_options(quake PRIVATE -Wno-missing-field-initializers -Wno-sign-compare)
+	# target_compile_options(quake PRIVATE -Wno-pointer-sign -Wno-pointer-sign)
 	# target_compile_definitions(quake PRIVATE PARANOID)
 	target_compile_definitions(quake PRIVATE DEBUG)
 else ()
@@ -154,5 +156,9 @@ endif ()
 
 add_subdirectory(src/platform)
 add_subdirectory(src/render)
+
+target_compile_options(quake PRIVATE -fpermissive)
+get_target_property(PSXQUAKE_SRC quake SOURCES)
+set_source_files_properties(${PSXQUAKE_SRC} PROPERTIES LANGUAGE CXX)
 
 install(FILES ${PROJECT_BINARY_DIR}/quake TYPE BIN)

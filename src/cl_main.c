@@ -139,7 +139,7 @@ CL_EstablishConnection
 Host should be either "local" or a net address to be passed on
 =====================
 */
-void CL_EstablishConnection(char *host)
+void CL_EstablishConnection(char const *host)
 {
     if (cls.state == ca_dedicated)
         return;

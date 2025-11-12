@@ -182,7 +182,7 @@ typedef struct {
     int (*Init)(void);
     void (*Listen)(qboolean state);
     void (*SearchForHosts)(qboolean xmit);
-    qsocket_t *(*Connect)(char *host);
+    qsocket_t *(*Connect)(char const *host);
     qsocket_t *(*CheckNewConnections)(void);
     int (*QGetMessage)(qsocket_t *sock);
     int (*QSendMessage)(qsocket_t *sock, sizebuf_t *data);
@@ -264,7 +264,7 @@ void NET_Shutdown(void);
 struct qsocket_s *NET_CheckNewConnections(void);
 // returns a new connection number if there is one pending, else -1
 
-struct qsocket_s *NET_Connect(char *host);
+struct qsocket_s *NET_Connect(char const *host);
 // called by client to connect to a host.  Returns -1 if not able to
 
 qboolean NET_CanSendMessage(qsocket_t *sock);

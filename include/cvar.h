@@ -56,7 +56,7 @@ interface from being ambiguous.
 #include "murmurhash2.h"
 
 typedef struct cvar_s {
-    char *name;
+    char const *name;
     char *string;
     qboolean archive; // set to true to cause it to be saved to vars.rc
     qboolean server; // notifies players when changed
@@ -69,13 +69,13 @@ void Cvar_RegisterVariable(cvar_t *variable);
 // registers a cvar that allready has the name, string, and optionally the
 // archive elements set.
 
-void Cvar_Set(char *var_name, char *value);
+void Cvar_Set(char const *var_name, char const *value);
 // equivelant to "<name> <variable>" typed at the console
 
-void Cvar_SetValue(char *var_name, float value);
+void Cvar_SetValue(char const *var_name, float value);
 // expands value to a string and calls Cvar_Set
 
-float Cvar_VariableValue(char *var_name);
+float Cvar_VariableValue(char const *var_name);
 // returns 0 if not defined or non numeric
 
 #ifdef CONSOLE_COMPLETION

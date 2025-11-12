@@ -94,9 +94,9 @@ void Z_CheckHeap(void);
 int Z_FreeMemory(void);
 
 void *Hunk_Alloc(int size); // returns 0 filled memory
-void *Hunk_AllocName(int size, char *name);
+void *Hunk_AllocName(int size, char const *name);
 
-void *Hunk_HighAllocName(int size, char *name);
+void *Hunk_HighAllocName(int size, char const *name);
 
 int Hunk_LowMark(void);
 void Hunk_FreeToLowMark(int mark);

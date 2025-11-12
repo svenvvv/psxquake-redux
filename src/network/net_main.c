@@ -332,7 +332,7 @@ NET_Connect
 int hostCacheCount = 0;
 hostcache_t hostcache[HOSTCACHESIZE];
 
-qsocket_t *NET_Connect(char *host)
+qsocket_t *NET_Connect(char const *host)
 {
     qsocket_t *ret;
     int n;

@@ -59,7 +59,7 @@ void Host_Status_f(void)
     int hours = 0;
     int j;
     __attribute__ ((format (printf, 1, 2)))
-    void (*print)(char *fmt, ...);
+    void (*print)(char const *fmt, ...);
 
     if (cmd_source == src_command) {
         if (!sv.active) {
@@ -843,7 +843,7 @@ Host_Name_f
 */
 void Host_Name_f(void)
 {
-    char *newName;
+    char * newName;
 
     if (Cmd_Argc() == 1) {
         Con_Printf("\"name\" is \"%s\"\n", cl_name.string);
@@ -1307,8 +1307,8 @@ Kicks a user off of the server
 */
 void Host_Kick_f(void)
 {
-    char *who;
-    char *message = NULL;
+    char const *who;
+    char const *message = NULL;
     client_t *save;
     int i;
     qboolean byNumber = false;
@@ -1389,7 +1389,7 @@ Host_Give_f
 */
 void Host_Give_f(void)
 {
-    char *t;
+    char const *t;
     int v;
     eval_t *val;
 

@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-char *svc_strings[] = { "svc_bad", "svc_nop", "svc_disconnect", "svc_updatestat",
+char const *svc_strings[] = { "svc_bad", "svc_nop", "svc_disconnect", "svc_updatestat",
                         "svc_version", // [long] server version
                         "svc_setview", // [short] entity number
                         "svc_sound", // <see code>

@@ -77,7 +77,7 @@ cvar_t temp1 = { "temp1", "0" };
 Host_EndGame
 ================
 */
-void Host_EndGame(char *message, ...)
+void Host_EndGame(char const *message, ...)
 {
     va_list argptr;
     char string[1024];
@@ -109,7 +109,7 @@ Host_Error
 This shuts down both the client and server
 ================
 */
-void Host_Error(char *error, ...)
+void Host_Error(char const *error, ...)
 {
     va_list argptr;
     char string[1024];
@@ -252,7 +252,7 @@ Sends text across to be displayed
 FIXME: make this just a stuffed echo?
 =================
 */
-void SV_ClientPrintf(char *fmt, ...)
+void SV_ClientPrintf(char const *fmt, ...)
 {
     va_list argptr;
     char string[1024];
@@ -272,7 +272,7 @@ SV_BroadcastPrintf
 Sends text to all active clients
 =================
 */
-void SV_BroadcastPrintf(char *fmt, ...)
+void SV_BroadcastPrintf(char const *fmt, ...)
 {
     va_list argptr;
     char string[1024];
@@ -296,7 +296,7 @@ Host_ClientCommands
 Send text over to the client to be executed
 =================
 */
-void Host_ClientCommands(char *fmt, ...)
+void Host_ClientCommands(char const *fmt, ...)
 {
     va_list argptr;
     char string[1024];

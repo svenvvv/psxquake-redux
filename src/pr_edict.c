@@ -179,7 +179,7 @@ ddef_t *ED_FieldAtOfs(int ofs)
 ED_FindField
 ============
 */
-ddef_t *ED_FindField(char *name)
+static ddef_t *ED_FindField(char const *name)
 {
     ddef_t *def;
     int i;
@@ -228,7 +228,7 @@ dfunction_t *ED_FindFunction(char *name)
     return NULL;
 }
 
-eval_t *GetEdictFieldValue(edict_t *ed, char *field)
+eval_t *GetEdictFieldValue(edict_t *ed, char const *field)
 {
     ddef_t *def = NULL;
     int i;
@@ -618,7 +618,7 @@ void ED_WriteGlobals(FILE *f)
 ED_ParseGlobals
 =============
 */
-void ED_ParseGlobals(char *data)
+void ED_ParseGlobals(char const *data)
 {
     char keyname[64];
     ddef_t *key;
@@ -661,12 +661,12 @@ ED_NewString
 */
 char *ED_NewString(char *string)
 {
-    char *new, *new_p;
+    char *newstring, *new_p;
     int i, l;
 
     l = strlen(string) + 1;
-    new = Hunk_Alloc(l);
-    new_p = new;
+    newstring = Hunk_Alloc(l);
+    new_p = newstring;
 
     for (i = 0; i < l; i++) {
         if (string[i] == '\\' && i < l - 1) {
@@ -679,7 +679,7 @@ char *ED_NewString(char *string)
             *new_p++ = string[i];
     }
 
-    return new;
+    return newstring;
 }
 
 /*
@@ -760,7 +760,7 @@ ed should be a properly initialized empty edict.
 Used for initial level load and for savegames.
 ====================
 */
-char *ED_ParseEdict(char *data, edict_t *ent)
+char const *ED_ParseEdict(char const *data, edict_t *ent)
 {
     ddef_t *key;
     qboolean anglehack;
@@ -856,7 +856,7 @@ Used for both fresh maps and savegame loads.  A fresh map would also need
 to call ED_CallSpawnFunctions () to let the objects initialize themselves.
 ================
 */
-void ED_LoadFromFile(char *data)
+void ED_LoadFromFile(char const *data)
 {
     edict_t *ent;
     int inhibit;

@@ -42,7 +42,7 @@ char *keybindings[256];
 static qboolean keydown[256];
 
 typedef struct {
-    char *name;
+    char const *name;
     int keynum;
 } keyname_t;
 
@@ -246,7 +246,7 @@ void Key_Console(int key)
 
 #ifdef CONSOLE_COMPLETION
     if (key == K_TAB) { // command completion
-        char * cmd = Cmd_CompleteCommand(key_lines[edit_line] + 1);
+        char const * cmd = Cmd_CompleteCommand(key_lines[edit_line] + 1);
         if (!cmd)
             cmd = Cvar_CompleteVariable(key_lines[edit_line] + 1);
         if (cmd) {
@@ -386,7 +386,7 @@ the given string.  Single ascii characters return themselves, while
 the K_* names are matched up.
 ===================
 */
-int Key_StringToKeynum(char *str)
+static int Key_StringToKeynum(char const *str)
 {
     if (!str || !str[0])
         return -1;
@@ -409,7 +409,7 @@ given keynum.
 FIXME: handle quote special (general escape sequence?)
 ===================
 */
-char *Key_KeynumToString(int keynum)
+char const *Key_KeynumToString(int keynum)
 {
     static char tinystr[2];
 
@@ -433,9 +433,9 @@ char *Key_KeynumToString(int keynum)
 Key_SetBinding
 ===================
 */
-void Key_SetBinding(int keynum, char *binding)
+void Key_SetBinding(int keynum, char const *binding)
 {
-    char *new;
+    char *newbind;
     int l;
 
     if (keynum == -1)
@@ -449,10 +449,10 @@ void Key_SetBinding(int keynum, char *binding)
 
     // allocate memory for new binding
     l = Q_strlen(binding);
-    new = Z_Malloc(l + 1);
-    Q_strcpy(new, binding);
-    new[l] = 0;
-    keybindings[keynum] = new;
+    newbind = Z_Malloc(l + 1);
+    Q_strcpy(newbind, binding);
+    newbind[l] = 0;
+    keybindings[keynum] = newbind;
 }
 
 /*
