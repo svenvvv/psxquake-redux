@@ -487,7 +487,7 @@ void Draw_ConsoleBackground(int lines)
     conback = Draw_CachePic("gfx/conback.lmp");
 
     // hack the version number directly into the pic
-    sprintf(ver, "(PSXQuake-next sw) %u.%02u", VERSION_MAJOR, VERSION_MINOR);
+    sprintf(ver, "(PSXQuake-redux sw) %u.%02u", VERSION_MAJOR, VERSION_MINOR);
     dest = conback->data + 320 * 186 + 320 - 11 - 8 * strlen(ver);
 
     for (x = 0; x < strlen(ver); x++)

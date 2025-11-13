@@ -38,7 +38,7 @@ char my_tcpip_address[NET_NAMELEN];
 void (*GetComPortConfig)(int portNumber, int *port, int *irq, int *baud, qboolean *useModem);
 void (*SetComPortConfig)(int portNumber, int port, int irq, int baud, qboolean useModem);
 void (*GetModemConfig)(int portNumber, char *dialType, char *clear, char *init, char *hangup);
-void (*SetModemConfig)(int portNumber, char *dialType, char *clear, char *init, char *hangup);
+void (*SetModemConfig)(int portNumber, char const *dialType, char const *clear, char const *init, char const *hangup);
 
 static qboolean listening = false;
 
@@ -50,8 +50,8 @@ static int slistLastShown;
 
 static void Slist_Send(void*);
 static void Slist_Poll(void*);
-PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send };
-PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll };
+PollProcedure slistSendProcedure = { NULL, 0, Slist_Send };
+PollProcedure slistPollProcedure = { NULL, 0, Slist_Poll };
 
 sizebuf_t net_message;
 int net_activeconnections = 0;
@@ -61,21 +61,21 @@ int messagesReceived = 0;
 int unreliableMessagesSent = 0;
 int unreliableMessagesReceived = 0;
 
-cvar_t net_messagetimeout = { "net_messagetimeout", "300" };
+cvar_t net_messagetimeout = { "net_messagetimeout", 300 };
 cvar_t hostname = { "hostname", "UNNAMED" };
 
 qboolean configRestored = false;
-cvar_t config_com_port = { "_config_com_port", "0x3f8", true };
-cvar_t config_com_irq = { "_config_com_irq", "4", true };
-cvar_t config_com_baud = { "_config_com_baud", "57600", true };
-cvar_t config_com_modem = { "_config_com_modem", "1", true };
+cvar_t config_com_port = { "_config_com_port", 0x3f8, true };
+cvar_t config_com_irq = { "_config_com_irq", 4, true };
+cvar_t config_com_baud = { "_config_com_baud", 57600, true };
+cvar_t config_com_modem = { "_config_com_modem", 1, true };
 cvar_t config_modem_dialtype = { "_config_modem_dialtype", "T", true };
 cvar_t config_modem_clear = { "_config_modem_clear", "ATZ", true };
 cvar_t config_modem_init = { "_config_modem_init", "", true };
 cvar_t config_modem_hangup = { "_config_modem_hangup", "AT H", true };
 
 #ifdef IDGODS
-cvar_t idgods = { "idgods", "0" };
+cvar_t idgods = { "idgods", 0 };
 #endif
 
 // these two macros are to make the code more readable

@@ -1,14 +1,14 @@
+#include "psx/io.h"
+#include "psx/files.h"
+#include "util/hashlib.h"
+#include "sys.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <psxcd.h>
-
-#include "psx/io.h"
-#include "psx/files.h"
-#include "murmurhash2.h"
-#include "sys.h"
 
 #define PSX_CD_SECTOR_SIZE 2048
 #define PSX_CD_FILES_MAX 4
@@ -151,7 +151,7 @@ int Sys_FileOpenRead(char const *path, int *handle)
         goto error;
     }
 
-    f->filename_hash = MurmurHash2(path, strlen(path));
+    f->filename_hash = pq_hash(path, strlen(path));
     *handle = (int)f;
     return f->file.size;
 error:

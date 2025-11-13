@@ -176,7 +176,7 @@ int main(int c, char **v)
     Sys_Init();
     printf("OK\n");
 
-    printf("PSXQuake-next going into game loop...\n");
+    printf("PSXQuake going into game loop...\n");
 
     oldtime = Sys_CurrentTicks() - 100;
 

@@ -53,16 +53,77 @@ Cvars are restricted from having the same names as commands to keep this
 interface from being ambiguous.
 */
 
-#include "murmurhash2.h"
+#include "util/hashlib.h"
+
+enum cvar_flags {
+    CVAR_FLAG_ARCHIVE = (1 << 0),
+    CVAR_FLAG_SERVER = (1 << 1),
+};
 
 typedef struct cvar_s {
+    uint32_t const name_hash;
+#ifdef ENABLE_CVAR_NAMES
     char const *name;
+#endif
     char *string;
-    qboolean archive; // set to true to cause it to be saved to vars.rc
-    qboolean server; // notifies players when changed
+    char const * const initial_value;
+    uint8_t flags;
     float value;
-    uint32_t name_hash;
     struct cvar_s *next;
+
+    [[nodiscard]]
+    constexpr bool is_archive() const
+    {
+        return flags & CVAR_FLAG_ARCHIVE;
+    }
+
+    [[nodiscard]]
+    constexpr bool is_server() const
+    {
+        return flags & CVAR_FLAG_SERVER;
+    }
+
+    consteval cvar_s(char const *_name, char const *_string, qboolean _archive = false, qboolean _server = false)
+        : name_hash(pq_hash_const(std::string_view(_name)))
+#ifdef ENABLE_CVAR_NAMES
+        , name(_name)
+#endif
+        , string(nullptr)
+        , initial_value(_string)
+        , flags(0)
+        , value(0.0f)
+        , next(nullptr)
+    {
+        if (_archive) {
+            flags |= CVAR_FLAG_ARCHIVE;
+        }
+        if (_server) {
+            flags |= CVAR_FLAG_SERVER;
+        }
+    }
+
+    template <
+        typename T,
+        typename = std::enable_if_t<std::is_arithmetic_v<T>, T>
+    >
+    consteval cvar_s(char const *_name, T _value, qboolean _archive = false, qboolean _server = false)
+        : name_hash(pq_hash_const(std::string_view(_name)))
+#ifdef ENABLE_CVAR_NAMES
+        , name(_name)
+#endif
+        , string(nullptr)
+        , initial_value(nullptr)
+        , flags(0)
+        , value(_value)
+        , next(nullptr)
+    {
+        if (_archive) {
+            flags |= CVAR_FLAG_ARCHIVE;
+        }
+        if (_server) {
+            flags |= CVAR_FLAG_SERVER;
+        }
+    }
 } cvar_t;
 
 void Cvar_RegisterVariable(cvar_t *variable);

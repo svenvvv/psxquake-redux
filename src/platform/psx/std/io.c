@@ -1,8 +1,8 @@
 #include "psx/io.h"
 
-#include "murmurhash2.h"
 #include "psx/files.h"
 #include "sys.h"
+#include "util/hashlib.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -10,7 +10,7 @@
 FILE *fopen(const char *filename, const char *mode)
 {
     size_t filename_len = strlen(filename);
-    uint32_t search_hash = MurmurHash2(filename, filename_len);
+    uint32_t search_hash = pq_hash(filename, filename_len);
     printf("fopen %s %s\n", filename, mode);
 
     if (strchr(mode, 'r')) {

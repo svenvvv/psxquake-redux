@@ -23,8 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 #include "psx/gl.h"
+#include "util/hashlib.h"
 
-cvar_t gl_max_size = { "gl_max_size", "1024" };
+cvar_t gl_max_size = { "gl_max_size", 1024 };
 
 static byte *draw_chars; // 8*8 graphic characters
 static qpic_t *draw_backtile;
@@ -84,7 +85,7 @@ qpic_t *Draw_CachePic(char const *path)
     int i;
     qpic_t *dat;
     glpic_t *gl;
-    uint32_t name_hash = MurmurHash2(path, strlen(path));
+    uint32_t name_hash = pq_hash(path, strlen(path));
 
     for (pic = menu_cachepics, i = 0; i < menu_numcachepics; pic++, i++)
         if (pic->name_hash == name_hash)
@@ -176,7 +177,7 @@ void Draw_Init(void)
     SwapPic(cb);
 
     // hack the version number directly into the pic
-    y = sprintf(ver, "(PSXQuake-next) %4u.%02u", VERSION_MAJOR, VERSION_MINOR);
+    y = sprintf(ver, "(PSXQuake-redux) %4u.%02u", VERSION_MAJOR, VERSION_MINOR);
     dest = cb->data + 320 * 186 + 320 - 11 - 8 * y;
     for (x = 0; x < y; x++)
         Draw_CharToConback(ver[x], dest + (x << 3));

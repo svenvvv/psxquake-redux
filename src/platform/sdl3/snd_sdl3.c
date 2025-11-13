@@ -22,9 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-cvar_t bgmvolume = { "bgmvolume", "1", true };
-cvar_t volume = { "volume", "0.7", true };
-cvar_t loadas8bit = { "loadas8bit", "0" };
+cvar_t bgmvolume = { "bgmvolume", 1, true };
+cvar_t volume = { "volume", 0.7, true };
+cvar_t loadas8bit = { "loadas8bit", 0 };
 
 volatile dma_t *shm = 0;
 volatile dma_t sn;

@@ -37,7 +37,7 @@ int texture_extension_number = 1;
 
 float gldepthmin, gldepthmax;
 
-cvar_t gl_ztrick = { "gl_ztrick", "1" };
+cvar_t gl_ztrick = { "gl_ztrick", 1 };
 
 /*-----------------------------------------------------------------------*/
 void D_BeginDirectRect(int x, int y, byte *pbitmap, int width, int height)

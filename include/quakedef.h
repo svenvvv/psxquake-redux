@@ -265,9 +265,9 @@ typedef struct {
 // available for the program to use
 
 typedef struct {
-    char *basedir;
+    char const *basedir;
     int argc;
-    char **argv;
+    char const **argv;
     void *membase;
     int memsize;
 } quakeparms_t;

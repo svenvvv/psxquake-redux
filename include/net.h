@@ -177,7 +177,7 @@ extern int net_numlandrivers;
 extern net_landriver_t net_landrivers[MAX_NET_DRIVERS];
 
 typedef struct {
-    char *name;
+    char const *name;
     qboolean initialized;
     int (*Init)(void);
     void (*Listen)(qboolean state);
@@ -316,7 +316,7 @@ extern char my_tcpip_address[NET_NAMELEN];
 extern void (*GetComPortConfig)(int portNumber, int *port, int *irq, int *baud, qboolean *useModem);
 extern void (*SetComPortConfig)(int portNumber, int port, int irq, int baud, qboolean useModem);
 extern void (*GetModemConfig)(int portNumber, char *dialType, char *clear, char *init, char *hangup);
-extern void (*SetModemConfig)(int portNumber, char *dialType, char *clear, char *init, char *hangup);
+extern void (*SetModemConfig)(int portNumber, char const *dialType, char const *clear, char const *init, char const *hangup);
 
 extern qboolean slistInProgress;
 extern qboolean slistSilent;

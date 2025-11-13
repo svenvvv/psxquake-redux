@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
-static enum {
+enum menu_state {
     m_none,
     m_main,
     m_singleplayer,
@@ -46,7 +46,9 @@ static enum {
     m_gameoptions,
     m_search,
     m_slist
-} m_state;
+};
+
+static enum menu_state m_state;
 
 void M_Menu_Main_f(void);
 void M_Menu_SinglePlayer_f(void);
@@ -839,7 +841,7 @@ int m_net_cursor;
 int m_net_items;
 int m_net_saveHeight;
 
-char *net_helpMessage[] = {
+static char const * const net_helpMessage[] = {
     /* .........1.........2.... */
     "                        ", " Two computers connected", "   through two modems.  ", "                        ",
 
@@ -1281,7 +1283,7 @@ void M_Menu_Keys_f(void)
     m_entersound = true;
 }
 
-void M_FindKeysForCommand(char *command, int *twokeys)
+static void M_FindKeysForCommand(char const *command, int *twokeys)
 {
     int count;
     int j;
@@ -1326,7 +1328,7 @@ void M_Keys_Draw(void)
 {
     int i;
     int keys[2];
-    char *name;
+    char const *name;
     int x, y;
     qpic_t *p;
 
@@ -1486,7 +1488,7 @@ void M_Help_Key(int key)
 /* QUIT MENU */
 
 int msgNumber;
-int m_quit_prevstate;
+enum menu_state m_quit_prevstate;
 qboolean wasInMenus;
 
 #ifndef _WIN32

@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.25)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 
 project(
 	quake1
@@ -43,11 +43,11 @@ set(COMMON_SRC
 		src/view.c
 		src/wad.c
 		src/world.c
-		src/murmurhash2.c
 )
 
 option(GLQUAKE "Enable hardware renderer (GLQuake)" 1)
-option(CONSOLE_COMPLETION "Enable console line completion" 0)
+option(CONSOLE_COMPLETION "Enable console line completion" 1)
+option(CVAR_NAMES "Keep cvar names" 1)
 option(USE_MATHLIB "Use in-tree math library" 0)
 option(PARANOID "Enable additional run-time validation" 0)
 
@@ -61,6 +61,8 @@ if (${PLATFORM} STREQUAL "SDL3")
 	set(PLATFORM_SDL3 1)
 elseif (${PLATFORM} STREQUAL "PSX")
 	set(PLATFORM_PSX 1)
+	set(CONSOLE_COMPLETION 0)
+	set(CVAR_NAMES 0)
 else ()
 	message(FATAL_ERROR "Invalid platform ${PLATFORM}")
 endif ()
@@ -101,6 +103,10 @@ endif ()
 
 target_compile_options(quake PRIVATE -ffast-math)
 
+if (CVAR_NAMES)
+	set(CONSOLE_COMPLETION 0) # Completion depends on CVAR names
+	target_compile_definitions(quake PRIVATE ENABLE_CVAR_NAMES=${CVAR_NAMES})
+endif ()
 if (CONSOLE_COMPLETION)
 	target_compile_definitions(quake PRIVATE CONSOLE_COMPLETION=${CONSOLE_COMPLETION})
 endif ()

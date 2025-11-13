@@ -30,14 +30,14 @@ float scr_con_current;
 float scr_conlines; // lines of console to display
 
 float oldscreensize, oldfov;
-cvar_t scr_viewsize = { "viewsize", "100", true };
-cvar_t scr_fov = { "fov", "90" }; // 10 - 170
-cvar_t scr_conspeed = { "scr_conspeed", "300" };
-cvar_t scr_centertime = { "scr_centertime", "2" };
-cvar_t scr_showram = { "showram", "1" };
-cvar_t scr_showturtle = { "showturtle", "0" };
-cvar_t scr_showpause = { "showpause", "1" };
-cvar_t scr_printspeed = { "scr_printspeed", "8" };
+cvar_t scr_viewsize = { "viewsize", 100, true };
+cvar_t scr_fov = { "fov", 90 }; // 10 - 170
+cvar_t scr_conspeed = { "scr_conspeed", 300 };
+cvar_t scr_centertime = { "scr_centertime", 2 };
+cvar_t scr_showram = { "showram", 1 };
+cvar_t scr_showturtle = { "showturtle", 0 };
+cvar_t scr_showpause = { "showpause", 1 };
+cvar_t scr_printspeed = { "scr_printspeed", 8 };
 
 qboolean scr_initialized; // ready to draw
 
@@ -527,7 +527,7 @@ void SCR_EndLoadingPlaque(void)
 
 //=============================================================================
 
-char *scr_notifystring;
+char const *scr_notifystring;
 qboolean scr_drawdialog;
 
 void SCR_DrawNotifyString(void)
@@ -569,7 +569,7 @@ Displays a text string in the center of the screen and waits for a Y or N
 keypress.  
 ==================
 */
-int SCR_ModalMessage(char *text)
+int SCR_ModalMessage(char const *text)
 {
     if (cls.state == ca_dedicated)
         return true;

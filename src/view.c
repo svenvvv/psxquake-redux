@@ -31,35 +31,35 @@ when crossing a water boudnary.
 
 */
 
-static cvar_t scr_ofsx = { "scr_ofsx", "0", false };
-static cvar_t scr_ofsy = { "scr_ofsy", "0", false };
-static cvar_t scr_ofsz = { "scr_ofsz", "0", false };
+static cvar_t scr_ofsx = { "scr_ofsx", 0, false };
+static cvar_t scr_ofsy = { "scr_ofsy", 0, false };
+static cvar_t scr_ofsz = { "scr_ofsz", 0, false };
 
-static cvar_t cl_rollspeed = { "cl_rollspeed", "200" };
-static cvar_t cl_rollangle = { "cl_rollangle", "2.0" };
+static cvar_t cl_rollspeed = { "cl_rollspeed", 200 };
+static cvar_t cl_rollangle = { "cl_rollangle", 2.0 };
 
-static cvar_t cl_bob = { "cl_bob", "0.02", false };
-static cvar_t cl_bobcycle = { "cl_bobcycle", "0.6", false };
-static cvar_t cl_bobup = { "cl_bobup", "0.5", false };
+static cvar_t cl_bob = { "cl_bob", 0.02, false };
+static cvar_t cl_bobcycle = { "cl_bobcycle", 0.6, false };
+static cvar_t cl_bobup = { "cl_bobup", 0.5, false };
 
-static cvar_t v_kicktime = { "v_kicktime", "0.5", false };
-static cvar_t v_kickroll = { "v_kickroll", "0.6", false };
-static cvar_t v_kickpitch = { "v_kickpitch", "0.6", false };
+static cvar_t v_kicktime = { "v_kicktime", 0.5, false };
+static cvar_t v_kickroll = { "v_kickroll", 0.6, false };
+static cvar_t v_kickpitch = { "v_kickpitch", 0.6, false };
 
-static cvar_t v_iyaw_cycle = { "v_iyaw_cycle", "2", false };
-static cvar_t v_iroll_cycle = { "v_iroll_cycle", "0.5", false };
-static cvar_t v_ipitch_cycle = { "v_ipitch_cycle", "1", false };
-static cvar_t v_iyaw_level = { "v_iyaw_level", "0.3", false };
-static cvar_t v_iroll_level = { "v_iroll_level", "0.1", false };
-static cvar_t v_ipitch_level = { "v_ipitch_level", "0.3", false };
+static cvar_t v_iyaw_cycle = { "v_iyaw_cycle", 2, false };
+static cvar_t v_iroll_cycle = { "v_iroll_cycle", 0.5, false };
+static cvar_t v_ipitch_cycle = { "v_ipitch_cycle", 1, false };
+static cvar_t v_iyaw_level = { "v_iyaw_level", 0.3, false };
+static cvar_t v_iroll_level = { "v_iroll_level", 0.1, false };
+static cvar_t v_ipitch_level = { "v_ipitch_level", 0.3, false };
 
-static cvar_t v_idlescale = { "v_idlescale", "0", false };
+static cvar_t v_idlescale = { "v_idlescale", 0, false };
 
-cvar_t crosshair = { "crosshair", "0", true };
-static cvar_t cl_crossx = { "cl_crossx", "0", false };
-static cvar_t cl_crossy = { "cl_crossy", "0", false };
+cvar_t crosshair = { "crosshair", 0, true };
+static cvar_t cl_crossx = { "cl_crossx", 0, false };
+static cvar_t cl_crossy = { "cl_crossy", 0, false };
 
-static cvar_t gl_cshiftpercent = { "gl_cshiftpercent", "100", false };
+static cvar_t gl_cshiftpercent = { "gl_cshiftpercent", 100, false };
 
 static uint32_t v_dmg_time;
 static float v_dmg_roll, v_dmg_pitch;
@@ -132,8 +132,8 @@ float V_CalcBob(void)
 
 //=============================================================================
 
-cvar_t v_centermove = { "v_centermove", "0.15", false };
-cvar_t v_centerspeed = { "v_centerspeed", "500" };
+cvar_t v_centermove = { "v_centermove", 0.15, false };
+cvar_t v_centerspeed = { "v_centerspeed", 500 };
 
 void V_StartPitchDrift(void)
 {
@@ -232,7 +232,7 @@ static cshift_t const cshift_water = { { 130, 80, 50 }, 128 };
 static cshift_t const cshift_slime = { { 0, 25, 5 }, 150 };
 static cshift_t const cshift_lava = { { 255, 80, 0 }, 150 };
 
-cvar_t v_gamma = { "gamma", "1", true };
+cvar_t v_gamma = { "gamma", 1, true };
 
 static byte gammatable[256]; // palette is sent through this
 

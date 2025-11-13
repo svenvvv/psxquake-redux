@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cmd.c -- Quake script command processing module
 
 #include "quakedef.h"
-#include "murmurhash2.h"
 
 typedef struct cmdalias_s {
     struct cmdalias_s *next;
@@ -342,7 +341,7 @@ void Cmd_Alias_f(void)
     }
 
     char const * s = Cmd_Argv(1);
-    uint32_t alias_name_hash = MurmurHash2(s, strlen(s));
+    uint32_t alias_name_hash = pq_hash(s, strlen(s));
 
     // if the alias already exists, reuse it
     a = Cmd_AliasFind(alias_name_hash);
@@ -442,7 +441,7 @@ void Cmd_Init(void)
 Cmd_Argc
 ============
 */
-inline int Cmd_Argc(void)
+int Cmd_Argc(void)
 {
     return cmd_argc;
 }
@@ -528,7 +527,7 @@ void Cmd_AddCommand(char const *cmd_name, xcommand_t function)
     if (host_initialized) // because hunk allocation would get stomped
         Sys_Error("Cmd_AddCommand after host_initialized");
 
-    uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
+    uint32_t cmd_name_hash = pq_hash(cmd_name, strlen(cmd_name));
 
     // fail if the command is a variable name
     if (Cvar_FindVarHashed(cmd_name_hash) != NULL) {
@@ -560,7 +559,7 @@ Cmd_Exists
 */
 qboolean Cmd_Exists(char *cmd_name)
 {
-    uint32_t cmd_name_hash = MurmurHash2(cmd_name, strlen(cmd_name));
+    uint32_t cmd_name_hash = pq_hash(cmd_name, strlen(cmd_name));
     return Cmd_FunctionFind(cmd_name_hash) != NULL;
 }
 
@@ -612,7 +611,7 @@ void Cmd_ExecuteString(char const *text, cmd_source_t src)
         return; // no tokens
     }
 
-    uint32_t cmd_name_hash = MurmurHash2(cmd_argv[0], strlen(cmd_argv[0]));
+    uint32_t cmd_name_hash = pq_hash(cmd_argv[0], strlen(cmd_argv[0]));
 
     // check functions
     cmd_function_t * cmd = Cmd_FunctionFind(cmd_name_hash);

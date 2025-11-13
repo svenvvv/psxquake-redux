@@ -31,7 +31,7 @@ Cvar_FindVar
 static cvar_t *Cvar_FindVar(char const *var_name)
 {
     cvar_t *var;
-    uint32_t var_name_hash = MurmurHash2(var_name, strlen(var_name));
+    uint32_t var_name_hash = pq_hash(var_name, strlen(var_name));
     for (var = cvar_vars; var; var = var->next)
         if (var->name_hash == var_name_hash)
             return var;
@@ -61,7 +61,7 @@ float Cvar_VariableValue(char const *var_name)
     var = Cvar_FindVar(var_name);
     if (!var)
         return 0;
-    return Q_atof(var->string);
+    return var->value; // Q_atof(var->string);
 }
 
 #ifdef CONSOLE_COMPLETION
@@ -96,16 +96,24 @@ Cvar_Set
 */
 static void Cvar_SetVar(cvar_t * var, char const *value)
 {
-    qboolean changed = Q_strcmp(var->string, value);
+    qboolean changed = true;
 
-    Z_Free(var->string); // free the old value string
+    if (var->string) {
+        changed = Q_strcmp(var->string, value);
+        Z_Free(var->string); // free the old value string
+    }
 
     var->string = Z_Malloc(Q_strlen(value) + 1);
     Q_strcpy(var->string, value);
     var->value = Q_atof(var->string);
-    if (var->server && changed) {
-        if (sv.active)
+    if (var->is_server() && changed) {
+        if (sv.active) {
+#ifdef ENABLE_CVAR_NAMES
             SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", var->name, var->string);
+#else
+            SV_BroadcastPrintf("0x%08X changed to \"%s\"\n", var->name_hash, var->string);
+#endif
+        }
     }
 }
 
@@ -143,26 +151,29 @@ Adds a freestanding variable to the variable list.
 void Cvar_RegisterVariable(cvar_t *variable)
 {
     char *oldstr;
-    uint32_t name_hash = MurmurHash2(variable->name, strlen(variable->name));
 
     // first check to see if it has already been defined
-    if (Cvar_FindVarHashed(name_hash)) {
+    if (Cvar_FindVarHashed(variable->name_hash)) {
+#ifdef ENABLE_CVAR_NAMES
         Con_Printf("Can't register variable %s, already defined\n", variable->name);
+#else
+        Con_Printf("Can't register variable 0x%08X, already defined\n", variable->name_hash);
+#endif
         return;
     }
 
     // check for overlap with a command
-    if (Cmd_ExistsHashed(name_hash)) {
-        Con_Printf("Cvar_RegisterVariable: %s is a command\n", variable->name);
+    if (Cmd_ExistsHashed(variable->name_hash)) {
+        Con_Printf("Cvar_RegisterVariable: 0x%08X is a command\n", variable->name_hash);
         return;
     }
 
-    // copy the value off, because future sets will Z_Free it
-    oldstr = variable->string;
-    variable->string = Z_Malloc(Q_strlen(variable->string) + 1);
-    Q_strcpy(variable->string, oldstr);
-    variable->value = Q_atof(variable->string);
-    variable->name_hash = name_hash;
+    if (variable->initial_value) {
+        // copy the value off, because future sets will Z_Free it
+        variable->string = Z_Malloc(Q_strlen(variable->initial_value) + 1);
+        Q_strcpy(variable->string, variable->initial_value);
+        variable->value = Q_atof(variable->string);
+    }
 
     // link the variable in
     variable->next = cvar_vars;
@@ -179,15 +190,16 @@ Handles variable inspection and changing from the console
 qboolean Cvar_Command(void)
 {
     cvar_t *v;
+    char const * var_name = Cmd_Argv(0);
 
     // check variables
-    v = Cvar_FindVar(Cmd_Argv(0));
+    v = Cvar_FindVar(var_name);
     if (!v)
         return false;
 
     // perform a variable print or set
     if (Cmd_Argc() == 1) {
-        Con_Printf("\"%s\" is \"%s\"\n", v->name, v->string);
+        Con_Printf("\"%s\" is \"%s\"\n", var_name, v->string);
         return true;
     }
 
@@ -205,9 +217,15 @@ with the archive flag set to true.
 */
 void Cvar_WriteVariables(FILE *f)
 {
+#ifdef ENABLE_CVAR_NAMES
     cvar_t *var;
 
-    for (var = cvar_vars; var; var = var->next)
-        if (var->archive)
+    for (var = cvar_vars; var; var = var->next) {
+        if (var->is_archive()) {
             fprintf(f, "%s \"%s\"\n", var->name, var->string);
+        }
+    }
+#else
+    Con_Printf("PSXQuake is compiled without support for CVAR names, not saving variables to config.cfg");
+#endif
 }

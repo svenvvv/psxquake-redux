@@ -144,7 +144,7 @@ extern qboolean com_eof;
 char const *COM_Parse(char const *data);
 
 extern int com_argc;
-extern char **com_argv;
+extern char const **com_argv;
 
 int COM_CheckParm(char const *parm);
 void COM_Init(void);

@@ -29,8 +29,8 @@ static char const *argvdummy = " ";
 static char const *safeargvs[NUM_SAFE_ARGVS] = { "-stdvid", "-nolan",   "-nosound", "-nocdaudio",
                                            "-nojoy",  "-nomouse", "-dibonly" };
 
-cvar_t registered = { "registered", "0" };
-cvar_t cmdline = { "cmdline", "0", false, true };
+cvar_t registered = { "registered", 0 };
+cvar_t cmdline = { "cmdline", 0, false, true };
 
 qboolean proghack;
 
@@ -46,7 +46,7 @@ void COM_InitFilesystem(void);
 
 char com_token[1024];
 int com_argc;
-char **com_argv;
+char const **com_argv;
 
 #define CMDLINE_LENGTH 256
 char com_cmdline[CMDLINE_LENGTH];

@@ -27,9 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern unsigned char d_15to8table[65536];
 
-cvar_t gl_nobind = { "gl_nobind", "0" };
-cvar_t gl_max_size = { "gl_max_size", "1024" };
-cvar_t gl_picmip = { "gl_picmip", "0" };
+cvar_t gl_nobind = { "gl_nobind", 0 };
+cvar_t gl_max_size = { "gl_max_size", 1024 };
+cvar_t gl_picmip = { "gl_picmip", 0 };
 
 byte *draw_chars; // 8*8 graphic characters
 qpic_t *draw_disc;
@@ -375,7 +375,7 @@ void Draw_Init(void)
     SwapPic(cb);
 
     // hack the version number directly into the pic
-    sprintf(ver, "(PSXQuake-next) %4u.%02u", VERSION_MAJOR, VERSION_MINOR);
+    sprintf(ver, "(PSXQuake-redux) %4u.%02u", VERSION_MAJOR, VERSION_MINOR);
     dest = cb->data + 320 * 186 + 320 - 11 - 8 * strlen(ver);
     y = strlen(ver);
     for (x = 0; x < y; x++)

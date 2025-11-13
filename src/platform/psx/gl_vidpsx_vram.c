@@ -1,12 +1,11 @@
-#include "murmurhash2.h"
+#include "psx/gl.h"
+#include "psx/io.h"
+#include "sys.h"
+#include "util/hashlib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "psx/gl.h"
-#include "psx/io.h"
-#include "sys.h"
 
 static psx_vram_texture vram_textures[PSX_MAX_VRAM_RECTS];
 static size_t vram_textures_count = 0;
@@ -45,7 +44,7 @@ psx_vram_texture *psx_vram_find(char const *ident, int w, int h)
         return NULL;
     }
 
-    ident_hash = MurmurHash2((uint8_t *)ident, strlen(ident));
+    ident_hash = pq_hash((uint8_t *)ident, strlen(ident));
 
     for (int i = 0; i < vram_textures_count; ++i) {
         psx_vram_texture *tex = &vram_textures[i];
@@ -220,7 +219,7 @@ psx_vram_texture *psx_vram_pack(char const *ident, int w, int h)
     int candidate_remaining_h = 0;
 
     if (ident[0]) {
-        ident_hash = MurmurHash2((uint8_t *)ident, strlen(ident));
+        ident_hash = pq_hash((uint8_t *)ident, strlen(ident));
     }
 
     w /= 2;
