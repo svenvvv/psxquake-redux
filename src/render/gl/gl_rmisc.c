@@ -162,37 +162,8 @@ void R_Init(void)
     Cmd_AddCommand("envmap", R_Envmap_f);
     Cmd_AddCommand("pointfile", R_ReadPointFile_f);
 
-    Cvar_RegisterVariable(&r_norefresh);
-    Cvar_RegisterVariable(&r_lightmap);
-    Cvar_RegisterVariable(&r_fullbright);
-    Cvar_RegisterVariable(&r_drawentities);
-    Cvar_RegisterVariable(&r_drawviewmodel);
-    Cvar_RegisterVariable(&r_shadows);
-    Cvar_RegisterVariable(&r_mirroralpha);
-    Cvar_RegisterVariable(&r_wateralpha);
-    Cvar_RegisterVariable(&r_dynamic);
-    Cvar_RegisterVariable(&r_novis);
-    Cvar_RegisterVariable(&r_speeds);
-
-    Cvar_RegisterVariable(&gl_finish);
-    Cvar_RegisterVariable(&gl_clear);
-    Cvar_RegisterVariable(&gl_texsort);
-
     if (gl_mtexable)
         Cvar_SetValue("gl_texsort", 0.0);
-
-    Cvar_RegisterVariable(&gl_cull);
-    Cvar_RegisterVariable(&gl_smoothmodels);
-    Cvar_RegisterVariable(&gl_affinemodels);
-    Cvar_RegisterVariable(&gl_polyblend);
-    Cvar_RegisterVariable(&gl_flashblend);
-    Cvar_RegisterVariable(&gl_playermip);
-    Cvar_RegisterVariable(&gl_nocolors);
-
-    Cvar_RegisterVariable(&gl_keeptjunctions);
-    Cvar_RegisterVariable(&gl_reporttjunctions);
-
-    Cvar_RegisterVariable(&gl_doubleeyes);
 
     R_InitParticles();
     R_InitParticleTexture();

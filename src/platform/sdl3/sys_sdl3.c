@@ -157,7 +157,7 @@ void Sys_Error(char const *error, ...)
     va_end(argptr);
     printf("\n");
 
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 void Sys_Printf(char const *fmt, ...)

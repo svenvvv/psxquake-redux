@@ -55,6 +55,15 @@ interface from being ambiguous.
 
 #include "util/hashlib.h"
 
+#define CVAR_REGISTER(_var, _value) \
+    cvar_t _var =  _value; \
+    __attribute__((__section__("pq_cvars"))) \
+    __attribute__((__used__)) \
+    cvar_t * _var ## _ptr =  &_var
+
+#define CVAR_CTOR(...) __VA_ARGS__
+
+
 enum cvar_flags {
     CVAR_FLAG_ARCHIVE = (1 << 0),
     CVAR_FLAG_SERVER = (1 << 1),
@@ -63,13 +72,12 @@ enum cvar_flags {
 typedef struct cvar_s {
     uint32_t const name_hash;
 #ifdef ENABLE_CVAR_NAMES
-    char const *name;
+    char const * const name;
 #endif
     char *string;
     char const * const initial_value;
     uint8_t flags;
     float value;
-    struct cvar_s *next;
 
     [[nodiscard]]
     constexpr bool is_archive() const
@@ -83,6 +91,17 @@ typedef struct cvar_s {
         return flags & CVAR_FLAG_SERVER;
     }
 
+    explicit constexpr cvar_s(uint32_t _name_hash)
+        : name_hash(_name_hash)
+#ifdef ENABLE_CVAR_NAMES
+        , name("")
+#endif
+        , string(nullptr)
+        , initial_value(nullptr)
+        , flags(0)
+        , value(0.0f)
+    {}
+
     consteval cvar_s(char const *_name, char const *_string, qboolean _archive = false, qboolean _server = false)
         : name_hash(pq_hash_const(std::string_view(_name)))
 #ifdef ENABLE_CVAR_NAMES
@@ -92,7 +111,6 @@ typedef struct cvar_s {
         , initial_value(_string)
         , flags(0)
         , value(0.0f)
-        , next(nullptr)
     {
         if (_archive) {
             flags |= CVAR_FLAG_ARCHIVE;
@@ -115,7 +133,6 @@ typedef struct cvar_s {
         , initial_value(nullptr)
         , flags(0)
         , value(_value)
-        , next(nullptr)
     {
         if (_archive) {
             flags |= CVAR_FLAG_ARCHIVE;
@@ -126,9 +143,7 @@ typedef struct cvar_s {
     }
 } cvar_t;
 
-void Cvar_RegisterVariable(cvar_t *variable);
-// registers a cvar that allready has the name, string, and optionally the
-// archive elements set.
+void Cvar_Init();
 
 void Cvar_Set(char const *var_name, char const *value);
 // equivelant to "<name> <variable>" typed at the console

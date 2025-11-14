@@ -42,7 +42,7 @@ int con_current; // where next message will be printed
 int con_x; // offset in current line for next print
 char *con_text = 0;
 
-cvar_t con_notifytime = { "con_notifytime", 3 }; //seconds
+CVAR_REGISTER(con_notifytime, CVAR_CTOR({ "con_notifytime", 3 })); //seconds
 
 #define NUM_CON_TIMES 4
 static uint32_t con_times[NUM_CON_TIMES]; // realtime time the line was generated
@@ -218,8 +218,6 @@ void Con_Init(void)
     //
     // register our commands
     //
-    Cvar_RegisterVariable(&con_notifytime);
-
     Cmd_AddCommand("toggleconsole", Con_ToggleConsole_f);
     Cmd_AddCommand("messagemode", Con_MessageMode_f);
     Cmd_AddCommand("messagemode2", Con_MessageMode2_f);

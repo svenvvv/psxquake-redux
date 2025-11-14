@@ -21,55 +21,110 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-static cvar_t *cvar_vars;
-
 /*
-============
-Cvar_FindVar
-============
-*/
+ * When using the CVAR_REGISTER preprocessor macro then every cvar will also have a pointer stored
+ * in the cvars linker section (see cvar.h). This linker section will have __start_x and __stop_x
+ * variables generated (by gcc), which we use here to iterate through the list of pointers.
+ *
+ * In Cvar_Init() those pointers will be sorted according to their name hash values.
+ * When doing cvar lookups we hash the cvar name and do a binary search on the pointer array
+ * (comparing name hashes) to find the matching one a quite a bit faster than looping through the
+ * entire array.
+ */
+extern cvar_t *__start_pq_cvars;
+extern cvar_t *__stop_pq_cvars;
+#define PQ_CVARS_SIZE (&__stop_pq_cvars - &__start_pq_cvars)
+
+static int Cvar_Comparator(void const *a, void const *b)
+{
+    auto const **aa = (cvar_t const **)a;
+    auto const **bb = (cvar_t const **)b;
+    auto const &a_val = (*aa)->name_hash;
+    auto const &b_val = (*bb)->name_hash;
+    if (a_val > b_val) {
+        return 1;
+    }
+    if (a_val < b_val) {
+        return -1;
+    }
+    return 0;
+}
+
+static void Cvar_InitVariable(cvar_t *variable)
+{
+#if 0
+    char *oldstr;
+
+    // first check to see if it has already been defined
+    if (Cvar_FindVarHashed(variable->name_hash)) {
+#ifdef ENABLE_CVAR_NAMES
+        Con_Printf("Can't register variable %s, already defined\n", variable->name);
+#else
+        Con_Printf("Can't register variable 0x%08X, already defined\n", variable->name_hash);
+#endif
+        return;
+    }
+
+    // check for overlap with a command
+    if (Cmd_ExistsHashed(variable->name_hash)) {
+        Con_Printf("Cvar_RegisterVariable: 0x%08X is a command\n", variable->name_hash);
+        return;
+    }
+#endif
+
+    if (variable->initial_value) {
+        // copy the value off, because future sets will Z_Free it
+        variable->string = static_cast<char *>(Z_Malloc(Q_strlen(variable->initial_value) + 1));
+        Q_strcpy(variable->string, variable->initial_value);
+    }
+}
+
+void Cvar_Init()
+{
+    qsort(&__start_pq_cvars, PQ_CVARS_SIZE, sizeof(void *), Cvar_Comparator);
+
+    for (cvar_t **iter = &__start_pq_cvars; iter < &__stop_pq_cvars; ++iter) {
+        Cvar_InitVariable(*iter);
+    }
+
+    // TODO: We could use something like a bloom filter here to keep track of which variables
+    // have been defined and halt and catch fire when there's two with the same name.
+    // Currently we don't check this anywhere and just hope that all's well :-).
+    // I don't think it's really worth the effort, given that this is a novelty Quake engine.
+}
+
 static cvar_t *Cvar_FindVar(char const *var_name)
 {
-    cvar_t *var;
     uint32_t var_name_hash = pq_hash(var_name, strlen(var_name));
-    for (var = cvar_vars; var; var = var->next)
-        if (var->name_hash == var_name_hash)
-            return var;
-
-    return NULL;
+    return Cvar_FindVarHashed(var_name_hash);
 }
 
 cvar_t *Cvar_FindVarHashed(uint32_t var_name_hash)
 {
-    cvar_t *var;
-    for (var = cvar_vars; var; var = var->next)
-        if (var->name_hash == var_name_hash)
-            return var;
+    cvar_t const search{ var_name_hash };
+    auto const *search_ptr = &search;
 
-    return NULL;
+    void *result = bsearch(&search_ptr, &__start_pq_cvars, PQ_CVARS_SIZE, sizeof(void *), Cvar_Comparator);
+
+    auto **ret = static_cast<cvar_t **>(result);
+    if (ret == nullptr) {
+        return nullptr;
+    }
+    return *ret;
 }
 
-/*
-============
-Cvar_VariableValue
-============
-*/
 float Cvar_VariableValue(char const *var_name)
 {
     cvar_t *var;
-
     var = Cvar_FindVar(var_name);
-    if (!var)
+    if (var == nullptr) {
         return 0;
-    return var->value; // Q_atof(var->string);
+    }
+    // Why did this previously return Q_atof(var->string) when var->value seems to be kept up to date..?
+    return var->value;
 }
 
 #ifdef CONSOLE_COMPLETION
-/*
-============
-Cvar_CompleteVariable
-============
-*/
 char *Cvar_CompleteVariable(char *partial)
 {
     cvar_t *cvar;
@@ -89,12 +144,7 @@ char *Cvar_CompleteVariable(char *partial)
 }
 #endif
 
-/*
-============
-Cvar_Set
-============
-*/
-static void Cvar_SetVar(cvar_t * var, char const *value)
+static void Cvar_SetVar(cvar_t *var, char const *value)
 {
     qboolean changed = true;
 
@@ -103,99 +153,49 @@ static void Cvar_SetVar(cvar_t * var, char const *value)
         Z_Free(var->string); // free the old value string
     }
 
-    var->string = Z_Malloc(Q_strlen(value) + 1);
+    var->string = static_cast<char *>(Z_Malloc(Q_strlen(value) + 1));
     Q_strcpy(var->string, value);
+    // NOLINTNEXTLINE(*-err34-c)
     var->value = Q_atof(var->string);
-    if (var->is_server() && changed) {
-        if (sv.active) {
+
+    if (var->is_server() && changed && sv.active) {
 #ifdef ENABLE_CVAR_NAMES
-            SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", var->name, var->string);
+        SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", var->name, var->string);
 #else
-            SV_BroadcastPrintf("0x%08X changed to \"%s\"\n", var->name_hash, var->string);
+        SV_BroadcastPrintf("0x%08X changed to \"%s\"\n", var->name_hash, var->string);
 #endif
-        }
     }
 }
 
 void Cvar_Set(char const *var_name, char const *value)
 {
-    cvar_t * var = Cvar_FindVar(var_name);
-    if (!var) { // there is an error in C code if this happens
+    cvar_t *var = Cvar_FindVar(var_name);
+    if (var == nullptr) {
         Con_Printf("Cvar_Set: variable %s not found\n", var_name);
         return;
     }
-
     Cvar_SetVar(var, value);
 }
 
-/*
-============
-Cvar_SetValue
-============
-*/
 void Cvar_SetValue(char const *var_name, float value)
 {
     char val[32];
-
-    sprintf(val, "%f", value);
+    snprintf(val, sizeof(val), "%f", value);
     Cvar_Set(var_name, val);
 }
 
-/*
-============
-Cvar_RegisterVariable
-
-Adds a freestanding variable to the variable list.
-============
-*/
-void Cvar_RegisterVariable(cvar_t *variable)
+/**
+ * Handles variable inspection and changing from the console.
+ */
+qboolean Cvar_Command()
 {
-    char *oldstr;
-
-    // first check to see if it has already been defined
-    if (Cvar_FindVarHashed(variable->name_hash)) {
-#ifdef ENABLE_CVAR_NAMES
-        Con_Printf("Can't register variable %s, already defined\n", variable->name);
-#else
-        Con_Printf("Can't register variable 0x%08X, already defined\n", variable->name_hash);
-#endif
-        return;
-    }
-
-    // check for overlap with a command
-    if (Cmd_ExistsHashed(variable->name_hash)) {
-        Con_Printf("Cvar_RegisterVariable: 0x%08X is a command\n", variable->name_hash);
-        return;
-    }
-
-    if (variable->initial_value) {
-        // copy the value off, because future sets will Z_Free it
-        variable->string = Z_Malloc(Q_strlen(variable->initial_value) + 1);
-        Q_strcpy(variable->string, variable->initial_value);
-        variable->value = Q_atof(variable->string);
-    }
-
-    // link the variable in
-    variable->next = cvar_vars;
-    cvar_vars = variable;
-}
-
-/*
-============
-Cvar_Command
-
-Handles variable inspection and changing from the console
-============
-*/
-qboolean Cvar_Command(void)
-{
-    cvar_t *v;
-    char const * var_name = Cmd_Argv(0);
+    char const *var_name = Cmd_Argv(0);
 
     // check variables
-    v = Cvar_FindVar(var_name);
-    if (!v)
+    cvar_t *v = Cvar_FindVar(var_name);
+    if (!v) {
         return false;
+    }
 
     // perform a variable print or set
     if (Cmd_Argc() == 1) {
@@ -207,22 +207,15 @@ qboolean Cvar_Command(void)
     return true;
 }
 
-/*
-============
-Cvar_WriteVariables
-
-Writes lines containing "set variable value" for all variables
-with the archive flag set to true.
-============
-*/
+/**
+ * Writes lines containing "set variable value" for all variables with the archive flag set to true.
+ */
 void Cvar_WriteVariables(FILE *f)
 {
 #ifdef ENABLE_CVAR_NAMES
-    cvar_t *var;
-
-    for (var = cvar_vars; var; var = var->next) {
-        if (var->is_archive()) {
-            fprintf(f, "%s \"%s\"\n", var->name, var->string);
+    for (cvar_t **iter = &__start_pq_cvars; iter < &__stop_pq_cvars; ++iter) {
+        if ((*iter)->is_archive()) {
+            fprintf(f, "%s \"%s\"\n", (*iter)->name, (*iter)->string);
         }
     }
 #else

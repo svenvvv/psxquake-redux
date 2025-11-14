@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "psx/gl.h"
 #include "util/hashlib.h"
 
-cvar_t gl_max_size = { "gl_max_size", 1024 };
+CVAR_REGISTER(gl_max_size, CVAR_CTOR({ "gl_max_size", 1024 }));
 
 static byte *draw_chars; // 8*8 graphic characters
 static qpic_t *draw_backtile;

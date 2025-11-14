@@ -24,9 +24,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define NUM_MIPS 4
 
-cvar_t d_subdiv16 = { "d_subdiv16", 1 };
-cvar_t d_mipcap = { "d_mipcap", 0 };
-cvar_t d_mipscale = { "d_mipscale", 1 };
+CVAR_REGISTER(d_subdiv16, CVAR_CTOR({ "d_subdiv16", 1 }));
+CVAR_REGISTER(d_mipcap, CVAR_CTOR({ "d_mipcap", 0 }));
+CVAR_REGISTER(d_mipscale, CVAR_CTOR({ "d_mipscale", 1 }));
 
 surfcache_t *d_initial_rover;
 qboolean d_roverwrapped;
@@ -47,10 +47,6 @@ D_Init
 void D_Init(void)
 {
     r_skydirect = 1;
-
-    Cvar_RegisterVariable(&d_subdiv16);
-    Cvar_RegisterVariable(&d_mipcap);
-    Cvar_RegisterVariable(&d_mipscale);
 
     r_drawpolys = false;
     r_worldpolysbacktofront = false;

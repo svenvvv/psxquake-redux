@@ -25,19 +25,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // references them even when on a unix system.
 
 // these two are not intended to be set directly
-cvar_t cl_name = { "_cl_name", "player", true };
-cvar_t cl_color = { "_cl_color", 0, true };
+CVAR_REGISTER(cl_name, CVAR_CTOR({ "_cl_name", "player", true }));
+CVAR_REGISTER(cl_color, CVAR_CTOR({ "_cl_color", 0, true }));
 
-cvar_t cl_nolerp = { "cl_nolerp", 0 };
+CVAR_REGISTER(cl_nolerp, CVAR_CTOR({ "cl_nolerp", 0 }));
 
-cvar_t lookspring = { "lookspring", 0, true };
-cvar_t lookstrafe = { "lookstrafe", 0, true };
-cvar_t sensitivity = { "sensitivity", 3, true };
+CVAR_REGISTER(lookspring, CVAR_CTOR({ "lookspring", 0, true }));
+CVAR_REGISTER(lookstrafe, CVAR_CTOR({ "lookstrafe", 0, true }));
+CVAR_REGISTER(sensitivity, CVAR_CTOR({ "sensitivity", 3, true }));
 
-cvar_t m_pitch = { "m_pitch", 0.022, true };
-cvar_t m_yaw = { "m_yaw", 0.022, true };
-cvar_t m_forward = { "m_forward", 1, true };
-cvar_t m_side = { "m_side", 0.8, true };
+CVAR_REGISTER(m_pitch, CVAR_CTOR({ "m_pitch", 0.022, true }));
+CVAR_REGISTER(m_yaw, CVAR_CTOR({ "m_yaw", 0.022, true }));
+CVAR_REGISTER(m_forward, CVAR_CTOR({ "m_forward", 1, true }));
+CVAR_REGISTER(m_side, CVAR_CTOR({ "m_side", 0.8, true }));
 
 client_static_t cls;
 client_state_t cl;
@@ -616,31 +616,6 @@ void CL_Init(void)
 
     CL_InitInput();
     CL_InitTEnts();
-
-    //
-    // register our commands
-    //
-    Cvar_RegisterVariable(&cl_name);
-    Cvar_RegisterVariable(&cl_color);
-    Cvar_RegisterVariable(&cl_upspeed);
-    Cvar_RegisterVariable(&cl_forwardspeed);
-    Cvar_RegisterVariable(&cl_backspeed);
-    Cvar_RegisterVariable(&cl_sidespeed);
-    Cvar_RegisterVariable(&cl_movespeedkey);
-    Cvar_RegisterVariable(&cl_yawspeed);
-    Cvar_RegisterVariable(&cl_pitchspeed);
-    Cvar_RegisterVariable(&cl_anglespeedkey);
-    Cvar_RegisterVariable(&cl_nolerp);
-    Cvar_RegisterVariable(&lookspring);
-    Cvar_RegisterVariable(&lookstrafe);
-    Cvar_RegisterVariable(&sensitivity);
-
-    Cvar_RegisterVariable(&m_pitch);
-    Cvar_RegisterVariable(&m_yaw);
-    Cvar_RegisterVariable(&m_forward);
-    Cvar_RegisterVariable(&m_side);
-
-    //	Cvar_RegisterVariable (&cl_autofire);
 
     Cmd_AddCommand("entities", CL_PrintEntities_f);
     Cmd_AddCommand("disconnect", CL_Disconnect_f);

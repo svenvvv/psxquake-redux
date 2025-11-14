@@ -29,8 +29,8 @@ static char const *argvdummy = " ";
 static char const *safeargvs[NUM_SAFE_ARGVS] = { "-stdvid", "-nolan",   "-nosound", "-nocdaudio",
                                            "-nojoy",  "-nomouse", "-dibonly" };
 
-cvar_t registered = { "registered", 0 };
-cvar_t cmdline = { "cmdline", 0, false, true };
+CVAR_REGISTER(registered, CVAR_CTOR({ "registered", 0 }));
+CVAR_REGISTER(cmdline, CVAR_CTOR({ "cmdline", 0, false, true }));
 
 qboolean proghack;
 
@@ -772,8 +772,6 @@ void COM_Init(void)
         LittleFloat = FloatSwap;
     }
 
-    Cvar_RegisterVariable(&registered);
-    Cvar_RegisterVariable(&cmdline);
     Cmd_AddCommand("path", COM_Path_f);
 
     COM_InitFilesystem();

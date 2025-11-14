@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 dprograms_t *progs;
 dfunction_t *pr_functions;
 char *pr_strings;
-ddef_t *pr_fielddefs;
-ddef_t *pr_globaldefs;
+static ddef_t *pr_fielddefs;
+static ddef_t *pr_globaldefs;
 dstatement_t *pr_statements;
 globalvars_t *pr_global_struct;
 float *pr_globals; // same as pr_global_struct
@@ -33,22 +33,22 @@ int pr_edict_size; // in bytes
 
 unsigned short pr_crc;
 
-int type_size[8] = { 1, sizeof(string_t) / 4, 1, 3, 1, 1, sizeof(func_t) / 4, sizeof(void *) / 4 };
+static constexpr int type_size[8] = { 1, sizeof(string_t) / 4, 1, 3, 1, 1, sizeof(func_t) / 4, sizeof(void *) / 4 };
 
 ddef_t *ED_FieldAtOfs(int ofs);
 qboolean ED_ParseEpair(void *base, ddef_t *key, char *s);
 
-cvar_t nomonsters = { "nomonsters", 0 };
-cvar_t gamecfg = { "gamecfg", 0 };
-cvar_t scratch1 = { "scratch1", 0 };
-cvar_t scratch2 = { "scratch2", 0 };
-cvar_t scratch3 = { "scratch3", 0 };
-cvar_t scratch4 = { "scratch4", 0 };
-cvar_t savedgamecfg = { "savedgamecfg", 0, true };
-cvar_t saved1 = { "saved1", 0, true };
-cvar_t saved2 = { "saved2", 0, true };
-cvar_t saved3 = { "saved3", 0, true };
-cvar_t saved4 = { "saved4", 0, true };
+CVAR_REGISTER(nomonsters, CVAR_CTOR({ "nomonsters", 0 }));
+CVAR_REGISTER(gamecfg, CVAR_CTOR({ "gamecfg", 0 }));
+CVAR_REGISTER(scratch1, CVAR_CTOR({ "scratch1", 0 }));
+CVAR_REGISTER(scratch2, CVAR_CTOR({ "scratch2", 0 }));
+CVAR_REGISTER(scratch3, CVAR_CTOR({ "scratch3", 0 }));
+CVAR_REGISTER(scratch4, CVAR_CTOR({ "scratch4", 0 }));
+CVAR_REGISTER(savedgamecfg, CVAR_CTOR({ "savedgamecfg", 0, true }));
+CVAR_REGISTER(saved1, CVAR_CTOR({ "saved1", 0, true }));
+CVAR_REGISTER(saved2, CVAR_CTOR({ "saved2", 0, true }));
+CVAR_REGISTER(saved3, CVAR_CTOR({ "saved3", 0, true }));
+CVAR_REGISTER(saved4, CVAR_CTOR({ "saved4", 0, true }));
 
 #define MAX_FIELD_LEN 64
 #define GEFV_CACHESIZE 2
@@ -1012,17 +1012,6 @@ void PR_Init(void)
     Cmd_AddCommand("edicts", ED_PrintEdicts);
     Cmd_AddCommand("edictcount", ED_Count);
     Cmd_AddCommand("profile", PR_Profile_f);
-    Cvar_RegisterVariable(&nomonsters);
-    Cvar_RegisterVariable(&gamecfg);
-    Cvar_RegisterVariable(&scratch1);
-    Cvar_RegisterVariable(&scratch2);
-    Cvar_RegisterVariable(&scratch3);
-    Cvar_RegisterVariable(&scratch4);
-    Cvar_RegisterVariable(&savedgamecfg);
-    Cvar_RegisterVariable(&saved1);
-    Cvar_RegisterVariable(&saved2);
-    Cvar_RegisterVariable(&saved3);
-    Cvar_RegisterVariable(&saved4);
 }
 
 edict_t *EDICT_NUM(int n)

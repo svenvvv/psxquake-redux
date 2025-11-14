@@ -37,7 +37,7 @@ qboolean isPermedia = false;
 float gldepthmin, gldepthmax;
 int texture_extension_number = 1;
 
-cvar_t gl_ztrick = { "gl_ztrick", 1 };
+CVAR_REGISTER(gl_ztrick, CVAR_CTOR({ "gl_ztrick", 1 }));
 
 void VID_SetPalette(unsigned char *palette)
 {

@@ -98,7 +98,7 @@ void PR_PrintStatement(dstatement_t *s)
 {
     int i;
 
-    if ((unsigned)s->op < sizeof(pr_opnames) / sizeof(pr_opnames[0])) {
+    if ((unsigned)s->op < std::size(pr_opnames)) {
         Con_Printf("%s ", pr_opnames[s->op]);
         i = strlen(pr_opnames[s->op]);
         for (; i < 10; i++)

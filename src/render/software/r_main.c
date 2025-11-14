@@ -113,27 +113,27 @@ uint32_t se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 
 void R_MarkLeaves(void);
 
-cvar_t r_draworder = { "r_draworder", 0 };
-cvar_t r_speeds = { "r_speeds", 0 };
-cvar_t r_timegraph = { "r_timegraph", 0 };
-cvar_t r_graphheight = { "r_graphheight", 10 };
-cvar_t r_clearcolor = { "r_clearcolor", 2 };
-cvar_t r_waterwarp = { "r_waterwarp", 1 };
-cvar_t r_fullbright = { "r_fullbright", 0 };
-cvar_t r_drawentities = { "r_drawentities", 1 };
-cvar_t r_drawviewmodel = { "r_drawviewmodel", 1 };
-cvar_t r_aliasstats = { "r_polymodelstats", 0 };
-cvar_t r_dspeeds = { "r_dspeeds", 0 };
-cvar_t r_drawflat = { "r_drawflat", 0 };
-cvar_t r_ambient = { "r_ambient", 0 };
-cvar_t r_reportsurfout = { "r_reportsurfout", 0 };
-cvar_t r_maxsurfs = { "r_maxsurfs", 0 };
-cvar_t r_numsurfs = { "r_numsurfs", 0 };
-cvar_t r_reportedgeout = { "r_reportedgeout", 0 };
-cvar_t r_maxedges = { "r_maxedges", 0 };
-cvar_t r_numedges = { "r_numedges", 0 };
-cvar_t r_aliastransbase = { "r_aliastransbase", 200 };
-cvar_t r_aliastransadj = { "r_aliastransadj", 100 };
+CVAR_REGISTER(r_draworder, CVAR_CTOR({ "r_draworder", 0 }));
+CVAR_REGISTER(r_speeds, CVAR_CTOR({ "r_speeds", 0 }));
+CVAR_REGISTER(r_timegraph, CVAR_CTOR({ "r_timegraph", 0 }));
+CVAR_REGISTER(r_graphheight, CVAR_CTOR({ "r_graphheight", 10 }));
+CVAR_REGISTER(r_clearcolor, CVAR_CTOR({ "r_clearcolor", 2 }));
+CVAR_REGISTER(r_waterwarp, CVAR_CTOR({ "r_waterwarp", 1 }));
+CVAR_REGISTER(r_fullbright, CVAR_CTOR({ "r_fullbright", 0 }));
+CVAR_REGISTER(r_drawentities, CVAR_CTOR({ "r_drawentities", 1 }));
+CVAR_REGISTER(r_drawviewmodel, CVAR_CTOR({ "r_drawviewmodel", 1 }));
+CVAR_REGISTER(r_aliasstats, CVAR_CTOR({ "r_polymodelstats", 0 }));
+CVAR_REGISTER(r_dspeeds, CVAR_CTOR({ "r_dspeeds", 0 }));
+CVAR_REGISTER(r_drawflat, CVAR_CTOR({ "r_drawflat", 0 }));
+CVAR_REGISTER(r_ambient, CVAR_CTOR({ "r_ambient", 0 }));
+CVAR_REGISTER(r_reportsurfout, CVAR_CTOR({ "r_reportsurfout", 0 }));
+CVAR_REGISTER(r_maxsurfs, CVAR_CTOR({ "r_maxsurfs", 0 }));
+CVAR_REGISTER(r_numsurfs, CVAR_CTOR({ "r_numsurfs", 0 }));
+CVAR_REGISTER(r_reportedgeout, CVAR_CTOR({ "r_reportedgeout", 0 }));
+CVAR_REGISTER(r_maxedges, CVAR_CTOR({ "r_maxedges", 0 }));
+CVAR_REGISTER(r_numedges, CVAR_CTOR({ "r_numedges", 0 }));
+CVAR_REGISTER(r_aliastransbase, CVAR_CTOR({ "r_aliastransbase", 200 }));
+CVAR_REGISTER(r_aliastransadj, CVAR_CTOR({ "r_aliastransadj", 100 }));
 
 extern cvar_t scr_fov;
 
@@ -187,28 +187,6 @@ void R_Init(void)
 
     Cmd_AddCommand("timerefresh", R_TimeRefresh_f);
     Cmd_AddCommand("pointfile", R_ReadPointFile_f);
-
-    Cvar_RegisterVariable(&r_draworder);
-    Cvar_RegisterVariable(&r_speeds);
-    Cvar_RegisterVariable(&r_timegraph);
-    Cvar_RegisterVariable(&r_graphheight);
-    Cvar_RegisterVariable(&r_drawflat);
-    Cvar_RegisterVariable(&r_ambient);
-    Cvar_RegisterVariable(&r_clearcolor);
-    Cvar_RegisterVariable(&r_waterwarp);
-    Cvar_RegisterVariable(&r_fullbright);
-    Cvar_RegisterVariable(&r_drawentities);
-    Cvar_RegisterVariable(&r_drawviewmodel);
-    Cvar_RegisterVariable(&r_aliasstats);
-    Cvar_RegisterVariable(&r_dspeeds);
-    Cvar_RegisterVariable(&r_reportsurfout);
-    Cvar_RegisterVariable(&r_maxsurfs);
-    Cvar_RegisterVariable(&r_numsurfs);
-    Cvar_RegisterVariable(&r_reportedgeout);
-    Cvar_RegisterVariable(&r_maxedges);
-    Cvar_RegisterVariable(&r_numedges);
-    Cvar_RegisterVariable(&r_aliastransbase);
-    Cvar_RegisterVariable(&r_aliastransadj);
 
     Cvar_SetValue("r_maxedges", (float)NUMSTACKEDGES);
     Cvar_SetValue("r_maxsurfs", (float)NUMSTACKSURFACES);

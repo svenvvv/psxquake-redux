@@ -39,11 +39,11 @@ solid_edge items only clip against bsp models.
 
 */
 
-cvar_t sv_friction = { "sv_friction", 4, false, true };
-cvar_t sv_stopspeed = { "sv_stopspeed", 100 };
-cvar_t sv_gravity = { "sv_gravity", 800, false, true };
-cvar_t sv_maxvelocity = { "sv_maxvelocity", 2000 };
-cvar_t sv_nostep = { "sv_nostep", 0 };
+CVAR_REGISTER(sv_friction, CVAR_CTOR({ "sv_friction", 4, false, true }));
+CVAR_REGISTER(sv_stopspeed, CVAR_CTOR({ "sv_stopspeed", 100 }));
+CVAR_REGISTER(sv_gravity, CVAR_CTOR({ "sv_gravity", 800, false, true }));
+CVAR_REGISTER(sv_maxvelocity, CVAR_CTOR({ "sv_maxvelocity", 2000 }));
+CVAR_REGISTER(sv_nostep, CVAR_CTOR({ "sv_nostep", 0 }));
 
 #ifdef QUAKE2
 static vec3_t vec_origin = { 0.0, 0.0, 0.0 };

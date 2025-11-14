@@ -30,14 +30,14 @@ float scr_con_current;
 float scr_conlines; // lines of console to display
 
 float oldscreensize, oldfov;
-cvar_t scr_viewsize = { "viewsize", 100, true };
-cvar_t scr_fov = { "fov", 90 }; // 10 - 170
-cvar_t scr_conspeed = { "scr_conspeed", 300 };
-cvar_t scr_centertime = { "scr_centertime", 2 };
-cvar_t scr_showram = { "showram", 1 };
-cvar_t scr_showturtle = { "showturtle", 0 };
-cvar_t scr_showpause = { "showpause", 1 };
-cvar_t scr_printspeed = { "scr_printspeed", 8 };
+CVAR_REGISTER(scr_viewsize, CVAR_CTOR({ "viewsize", 100, true }));
+CVAR_REGISTER(scr_fov, CVAR_CTOR({ "fov", 90 })); // 10 - 170
+CVAR_REGISTER(scr_conspeed, CVAR_CTOR({ "scr_conspeed", 300 }));
+CVAR_REGISTER(scr_centertime, CVAR_CTOR({ "scr_centertime", 2 }));
+CVAR_REGISTER(scr_showram, CVAR_CTOR({ "showram", 1 }));
+CVAR_REGISTER(scr_showturtle, CVAR_CTOR({ "showturtle", 0 }));
+CVAR_REGISTER(scr_showpause, CVAR_CTOR({ "showpause", 1 }));
+CVAR_REGISTER(scr_printspeed, CVAR_CTOR({ "scr_printspeed", 8 }));
 
 qboolean scr_initialized; // ready to draw
 
@@ -305,15 +305,6 @@ SCR_Init
 */
 void SCR_Init(void)
 {
-    Cvar_RegisterVariable(&scr_fov);
-    Cvar_RegisterVariable(&scr_viewsize);
-    Cvar_RegisterVariable(&scr_conspeed);
-    Cvar_RegisterVariable(&scr_showram);
-    Cvar_RegisterVariable(&scr_showturtle);
-    Cvar_RegisterVariable(&scr_showpause);
-    Cvar_RegisterVariable(&scr_centertime);
-    Cvar_RegisterVariable(&scr_printspeed);
-
     //
     // register our commands
     //

@@ -37,7 +37,7 @@ int texture_extension_number = 1;
 
 float gldepthmin, gldepthmax;
 
-cvar_t gl_ztrick = { "gl_ztrick", 1 };
+CVAR_REGISTER(gl_ztrick, CVAR_CTOR({ "gl_ztrick", 1 }));
 
 /*-----------------------------------------------------------------------*/
 void D_BeginDirectRect(int x, int y, byte *pbitmap, int width, int height)
@@ -145,8 +145,6 @@ void GL_EndRendering(void)
 
 void VID_Init(unsigned char *palette)
 {
-    Cvar_RegisterVariable(&gl_ztrick);
-
     vid.maxwarpwidth = vid.width = VID_WIDTH;
     vid.maxwarpheight = vid.height = VID_HEIGHT;
     vid.colormap = host_colormap;

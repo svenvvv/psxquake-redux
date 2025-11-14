@@ -72,30 +72,30 @@ int d_lightstylevalue[256]; // 8.8 fraction of base light value
 
 void R_MarkLeaves(void);
 
-cvar_t r_norefresh = { "r_norefresh", 0 };
-cvar_t r_drawentities = { "r_drawentities", 1 };
-cvar_t r_drawviewmodel = { "r_drawviewmodel", 1 };
-cvar_t r_speeds = { "r_speeds", 0 };
-cvar_t r_fullbright = { "r_fullbright", 0 };
-cvar_t r_lightmap = { "r_lightmap", 0 };
-cvar_t r_shadows = { "r_shadows", 0 };
-cvar_t r_mirroralpha = { "r_mirroralpha", 1 };
-cvar_t r_wateralpha = { "r_wateralpha", 1 };
-cvar_t r_novis = { "r_novis", 0 };
+CVAR_REGISTER(r_norefresh, CVAR_CTOR({ "r_norefresh", 0 }));
+CVAR_REGISTER(r_drawentities, CVAR_CTOR({ "r_drawentities", 1 }));
+CVAR_REGISTER(r_drawviewmodel, CVAR_CTOR({ "r_drawviewmodel", 1 }));
+CVAR_REGISTER(r_speeds, CVAR_CTOR({ "r_speeds", 0 }));
+CVAR_REGISTER(r_fullbright, CVAR_CTOR({ "r_fullbright", 0 }));
+CVAR_REGISTER(r_lightmap, CVAR_CTOR({ "r_lightmap", 0 }));
+CVAR_REGISTER(r_shadows, CVAR_CTOR({ "r_shadows", 0 }));
+CVAR_REGISTER(r_mirroralpha, CVAR_CTOR({ "r_mirroralpha", 1 }));
+CVAR_REGISTER(r_wateralpha, CVAR_CTOR({ "r_wateralpha", 1 }));
+CVAR_REGISTER(r_novis, CVAR_CTOR({ "r_novis", 0 }));
 
-cvar_t gl_finish = { "gl_finish", 0 };
-cvar_t gl_clear = { "gl_clear", 0 };
-cvar_t gl_cull = { "gl_cull", 1 };
-cvar_t gl_texsort = { "gl_texsort", 1 };
-cvar_t gl_smoothmodels = { "gl_smoothmodels", 1 };
-cvar_t gl_affinemodels = { "gl_affinemodels", 0 };
-cvar_t gl_polyblend = { "gl_polyblend", 1 };
-cvar_t gl_flashblend = { "gl_flashblend", 1 };
-cvar_t gl_playermip = { "gl_playermip", 0 };
-cvar_t gl_nocolors = { "gl_nocolors", 0 };
-cvar_t gl_keeptjunctions = { "gl_keeptjunctions", 0 };
-cvar_t gl_reporttjunctions = { "gl_reporttjunctions", 0 };
-cvar_t gl_doubleeyes = { "gl_doubleeys", 1 };
+CVAR_REGISTER(gl_finish, CVAR_CTOR({ "gl_finish", 0 }));
+CVAR_REGISTER(gl_clear, CVAR_CTOR({ "gl_clear", 0 }));
+CVAR_REGISTER(gl_cull, CVAR_CTOR({ "gl_cull", 1 }));
+CVAR_REGISTER(gl_texsort, CVAR_CTOR({ "gl_texsort", 1 }));
+CVAR_REGISTER(gl_smoothmodels, CVAR_CTOR({ "gl_smoothmodels", 1 }));
+CVAR_REGISTER(gl_affinemodels, CVAR_CTOR({ "gl_affinemodels", 0 }));
+CVAR_REGISTER(gl_polyblend, CVAR_CTOR({ "gl_polyblend", 1 }));
+CVAR_REGISTER(gl_flashblend, CVAR_CTOR({ "gl_flashblend", 1 }));
+CVAR_REGISTER(gl_playermip, CVAR_CTOR({ "gl_playermip", 0 }));
+CVAR_REGISTER(gl_nocolors, CVAR_CTOR({ "gl_nocolors", 0 }));
+CVAR_REGISTER(gl_keeptjunctions, CVAR_CTOR({ "gl_keeptjunctions", 0 }));
+CVAR_REGISTER(gl_reporttjunctions, CVAR_CTOR({ "gl_reporttjunctions", 0 }));
+CVAR_REGISTER(gl_doubleeyes, CVAR_CTOR({ "gl_doubleeys", 1 }));
 
 extern cvar_t gl_ztrick;
 

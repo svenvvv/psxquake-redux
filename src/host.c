@@ -53,24 +53,24 @@ jmp_buf host_abortserver;
 byte *host_basepal;
 byte *host_colormap;
 
-cvar_t host_framerate = { "host_framerate", 0 }; // set for slow motion
+CVAR_REGISTER(host_framerate, CVAR_CTOR({ "host_framerate", 0 })); // set for slow motion
 
-cvar_t sys_ticrate_ms = { "sys_ticrate_ms", 50 };
+CVAR_REGISTER(sys_ticrate_ms, CVAR_CTOR({ "sys_ticrate_ms", 50 }));
 
-cvar_t fraglimit = { "fraglimit", 0, false, true };
-cvar_t timelimit = { "timelimit", 0, false, true };
-cvar_t teamplay = { "teamplay", 0, false, true };
+CVAR_REGISTER(fraglimit, CVAR_CTOR({ "fraglimit", 0, false, true }));
+CVAR_REGISTER(timelimit, CVAR_CTOR({ "timelimit", 0, false, true }));
+CVAR_REGISTER(teamplay, CVAR_CTOR({ "teamplay", 0, false, true }));
 
-cvar_t samelevel = { "samelevel", 0 };
-cvar_t noexit = { "noexit", 0, false, true };
+CVAR_REGISTER(samelevel, CVAR_CTOR({ "samelevel", 0 }));
+CVAR_REGISTER(noexit, CVAR_CTOR({ "noexit", 0, false, true }));
 
-cvar_t skill = { "skill", 1 }; // 0 - 3
-cvar_t deathmatch = { "deathmatch", 0 }; // 0, 1, or 2
-cvar_t coop = { "coop", 0 }; // 0 or 1
+CVAR_REGISTER(skill, CVAR_CTOR({ "skill", 1 })); // 0 - 3
+CVAR_REGISTER(deathmatch, CVAR_CTOR({ "deathmatch", 0 })); // 0, 1, or 2
+CVAR_REGISTER(coop, CVAR_CTOR({ "coop", 0 })); // 0 or 1
 
-cvar_t pausable = { "pausable", 1 };
+CVAR_REGISTER(pausable, CVAR_CTOR({ "pausable", 1 }));
 
-cvar_t temp1 = { "temp1", 0 };
+CVAR_REGISTER(temp1, CVAR_CTOR({ "temp1", 0 }));
 
 /*
 ================
@@ -194,23 +194,6 @@ Host_InitLocal
 void Host_InitLocal(void)
 {
     Host_InitCommands();
-
-    Cvar_RegisterVariable(&host_framerate);
-
-    Cvar_RegisterVariable(&sys_ticrate_ms);
-
-    Cvar_RegisterVariable(&fraglimit);
-    Cvar_RegisterVariable(&timelimit);
-    Cvar_RegisterVariable(&teamplay);
-    Cvar_RegisterVariable(&samelevel);
-    Cvar_RegisterVariable(&noexit);
-    Cvar_RegisterVariable(&skill);
-    Cvar_RegisterVariable(&deathmatch);
-    Cvar_RegisterVariable(&coop);
-
-    Cvar_RegisterVariable(&pausable);
-
-    Cvar_RegisterVariable(&temp1);
 
     Host_FindMaxClients();
 
@@ -620,6 +603,7 @@ void Host_Init(quakeparms_t *parms)
     com_argv = parms->argv;
 
     Memory_Init(parms->membase, parms->memsize);
+    Cvar_Init();
     Cbuf_Init();
     Cmd_Init();
     V_Init();

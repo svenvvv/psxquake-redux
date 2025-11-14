@@ -27,9 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern unsigned char d_15to8table[65536];
 
-cvar_t gl_nobind = { "gl_nobind", 0 };
-cvar_t gl_max_size = { "gl_max_size", 1024 };
-cvar_t gl_picmip = { "gl_picmip", 0 };
+CVAR_REGISTER(gl_nobind, CVAR_CTOR({ "gl_nobind", 0 }));
+CVAR_REGISTER(gl_max_size, CVAR_CTOR({ "gl_max_size", 1024 }));
+CVAR_REGISTER(gl_picmip, CVAR_CTOR({ "gl_picmip", 0 }));
 
 byte *draw_chars; // 8*8 graphic characters
 qpic_t *draw_disc;
@@ -348,10 +348,6 @@ void Draw_Init(void)
     glpic_t *gl;
     int start;
     byte *ncdata;
-
-    Cvar_RegisterVariable(&gl_nobind);
-    Cvar_RegisterVariable(&gl_max_size);
-    Cvar_RegisterVariable(&gl_picmip);
 
     Cmd_AddCommand("gl_texturemode", &Draw_TextureMode_f);
 

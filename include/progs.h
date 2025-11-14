@@ -51,8 +51,6 @@ typedef struct edict_s {
 extern dprograms_t *progs;
 extern dfunction_t *pr_functions;
 extern char *pr_strings;
-extern ddef_t *pr_globaldefs;
-extern ddef_t *pr_fielddefs;
 extern dstatement_t *pr_statements;
 extern globalvars_t *pr_global_struct;
 extern float *pr_globals; // same as pr_global_struct
@@ -108,8 +106,6 @@ int NUM_FOR_EDICT(edict_t *e);
 #define E_INT(e, o) (*(int *)&((float *)&e->v)[o])
 #define E_VECTOR(e, o) (&((float *)&e->v)[o])
 #define E_STRING(e, o) (pr_strings + *(string_t *)&((float *)&e->v)[o])
-
-extern int type_size[8];
 
 typedef void (*builtin_t)(void);
 extern builtin_t const *pr_builtins;
