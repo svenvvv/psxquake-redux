@@ -38,8 +38,8 @@ static qboolean cmd_wait;
 /*
  * See explanation in crc.c
  */
-extern cvar_t *__start_pq_cmds;
-extern cvar_t *__stop_pq_cmds;
+extern cmd_function_t const *__start_pq_cmds;
+extern cmd_function_t const *__stop_pq_cmds;
 #define PQ_CMDS_SIZE (&__stop_pq_cmds - &__start_pq_cmds)
 
 static int Cmd_Comparator(void const *a, void const *b)
@@ -111,7 +111,7 @@ void Cbuf_InsertText(char const *text)
     // copy off any commands still remaining in the exec buffer
     int templen = cmd_text.cursize;
     if (templen) {
-        temp = Z_Malloc(templen);
+        temp = static_cast<char *>(Z_Malloc(templen));
         Q_memcpy(temp, cmd_text.data, templen);
         SZ_Clear(&cmd_text);
     }
@@ -211,7 +211,7 @@ void Cmd_StuffCmds_f()
         return;
     }
 
-    text = Z_Malloc(s + 1);
+    text = static_cast<char *>(Z_Malloc(s + 1));
     text[0] = 0;
     for (i = 1; i < com_argc; i++) {
         if (!com_argv[i]) {
@@ -224,7 +224,7 @@ void Cmd_StuffCmds_f()
     }
 
     // pull out the commands
-    build = Z_Malloc(s + 1);
+    build = static_cast<char *>(Z_Malloc(s + 1));
     build[0] = 0;
 
     for (i = 0; i < s - 1; i++) {
@@ -289,7 +289,7 @@ void Cmd_Echo_f()
  */
 char *CopyString(char const *in)
 {
-    char * out = Z_Malloc(strlen(in) + 1);
+    char * out = static_cast<char *>(Z_Malloc(strlen(in) + 1));
     strcpy(out, in);
     return out;
 }
@@ -331,7 +331,7 @@ void Cmd_Alias_f()
     }
 
     if (!a) {
-        a = Z_Malloc(sizeof(cmdalias_t));
+        a = static_cast<cmdalias_t *>(Z_Malloc(sizeof(*a)));
         a->next = cmd_alias;
         cmd_alias = a;
     }
@@ -370,7 +370,7 @@ void Cmd_Alias_f()
 static int cmd_argc;
 static char *cmd_argv[MAX_ARGS];
 static char const *cmd_null_string = "";
-static char *cmd_args = NULL;
+static char const *cmd_args = nullptr;
 
 cmd_source_t cmd_source;
 
@@ -398,15 +398,15 @@ int Cmd_Argc()
     return cmd_argc;
 }
 
-char *Cmd_Argv(int arg)
+char const *Cmd_Argv(int arg)
 {
-    if ((unsigned) arg >= cmd_argc) {
+    if (arg >= cmd_argc) {
         return cmd_null_string;
     }
     return cmd_argv[arg];
 }
 
-char *Cmd_Args()
+char const *Cmd_Args()
 {
     return cmd_args;
 }
@@ -416,15 +416,13 @@ char *Cmd_Args()
  */
 void Cmd_TokenizeString(char const *text)
 {
-    unsigned i;
-
     // clear the args from the last string
-    for (i = 0; i < cmd_argc; i++) {
+    for (int i = 0; i < cmd_argc; i++) {
         Z_Free(cmd_argv[i]);
     }
 
     cmd_argc = 0;
-    cmd_args = NULL;
+    cmd_args = nullptr;
 
     while (1) {
         // skip whitespace up to a /n
@@ -450,7 +448,7 @@ void Cmd_TokenizeString(char const *text)
             return;
 
         if (cmd_argc < MAX_ARGS) {
-            cmd_argv[cmd_argc] = Z_Malloc(Q_strlen(com_token) + 1);
+            cmd_argv[cmd_argc] = static_cast<char *>(Z_Malloc(Q_strlen(com_token) + 1));
             Q_strcpy(cmd_argv[cmd_argc], com_token);
             cmd_argc++;
         }
@@ -466,20 +464,20 @@ qboolean Cmd_Exists(char *cmd_name)
 #ifdef CMD_FUNCTION_HAS_NAME
 char const *Cmd_CompleteCommand(char *partial)
 {
-    cmd_function_t *cmd;
-    int len;
-
-    len = Q_strlen(partial);
-
-    if (!len)
-        return NULL;
+    int len = Q_strlen(partial);
+    if (!len) {
+        return nullptr;
+    }
 
     // check functions
-    for (cmd = cmd_functions; cmd; cmd = cmd->next)
-        if (!Q_strncmp(partial, cmd->name_debug, len))
+    for (cmd_function_t const ** iter = &__start_pq_cmds; iter < &__stop_pq_cmds; ++iter) {
+        cmd_function_t const *cmd = *iter;
+        if (!Q_strncmp(partial, cmd->name_debug, len)) {
             return cmd->name_debug;
+        }
+    }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 

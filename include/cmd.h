@@ -80,7 +80,7 @@ not apropriate.
 
 #define CMD_REGISTER(...) CMD_EXPAND(CMD_REGISTER_1, __COUNTER__, __LINE__, __VA_ARGS__)
 
-typedef void (*xcommand_t)(void);
+typedef void (*xcommand_t)();
 
 typedef enum {
     src_client, // came in over a net connection as a clc_stringcmd
@@ -114,7 +114,7 @@ typedef struct cmd_function_s {
 
 extern cmd_source_t cmd_source;
 
-void Cmd_Init(void);
+void Cmd_Init();
 
 qboolean Cmd_Exists(char const *cmd_name);
 // used by the cvar code to check for cvar / command name overlap
@@ -123,9 +123,9 @@ char *Cmd_CompleteCommand(char const *partial);
 // attempts to match a partial command for automatic command line completion
 // returns NULL if nothing fits
 
-int Cmd_Argc(void);
-char *Cmd_Argv(int arg);
-char *Cmd_Args(void);
+int Cmd_Argc();
+char const *Cmd_Argv(int arg);
+char const *Cmd_Args();
 // The functions that execute commands get their parameters with these
 // functions. Cmd_Argv () will return an empty string, not a NULL
 // if arg > argc, so string operations are allways safe.
@@ -142,11 +142,7 @@ void Cmd_ExecuteString(char const *text, cmd_source_t src);
 // Parses a single line of text into arguments and tries to execute it.
 // The text can come from the command buffer, a remote client, or stdin.
 
-void Cmd_ForwardToServer(void);
+void Cmd_ForwardToServer();
 // adds the current command line as a clc_stringcmd to the client message.
 // things like godmode, noclip, etc, are commands directed to the server,
 // so when they are typed in at the console, they will need to be forwarded.
-
-void Cmd_Print(char *text);
-// used by command functions to send output to either the graphics console or
-// passed as a print message to the client

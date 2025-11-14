@@ -843,31 +843,36 @@ Host_Name_f
 */
 void Host_Name_f(void)
 {
-    char * newName;
+    char new_name[16];
 
     if (Cmd_Argc() == 1) {
         Con_Printf("\"name\" is \"%s\"\n", cl_name.string);
         return;
     }
-    if (Cmd_Argc() == 2)
-        newName = Cmd_Argv(1);
-    else
-        newName = Cmd_Args();
-    newName[15] = 0;
+
+    char const * name_arg;
+    if (Cmd_Argc() == 2) {
+        name_arg = Cmd_Argv(1);
+    } else {
+        name_arg = Cmd_Args();
+    }
+
+    new_name[0] = 0;
+    strncat(new_name, name_arg, std::size(new_name) - 1);
 
     if (cmd_source == src_command) {
-        if (Q_strcmp(cl_name.string, newName) == 0)
+        if (Q_strcmp(cl_name.string, new_name) == 0)
             return;
-        Cvar_Set("_cl_name", newName);
+        Cvar_Set("_cl_name", new_name);
         if (cls.state == ca_connected)
             Cmd_ForwardToServer();
         return;
     }
 
     if (host_client->name[0] && strcmp(host_client->name, "unconnected"))
-        if (Q_strcmp(host_client->name, newName) != 0)
-            Con_Printf("%s renamed to %s\n", host_client->name, newName);
-    Q_strcpy(host_client->name, newName);
+        if (Q_strcmp(host_client->name, new_name) != 0)
+            Con_Printf("%s renamed to %s\n", host_client->name, new_name);
+    Q_strcpy(host_client->name, new_name);
     host_client->edict->v.netname = host_client->name - pr_strings;
 
     // send notification to all clients
@@ -932,8 +937,6 @@ void Host_Say(qboolean teamonly)
 {
     client_t *client;
     client_t *save;
-    int j;
-    char *p;
     char text[64];
     qboolean fromServer = false;
 
@@ -952,26 +955,25 @@ void Host_Say(qboolean teamonly)
 
     save = host_client;
 
-    p = Cmd_Args();
+    char const * args = Cmd_Args();
+    int args_len = strlen(args);
+
     // remove quotes if present
-    if (*p == '"') {
-        p++;
-        p[Q_strlen(p) - 1] = 0;
+    if (args[args_len - 1] == '"') {
+        args_len -= 1;
+    }
+    if (args[0] == '"') {
+        args += 1;
     }
 
     // turn on color set 1
-    if (!fromServer)
-        sprintf(text, "%c%s: ", 1, save->name);
-    else
-        sprintf(text, "%c<%s> ", 1, hostname.string);
+    if (!fromServer) {
+        snprintf(text, sizeof(text), "%c%s: %.*s\n", 1, save->name, args_len, args);
+    } else {
+        snprintf(text, sizeof(text), "%c<%s> %.*s\n", 1, hostname.string, args_len, args);
+    }
 
-    j = sizeof(text) - 2 - Q_strlen(text); // -2 for /n and null terminator
-    if (Q_strlen(p) > j)
-        p[j] = 0;
-
-    strcat(text, p);
-    strcat(text, "\n");
-
+    int j;
     for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
         if (!client || !client->active || !client->spawned)
             continue;
@@ -1000,7 +1002,6 @@ void Host_Tell_f(void)
     client_t *client;
     client_t *save;
     int j;
-    char *p;
     char text[64];
 
     if (cmd_source == src_command) {
@@ -1011,24 +1012,18 @@ void Host_Tell_f(void)
     if (Cmd_Argc() < 3)
         return;
 
-    Q_strcpy(text, host_client->name);
-    Q_strcat(text, ": ");
-
-    p = Cmd_Args();
+    char const * args = Cmd_Args();
+    int args_len = strlen(args);
 
     // remove quotes if present
-    if (*p == '"') {
-        p++;
-        p[Q_strlen(p) - 1] = 0;
+    if (args[args_len - 1] == '"') {
+        args_len -= 1;
+    }
+    if (args[0] == '"') {
+        args += 1;
     }
 
-    // check length & truncate if necessary
-    j = sizeof(text) - 2 - Q_strlen(text); // -2 for /n and null terminator
-    if (Q_strlen(p) > j)
-        p[j] = 0;
-
-    strcat(text, p);
-    strcat(text, "\n");
+    snprintf(text, sizeof(text), "%s: %.*s\n", host_client->name, args_len, args);
 
     save = host_client;
     for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
