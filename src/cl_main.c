@@ -616,11 +616,11 @@ void CL_Init(void)
 
     CL_InitInput();
     CL_InitTEnts();
-
-    Cmd_AddCommand("entities", CL_PrintEntities_f);
-    Cmd_AddCommand("disconnect", CL_Disconnect_f);
-    Cmd_AddCommand("record", CL_Record_f);
-    Cmd_AddCommand("stop", CL_Stop_f);
-    Cmd_AddCommand("playdemo", CL_PlayDemo_f);
-    Cmd_AddCommand("timedemo", CL_TimeDemo_f);
 }
+
+CMD_REGISTER("entities", CL_PrintEntities_f);
+CMD_REGISTER("disconnect", CL_Disconnect_f);
+CMD_REGISTER("record", CL_Record_f);
+CMD_REGISTER("stop", CL_Stop_f);
+CMD_REGISTER("playdemo", CL_PlayDemo_f);
+CMD_REGISTER("timedemo", CL_TimeDemo_f);

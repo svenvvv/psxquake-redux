@@ -500,6 +500,42 @@ void CL_SendMove(usercmd_t *cmd)
     }
 }
 
+CMD_REGISTER("+moveup", IN_UpDown);
+CMD_REGISTER("-moveup", IN_UpUp);
+CMD_REGISTER("+movedown", IN_DownDown);
+CMD_REGISTER("-movedown", IN_DownUp);
+CMD_REGISTER("+left", IN_LeftDown);
+CMD_REGISTER("-left", IN_LeftUp);
+CMD_REGISTER("+right", IN_RightDown);
+CMD_REGISTER("-right", IN_RightUp);
+CMD_REGISTER("+forward", IN_ForwardDown);
+CMD_REGISTER("-forward", IN_ForwardUp);
+CMD_REGISTER("+back", IN_BackDown);
+CMD_REGISTER("-back", IN_BackUp);
+CMD_REGISTER("+lookup", IN_LookupDown);
+CMD_REGISTER("-lookup", IN_LookupUp);
+CMD_REGISTER("+lookdown", IN_LookdownDown);
+CMD_REGISTER("-lookdown", IN_LookdownUp);
+CMD_REGISTER("+strafe", IN_StrafeDown);
+CMD_REGISTER("-strafe", IN_StrafeUp);
+CMD_REGISTER("+moveleft", IN_MoveleftDown);
+CMD_REGISTER("-moveleft", IN_MoveleftUp);
+CMD_REGISTER("+moveright", IN_MoverightDown);
+CMD_REGISTER("-moveright", IN_MoverightUp);
+CMD_REGISTER("+speed", IN_SpeedDown);
+CMD_REGISTER("-speed", IN_SpeedUp);
+CMD_REGISTER("+attack", IN_AttackDown);
+CMD_REGISTER("-attack", IN_AttackUp);
+CMD_REGISTER("+use", IN_UseDown);
+CMD_REGISTER("-use", IN_UseUp);
+CMD_REGISTER("+jump", IN_JumpDown);
+CMD_REGISTER("-jump", IN_JumpUp);
+CMD_REGISTER("impulse", IN_Impulse);
+CMD_REGISTER("+klook", IN_KLookDown);
+CMD_REGISTER("-klook", IN_KLookUp);
+CMD_REGISTER("+mlook", IN_MLookDown);
+CMD_REGISTER("-mlook", IN_MLookUp);
+
 /*
 ============
 CL_InitInput
@@ -507,39 +543,5 @@ CL_InitInput
 */
 void CL_InitInput(void)
 {
-    Cmd_AddCommand("+moveup", IN_UpDown);
-    Cmd_AddCommand("-moveup", IN_UpUp);
-    Cmd_AddCommand("+movedown", IN_DownDown);
-    Cmd_AddCommand("-movedown", IN_DownUp);
-    Cmd_AddCommand("+left", IN_LeftDown);
-    Cmd_AddCommand("-left", IN_LeftUp);
-    Cmd_AddCommand("+right", IN_RightDown);
-    Cmd_AddCommand("-right", IN_RightUp);
-    Cmd_AddCommand("+forward", IN_ForwardDown);
-    Cmd_AddCommand("-forward", IN_ForwardUp);
-    Cmd_AddCommand("+back", IN_BackDown);
-    Cmd_AddCommand("-back", IN_BackUp);
-    Cmd_AddCommand("+lookup", IN_LookupDown);
-    Cmd_AddCommand("-lookup", IN_LookupUp);
-    Cmd_AddCommand("+lookdown", IN_LookdownDown);
-    Cmd_AddCommand("-lookdown", IN_LookdownUp);
-    Cmd_AddCommand("+strafe", IN_StrafeDown);
-    Cmd_AddCommand("-strafe", IN_StrafeUp);
-    Cmd_AddCommand("+moveleft", IN_MoveleftDown);
-    Cmd_AddCommand("-moveleft", IN_MoveleftUp);
-    Cmd_AddCommand("+moveright", IN_MoverightDown);
-    Cmd_AddCommand("-moveright", IN_MoverightUp);
-    Cmd_AddCommand("+speed", IN_SpeedDown);
-    Cmd_AddCommand("-speed", IN_SpeedUp);
-    Cmd_AddCommand("+attack", IN_AttackDown);
-    Cmd_AddCommand("-attack", IN_AttackUp);
-    Cmd_AddCommand("+use", IN_UseDown);
-    Cmd_AddCommand("-use", IN_UseUp);
-    Cmd_AddCommand("+jump", IN_JumpDown);
-    Cmd_AddCommand("-jump", IN_JumpUp);
-    Cmd_AddCommand("impulse", IN_Impulse);
-    Cmd_AddCommand("+klook", IN_KLookDown);
-    Cmd_AddCommand("-klook", IN_KLookUp);
-    Cmd_AddCommand("+mlook", IN_MLookDown);
-    Cmd_AddCommand("-mlook", IN_MLookUp);
+
 }

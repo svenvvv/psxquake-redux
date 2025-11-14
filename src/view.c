@@ -956,9 +956,9 @@ V_Init
 */
 void V_Init(void)
 {
-    Cmd_AddCommand("v_cshift", V_cshift_f);
-    Cmd_AddCommand("bf", V_BonusFlash_f);
-    Cmd_AddCommand("centerview", V_StartPitchDrift);
-
     BuildGammaTable(1.0f); // no gamma yet
 }
+
+CMD_REGISTER("v_cshift", V_cshift_f);
+CMD_REGISTER("bf", V_BonusFlash_f);
+CMD_REGISTER("centerview", V_StartPitchDrift);

@@ -185,9 +185,6 @@ void Sbar_Init(void)
     sb_face_invis_invuln = Draw_PicFromWad("face_inv2");
     sb_face_quad = Draw_PicFromWad("face_quad");
 
-    Cmd_AddCommand("+showscores", Sbar_ShowScores);
-    Cmd_AddCommand("-showscores", Sbar_DontShowScores);
-
     sb_sbar = Draw_PicFromWad("sbar");
     sb_ibar = Draw_PicFromWad("ibar");
     sb_scorebar = Draw_PicFromWad("scorebar");
@@ -1210,3 +1207,6 @@ void Sbar_FinaleOverlay(void)
     pic = Draw_CachePic("gfx/finale.lmp");
     Draw_TransPic((vid.width - pic->width) / 2, 16, pic);
 }
+
+CMD_REGISTER("+showscores", Sbar_ShowScores);
+CMD_REGISTER("-showscores", Sbar_DontShowScores);

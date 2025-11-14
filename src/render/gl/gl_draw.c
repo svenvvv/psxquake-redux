@@ -349,8 +349,6 @@ void Draw_Init(void)
     int start;
     byte *ncdata;
 
-    Cmd_AddCommand("gl_texturemode", &Draw_TextureMode_f);
-
     // load the console background and the charset
     // by hand, because we need to write the version
     // string into the background before turning
@@ -489,7 +487,7 @@ void Draw_Character(int x, int y, int num)
 Draw_String
 ================
 */
-void Draw_String(int x, int y, char *str)
+void Draw_String(int x, int y, char const *str)
 {
     while (*str) {
         Draw_Character(x, y, *str);
@@ -980,12 +978,12 @@ void GL_Upload8(byte *data, int width, int height, qboolean mipmap, qboolean alp
 GL_LoadTexture
 ================
 */
-int GL_LoadTexture(char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
+int GL_LoadTexture(char const *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
 {
     int i;
     gltexture_t *glt;
 
-    // see if the texture is allready present
+    // see if the texture is already present
     if (identifier[0]) {
         for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
             if (!strcmp(identifier, glt->identifier)) {
@@ -1039,3 +1037,5 @@ void GL_SelectTexture(GLenum target)
     currenttexture = cnttextures[target - TEXTURE0_SGIS];
     oldtarget = target;
 }
+
+CMD_REGISTER("gl_texturemode", &Draw_TextureMode_f);

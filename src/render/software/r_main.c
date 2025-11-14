@@ -185,9 +185,6 @@ void R_Init(void)
 
     R_InitTurb();
 
-    Cmd_AddCommand("timerefresh", R_TimeRefresh_f);
-    Cmd_AddCommand("pointfile", R_ReadPointFile_f);
-
     Cvar_SetValue("r_maxedges", (float)NUMSTACKEDGES);
     Cvar_SetValue("r_maxsurfs", (float)NUMSTACKSURFACES);
 
@@ -944,3 +941,6 @@ void R_InitTurb(void)
         intsintable[i] = AMP2 + sin(i * 3.14159 * 2 / CYCLE) * AMP2; // AMP2, not 20
     }
 }
+
+CMD_REGISTER("timerefresh", R_TimeRefresh_f);
+CMD_REGISTER("pointfile", R_ReadPointFile_f);

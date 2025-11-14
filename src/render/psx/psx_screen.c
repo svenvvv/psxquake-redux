@@ -354,12 +354,6 @@ SCR_Init
 */
 void SCR_Init(void)
 {
-    //
-    // register our commands
-    //
-    Cmd_AddCommand("sizeup", SCR_SizeUp_f);
-    Cmd_AddCommand("sizedown", SCR_SizeDown_f);
-
     scr_ram = Draw_PicFromWad("ram");
     scr_net = Draw_PicFromWad("net");
     scr_turtle = Draw_PicFromWad("turtle");
@@ -605,7 +599,7 @@ Displays a text string in the center of the screen and waits for a Y or N
 keypress.  
 ==================
 */
-int SCR_ModalMessage(char *text)
+int SCR_ModalMessage(char const *text)
 {
     if (cls.state == ca_dedicated)
         return true;
@@ -768,3 +762,6 @@ void SCR_UpdateScreen(void)
 
     GL_EndRendering();
 }
+
+CMD_REGISTER("sizeup", SCR_SizeUp_f);
+CMD_REGISTER("sizedown", SCR_SizeDown_f);

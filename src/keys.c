@@ -559,13 +559,6 @@ void Key_Init(void)
         key_lines[i][1] = 0;
     }
     key_linepos = 1;
-
-    //
-    // register our functions
-    //
-    Cmd_AddCommand("bind", Key_Bind_f);
-    Cmd_AddCommand("unbind", Key_Unbind_f);
-    Cmd_AddCommand("unbindall", Key_Unbindall_f);
 }
 
 /*
@@ -702,3 +695,7 @@ void Key_ClearStates(void)
 {
     Q_memset(keydown, 0, sizeof(keydown));
 }
+
+CMD_REGISTER("bind", Key_Bind_f);
+CMD_REGISTER("unbind", Key_Unbind_f);
+CMD_REGISTER("unbindall", Key_Unbindall_f);

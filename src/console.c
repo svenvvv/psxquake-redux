@@ -215,13 +215,6 @@ void Con_Init(void)
 
     Con_Printf("Console initialized.\n");
 
-    //
-    // register our commands
-    //
-    Cmd_AddCommand("toggleconsole", Con_ToggleConsole_f);
-    Cmd_AddCommand("messagemode", Con_MessageMode_f);
-    Cmd_AddCommand("messagemode2", Con_MessageMode2_f);
-    Cmd_AddCommand("clear", Con_Clear_f);
     con_initialized = true;
 }
 
@@ -595,3 +588,8 @@ void Con_NotifyBox(char *text)
     key_dest = key_game;
     realtime = 0; // put the cursor back to invisible
 }
+
+CMD_REGISTER("toggleconsole", Con_ToggleConsole_f);
+CMD_REGISTER("messagemode", Con_MessageMode_f);
+CMD_REGISTER("messagemode2", Con_MessageMode2_f);
+CMD_REGISTER("clear", Con_Clear_f);

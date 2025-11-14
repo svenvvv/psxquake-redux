@@ -1008,10 +1008,6 @@ PR_Init
 */
 void PR_Init(void)
 {
-    Cmd_AddCommand("edict", ED_PrintEdict_f);
-    Cmd_AddCommand("edicts", ED_PrintEdicts);
-    Cmd_AddCommand("edictcount", ED_Count);
-    Cmd_AddCommand("profile", PR_Profile_f);
 }
 
 edict_t *EDICT_NUM(int n)
@@ -1032,3 +1028,8 @@ int NUM_FOR_EDICT(edict_t *e)
         Sys_Error("NUM_FOR_EDICT: bad pointer");
     return b;
 }
+
+CMD_REGISTER("edict", ED_PrintEdict_f);
+CMD_REGISTER("edicts", ED_PrintEdicts);
+CMD_REGISTER("edictcount", ED_Count);
+CMD_REGISTER("profile", PR_Profile_f);

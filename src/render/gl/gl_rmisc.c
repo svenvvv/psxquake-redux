@@ -158,10 +158,6 @@ void R_Init(void)
 {
     extern cvar_t gl_finish;
 
-    Cmd_AddCommand("timerefresh", R_TimeRefresh_f);
-    Cmd_AddCommand("envmap", R_Envmap_f);
-    Cmd_AddCommand("pointfile", R_ReadPointFile_f);
-
     if (gl_mtexable)
         Cvar_SetValue("gl_texsort", 0.0);
 
@@ -369,3 +365,7 @@ void R_TimeRefresh_f(void)
 void D_FlushCaches(void)
 {
 }
+
+CMD_REGISTER("timerefresh", R_TimeRefresh_f);
+CMD_REGISTER("envmap", R_Envmap_f);
+CMD_REGISTER("pointfile", R_ReadPointFile_f);

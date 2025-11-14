@@ -478,10 +478,11 @@ char const *COM_SkipPath(char const *pathname)
 COM_StripExtension
 ============
 */
-void COM_StripExtension(char *in, char *out)
+void COM_StripExtension(char const *in, char *out)
 {
-    while (*in && *in != '.')
+    while (*in && *in != '.') {
         *out++ = *in++;
+    }
     *out = 0;
 }
 
@@ -771,8 +772,6 @@ void COM_Init(void)
         BigFloat = FloatNoSwap;
         LittleFloat = FloatSwap;
     }
-
-    Cmd_AddCommand("path", COM_Path_f);
 
     COM_InitFilesystem();
     COM_CheckRegistered();
@@ -1358,3 +1357,5 @@ void COM_InitFilesystem(void)
     if (COM_CheckParm("-proghack"))
         proghack = true;
 }
+
+CMD_REGISTER("path", COM_Path_f);

@@ -65,6 +65,21 @@ not apropriate.
 
 */
 
+#if defined(DEBUG) || defined(CONSOLE_COMPLETION)
+#define CMD_FUNCTION_HAS_NAME 1
+#endif
+
+#define CMD_REGISTER_1(_var, _line, _name, _fn) \
+    __attribute__((__used__)) \
+    static cmd_function_t const cmd_ ## _var ## _line { _name, _fn }; \
+    __attribute__((__section__("pq_cmds"))) \
+    __attribute__((__used__)) \
+    cmd_function_t const * cmd_ ## _var ## _line ## _ptr =  &(cmd_ ## _var ## _line)
+
+#define CMD_EXPAND(_m, ...) _m(__VA_ARGS__)
+
+#define CMD_REGISTER(...) CMD_EXPAND(CMD_REGISTER_1, __COUNTER__, __LINE__, __VA_ARGS__)
+
 typedef void (*xcommand_t)(void);
 
 typedef enum {
@@ -73,19 +88,36 @@ typedef enum {
     src_command // from the command buffer
 } cmd_source_t;
 
+typedef struct cmd_function_s {
+    uint32_t const name_hash;
+#if CMD_FUNCTION_HAS_NAME
+    char const * const name_debug;
+#endif
+    xcommand_t const function;
+
+    consteval cmd_function_s(char const * name, xcommand_t const fn)
+        : name_hash(pq_hash_const(std::string_view(name)))
+#if CMD_FUNCTION_HAS_NAME
+        , name_debug(name)
+#endif
+        , function(fn)
+    {}
+
+    explicit constexpr cmd_function_s(uint32_t _name_hash)
+        : name_hash(_name_hash)
+#if CMD_FUNCTION_HAS_NAME
+        , name_debug(nullptr)
+#endif
+        , function(nullptr)
+    {}
+} cmd_function_t;
+
 extern cmd_source_t cmd_source;
 
 void Cmd_Init(void);
 
-void Cmd_AddCommand(char const *cmd_name, xcommand_t function);
-// called by the init functions of other parts of the program to
-// register commands and functions to call for them.
-// The cmd_name is referenced later, so it should not be in temp memory
-
 qboolean Cmd_Exists(char const *cmd_name);
 // used by the cvar code to check for cvar / command name overlap
-
-qboolean Cmd_ExistsHashed(uint32_t name_hash);
 
 char *Cmd_CompleteCommand(char const *partial);
 // attempts to match a partial command for automatic command line completion

@@ -2798,19 +2798,7 @@ void M_ServerList_Key(int k)
 
 void M_Init(void)
 {
-    Cmd_AddCommand("togglemenu", M_ToggleMenu_f);
 
-    Cmd_AddCommand("menu_main", M_Menu_Main_f);
-    Cmd_AddCommand("menu_singleplayer", M_Menu_SinglePlayer_f);
-    Cmd_AddCommand("menu_load", M_Menu_Load_f);
-    Cmd_AddCommand("menu_save", M_Menu_Save_f);
-    Cmd_AddCommand("menu_multiplayer", M_Menu_MultiPlayer_f);
-    Cmd_AddCommand("menu_setup", M_Menu_Setup_f);
-    Cmd_AddCommand("menu_options", M_Menu_Options_f);
-    Cmd_AddCommand("menu_keys", M_Menu_Keys_f);
-    Cmd_AddCommand("menu_video", M_Menu_Video_f);
-    Cmd_AddCommand("help", M_Menu_Help_f);
-    Cmd_AddCommand("menu_quit", M_Menu_Quit_f);
 }
 
 void M_Draw(void)
@@ -3018,3 +3006,17 @@ bool M_IsOpen(void)
 {
     return m_state != m_none;
 }
+
+CMD_REGISTER("togglemenu", M_ToggleMenu_f);
+
+CMD_REGISTER("menu_main", M_Menu_Main_f);
+CMD_REGISTER("menu_singleplayer", M_Menu_SinglePlayer_f);
+CMD_REGISTER("menu_load", M_Menu_Load_f);
+CMD_REGISTER("menu_save", M_Menu_Save_f);
+CMD_REGISTER("menu_multiplayer", M_Menu_MultiPlayer_f);
+CMD_REGISTER("menu_setup", M_Menu_Setup_f);
+CMD_REGISTER("menu_options", M_Menu_Options_f);
+CMD_REGISTER("menu_keys", M_Menu_Keys_f);
+CMD_REGISTER("menu_video", M_Menu_Video_f);
+CMD_REGISTER("help", M_Menu_Help_f);
+CMD_REGISTER("menu_quit", M_Menu_Quit_f);

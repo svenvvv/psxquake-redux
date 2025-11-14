@@ -305,12 +305,6 @@ SCR_Init
 */
 void SCR_Init(void)
 {
-    //
-    // register our commands
-    //
-    Cmd_AddCommand("sizeup", SCR_SizeUp_f);
-    Cmd_AddCommand("sizedown", SCR_SizeDown_f);
-
     scr_ram = Draw_PicFromWad("ram");
     scr_net = Draw_PicFromWad("net");
     scr_turtle = Draw_PicFromWad("turtle");
@@ -769,3 +763,6 @@ void SCR_UpdateWholeScreen(void)
     scr_fullupdate = 0;
     SCR_UpdateScreen();
 }
+
+CMD_REGISTER("sizeup", SCR_SizeUp_f);
+CMD_REGISTER("sizedown", SCR_SizeDown_f);

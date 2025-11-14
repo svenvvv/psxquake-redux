@@ -677,11 +677,6 @@ void NET_Init(void)
     // allocate space for network message buffer
     SZ_Alloc(&net_message, NET_MAXMESSAGE);
 
-    Cmd_AddCommand("slist", NET_Slist_f);
-    Cmd_AddCommand("listen", NET_Listen_f);
-    Cmd_AddCommand("maxplayers", MaxPlayers_f);
-    Cmd_AddCommand("port", NET_Port_f);
-
     // initialize all the drivers
     for (net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++) {
         controlSocket = net_drivers[net_driverlevel].Init();
@@ -793,3 +788,8 @@ qboolean IsID(struct qsockaddr *addr)
     return false;
 }
 #endif
+
+CMD_REGISTER("slist", NET_Slist_f);
+CMD_REGISTER("listen", NET_Listen_f);
+CMD_REGISTER("maxplayers", MaxPlayers_f);
+CMD_REGISTER("port", NET_Port_f);
