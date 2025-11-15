@@ -55,6 +55,8 @@ interface from being ambiguous.
 
 #include "util/hashlib.h"
 
+#include <string_view>
+
 #define CVAR_REGISTER(_var, _value) \
     cvar_t _var =  _value; \
     __attribute__((__section__("pq_cvars"))) \

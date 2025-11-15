@@ -18,6 +18,8 @@ endif ()
 target_sources(quake PRIVATE
         std/io.c
         std/lib.c
+        std/lib_qsort.c
+        std/lib_bsearch.c
         std/string.c
         gl.c
 )

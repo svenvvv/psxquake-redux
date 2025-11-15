@@ -939,13 +939,13 @@ void BuildSurfaceDisplayList(msurface_t *fa)
     if (!gl_keeptjunctions.value && !(fa->flags & SURF_UNDERWATER)) {
         for (i = 0; i < lnumverts; ++i) {
             vec3_t v1, v2;
-            float *prev, *this, *next;
+            float *prev, *cur, *next;
 
             prev = poly->verts[(i + lnumverts - 1) % lnumverts];
-            this = poly->verts[i];
+            cur = poly->verts[i];
             next = poly->verts[(i + 1) % lnumverts];
 
-            VectorSubtract(this, prev, v1);
+            VectorSubtract(cur, prev, v1);
             VectorNormalize(v1);
             VectorSubtract(next, prev, v2);
             VectorNormalize(v2);

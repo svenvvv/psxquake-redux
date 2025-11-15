@@ -3,7 +3,6 @@
 #include "util/hashlib.h"
 #include "sys.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -48,19 +47,19 @@ void * psx_file_duplicate_handle(uint32_t filename_hash)
 
         // If we have the file already open then allocate a new handle and copy the contents over
         psx_cd_file * ret = psx_file_alloc();
-        if (ret == NULL) {
+        if (ret == nullptr) {
             printf("psx_file_duplicate_handle: no available file handles\n");
-            return NULL;
+            return nullptr;
         }
         ret->filename_hash = f->filename_hash;
         memcpy(&ret->file, &f->file, sizeof(ret->file));
         return ret;
     }
     printf("psx_file_duplicate_handle: file not found\n");
-    return NULL;
+    return nullptr;
 }
 
-void * psx_file_alloc(void)
+psx_cd_file * psx_file_alloc()
 {
     psx_cd_file *ret = NULL;
     // EnterCriticalSection();
@@ -104,12 +103,13 @@ returns -1 if not present
 */
 int Sys_FileTime(char const *path)
 {
+    return 1;
     // Hack, but OK for now...
-    if (strcmp(path, "./id1/autoexec.cfg") == 0 || strcmp(path, "./id1/autoexec.cfg") == 0) {
-        return 1;
-    }
-    printf("Sys_FileTime failed %s\n", path);
-    return -1;
+    // if (strcmp(path, "./id1/autoexec.cfg") == 0 || strcmp(path, "./id1/autoexec.cfg") == 0) {
+    //     return 1;
+    // }
+    // printf("Sys_FileTime failed %s\n", path);
+    // return -1;
 }
 
 void Sys_mkdir(char const *path)
@@ -117,35 +117,48 @@ void Sys_mkdir(char const *path)
     printf("Sys_mkdir unsupported %s\n", path);
 }
 
+#define PQ_DATADIR "./id1/"
+#define PQ_DATADIR_LEN (sizeof(PQ_DATADIR) - 1)
+
 int Sys_FileOpenRead(char const *path, int *handle)
 {
-    psx_cd_file *f = NULL;
-    char const *tmp = path;
     char pathbuf[64];
+    size_t path_len = strlen(path);
+
+    if (path_len > std::size(pathbuf)) {
+        Sys_Error("Given path is too long for pathbuf, %d", path_len);
+    }
+
+    if (path_len >= PQ_DATADIR_LEN && memcmp(path, PQ_DATADIR, PQ_DATADIR_LEN) == 0) {
+        path_len -= PQ_DATADIR_LEN;
+        path += PQ_DATADIR_LEN;
+    }
+
     size_t pathbuf_len = 0;
 
-    if (*tmp == '.') {
-        tmp += 1;
-    }
-    while (*tmp != 0) {
-        if (*tmp == '/') {
-            pathbuf_len = 0;
-            // pathbuf[pathbuf_len++] = '\\';
-        } else {
-            pathbuf[pathbuf_len++] = toupper(*tmp);
-        }
-        tmp += 1;
-    }
-    pathbuf[pathbuf_len++] = 0;
+    pathbuf[pathbuf_len] = '\\';
+    pathbuf_len += 1;
 
-    f = psx_file_alloc();
-    if (f == NULL) {
+    for (size_t i = 0; i < path_len; ++i) {
+        char ch = path[i];
+        if (ch == '/') {
+            ch = '\\';
+        } else {
+            ch = toupper(ch);
+        }
+        pathbuf[pathbuf_len] = ch;
+        pathbuf_len += 1;
+    }
+    pathbuf[pathbuf_len] = '\0';
+
+    psx_cd_file * f = psx_file_alloc();
+    if (f == nullptr) {
         Sys_Error("All out of CD file handles..");
     }
 
     printf("Sys_FileOpenRead 0x%p %s\n", f, pathbuf);
 
-    if (CdSearchFile(&f->file, pathbuf) == NULL) {
+    if (CdSearchFile(&f->file, pathbuf) == nullptr) {
         printf("Failed to open file %s\n", path);
         f->allocated = false;
         goto error;

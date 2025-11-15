@@ -42,12 +42,12 @@ void Sys_Printf(char const *fmt, ...)
     }
 }
 
-void Sys_Quit(void)
+void Sys_Quit()
 {
     Host_Shutdown();
 }
 
-void Sys_Init(void)
+void Sys_Init()
 {
 }
 
@@ -67,7 +67,7 @@ void Sys_Error(char const *error, ...)
     }
 }
 
-uint32_t Sys_CurrentTicks(void)
+uint32_t Sys_CurrentTicks()
 {
     return systick_ms;
 }
@@ -76,21 +76,21 @@ uint32_t Sys_CurrentTicks(void)
 // Sleeps for microseconds
 // =======================================================================
 
-char *Sys_ConsoleInput(void)
+char *Sys_ConsoleInput()
 {
     // Unsupported on PSX
-    return NULL;
+    return nullptr;
 }
 
-void Sys_HighFPPrecision(void)
+void Sys_HighFPPrecision()
 {
 }
 
-void Sys_LowFPPrecision(void)
+void Sys_LowFPPrecision()
 {
 }
 
-static void vblank_handler(void)
+static void vblank_handler()
 {
     // FIXME? systick overflow not handled. Although I don't think anyone will play PSXQuake for over 49 days
     systick_ms += ms_per_frame;
@@ -98,6 +98,50 @@ static void vblank_handler(void)
 
 static uint8_t membase[5 * 1024 * 1024];
 extern uint8_t _end[];
+
+void iterate_files_dir(char * path)
+{
+    CdlFILE file;
+    size_t path_len = strlen(path);
+
+    printf("Opening dir %s\n", path);
+
+    CdlDIR * dir = CdOpenDir(path);
+    if (dir == nullptr) {
+        printf("Failed to open directory \"%s\" for file iteration\n", path);
+        return;
+    }
+
+    while (CdReadDir(dir, &file)) {
+        std::string_view name{file.name};
+        printf("Pre \"%s\", size %u bytes\n", file.name, file.size);
+        if (name.starts_with('.')) {
+            // Skip "." and ".." (and all other dotfiles, coincidentally)
+            continue;
+        }
+        if (name.ends_with(";1")) {
+            printf("File \"%s\", size %u bytes\n", file.name, file.size);
+        } else {
+            if (path[path_len - 1] != '\\') {
+                path[path_len] = '\\';
+                path_len += 1;
+            }
+            memcpy(path + path_len, file.name, name.length());
+            path[path_len + name.length()] = '\0';
+            iterate_files_dir(path);
+        }
+    }
+
+    CdCloseDir(dir);
+}
+
+void iterate_files()
+{
+    // Hackish, but most likely fine
+    char pathbuf[256];
+    strcat(pathbuf, "\\");
+    iterate_files_dir(pathbuf);
+}
 
 int main(int c, char **v)
 {
@@ -136,22 +180,11 @@ int main(int c, char **v)
     CdInit();
     printf("OK\n");
 
-    CdControl(CdlNop, 0, 0);
+    CdControl(CdlNop, nullptr, nullptr);
     CdStatus();
 
-    // printf("Files on CD:\n");
-    // CdlDIR * dir = CdOpenDir("\\");
-    // CdlFILE files[32];
-    // int files_found = 0;
-    // if (dir) {
-    // 	while(CdReadDir(dir, &files[files_found]) ) {
-    // 		printf("%s\n", files[files_found].name);
-    // 		files_found++;
-    // 	}
-    // 	CdCloseDir(dir);
-    // } else {
-    // 	printf("directory not found\n");
-    // }
+    // printf("File data map:\n");
+    // iterate_files();
 
     memset(&parms, 0, sizeof(parms));
 
@@ -168,7 +201,7 @@ int main(int c, char **v)
     // Caching is disabled by default, use -cachedir to enable
     // parms.cachedir = cachedir;
 
-    printf("Host init...");
+    printf("Host init...\n");
     Host_Init(&parms);
     printf("OK\n");
 

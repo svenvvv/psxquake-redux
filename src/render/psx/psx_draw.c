@@ -34,7 +34,7 @@ qpic_t *draw_disc;
 typedef struct {
     int texnum;
 } glpic_t;
-_Static_assert(sizeof((qpic_t *)0)->data == sizeof(glpic_t));
+static_assert(sizeof((qpic_t *)0)->data == sizeof(glpic_t));
 
 static byte conback_buffer[sizeof(qpic_t)];
 static qpic_t *conback = (qpic_t *)&conback_buffer;

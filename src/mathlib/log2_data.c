@@ -13,6 +13,17 @@ const struct log2_data __log2_data = {
 // First coefficient: 0x1.71547652b82fe1777d0ffda0d24p0
 .invln2hi = 0x1.7154765200000p+0,
 .invln2lo = 0x1.705fc2eefa200p-33,
+.poly = {
+// relative error: 0x1.a72c2bf8p-58
+// abs error: 0x1.67a552c8p-66
+// in -0x1.f45p-8 0x1.f45p-8
+-0x1.71547652b8339p-1,
+0x1.ec709dc3a04bep-2,
+-0x1.7154764702ffbp-2,
+0x1.2776c50034c48p-2,
+-0x1.ec7b328ea92bcp-3,
+0x1.a6225e117f92ep-3,
+},
 .poly1 = {
 // relative error: 0x1.2fad8188p-63
 // in -0x1.5b51p-5 0x1.6ab2p-5
@@ -26,17 +37,6 @@ const struct log2_data __log2_data = {
 0x1.484d154f01b4ap-3,
 -0x1.289e4a72c383cp-3,
 0x1.0b32f285aee66p-3,
-},
-.poly = {
-// relative error: 0x1.a72c2bf8p-58
-// abs error: 0x1.67a552c8p-66
-// in -0x1.f45p-8 0x1.f45p-8
--0x1.71547652b8339p-1,
-0x1.ec709dc3a04bep-2,
--0x1.7154764702ffbp-2,
-0x1.2776c50034c48p-2,
--0x1.ec7b328ea92bcp-3,
-0x1.a6225e117f92ep-3,
 },
 /* Algorithm:
 

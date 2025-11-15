@@ -38,7 +38,6 @@ Copyright (C) 2012-2020 Yann Collet
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <iterator>  // for std::data, std::size
 #include <type_traits>

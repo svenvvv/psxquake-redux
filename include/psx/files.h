@@ -3,12 +3,14 @@
 
 #include <stdint.h>
 
+struct psx_cd_file_s;
+
 /**
  * Allocate a new file handle for a PSX file.
  * @return Pointer to available file handle on success,
  *         NULL on error.
  */
-void * psx_file_alloc(void);
+psx_cd_file_s * psx_file_alloc();
 
 /**
  * Duplicate a previously opened file handle.

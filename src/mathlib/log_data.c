@@ -12,6 +12,16 @@
 const struct log_data __log_data = {
 .ln2hi = 0x1.62e42fefa3800p-1,
 .ln2lo = 0x1.ef35793c76730p-45,
+.poly = {
+// relative error: 0x1.926199e8p-56
+// abs error: 0x1.882ff33p-65
+// in -0x1.fp-9 0x1.fp-9
+-0x1.0000000000001p-1,
+0x1.555555551305bp-2,
+-0x1.fffffffeb459p-3,
+0x1.999b324f10111p-3,
+-0x1.55575e506c89fp-3,
+},
 .poly1 = {
 // relative error: 0x1.c04d76cp-63
 // in -0x1p-4 0x1.09p-4 (|log(1+x)| > 0x1p-4 outside the interval)
@@ -26,16 +36,6 @@ const struct log_data __log_data = {
 -0x1.999eb43b068ffp-4,
 0x1.78182f7afd085p-4,
 -0x1.5521375d145cdp-4,
-},
-.poly = {
-// relative error: 0x1.926199e8p-56
-// abs error: 0x1.882ff33p-65
-// in -0x1.fp-9 0x1.fp-9
--0x1.0000000000001p-1,
-0x1.555555551305bp-2,
--0x1.fffffffeb459p-3,
-0x1.999b324f10111p-3,
--0x1.55575e506c89fp-3,
 },
 /* Algorithm:
 
