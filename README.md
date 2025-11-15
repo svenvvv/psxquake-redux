@@ -22,6 +22,16 @@ No sound, saving, etc.
 
 ### Prerequisites
 
+>[!NOTE]
+> You might have to compile GCC for mipsel target yourself, as the precompiled
+> ones linked to by PSn00bSDK don't ship a complete enough C++ standard library.
+>
+> Currently I'm using self-compiled GCC 15.2.
+> I've checked the Arch Linux PKGBUILD I used into this repository (scripts/mipsle-gcc),
+> as it required some modifications to support softfloat that I don't want to re-do.
+> The binutils package doesn't need any modifications, so you can use the `mipsel-elf-binutils`
+> package from AUR.
+
 1. Set up PSn00bSDK following [their installation guide](https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/installation.md);
 2. Clone this repo.
 
